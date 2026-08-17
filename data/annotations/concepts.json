@@ -96,5 +96,201 @@
       "source_url": "https://docs.unity3d.com/ScriptReference/Rendering.AsyncGPUReadback.html"
     }
   ],
-  "additions": []
+  "additions": [
+    {
+      "id": "field",
+      "name": "Fields & grids",
+      "facet": "representation",
+      "what": "A value at every point of a regular lattice: heightfields, voxel grids, scalar and vector fields, and the 2D and 3D images they are stored as. Sampling, resampling, gradients and boundary handling come with the format.",
+      "good": "Holding whatever noise, erosion, reaction–diffusion, cellular automata or a fluid solver produces or consumes. It is the interchange format the operator layer actually passes around.",
+      "bad": "Sparse or unbounded structure — a field pays for every cell whether that cell is interesting or not, and a heightfield cannot represent an overhang at all.",
+      "watch": "The resolution is a design decision disguised as an implementation detail. It fixes the smallest feature you will ever be able to have, and every later stage inherits that ceiling.",
+      "eli5": "Graph paper with a number written in every square. If the number is a height you get a landscape; if it is a temperature you get a weather map; if it is how full of rock the square is, you get a cave. Almost every machine in this catalogue either fills in the squares or reads them back.",
+      "why": "It was the substrate the whole operator layer already ran on, and the only thing missing was the word. Noise writes one, erosion reads and rewrites one, marching cubes converts one into a mesh, and \"Voxel worlds\", \"Temperature & precipitation fields\" and \"Heightfields from fBm & ridged noise\" are catalogue entries whose shared object had no name. Without it, the fact that hydraulic erosion and texture weathering are the same code operating on the same thing stays invisible.",
+      "importable": "numpy's ndarray for the plain case, xarray for labelled and coordinate-aware fields, zarr for chunked out-of-core ones, and DataTexture / Data3DTexture in three.js on the browser side.",
+      "absence": "Marching cubes, marching tetrahedra, surface nets and dual contouring are all filed under `sdf`, which is not quite right — they consume a sampled grid, and a signed distance function is only one of the things that grid might hold.",
+      "applies_to": {
+        "terrain": [
+          "Heightfields from fBm & ridged noise",
+          "Voxel worlds & chunked infinite terrain",
+          "Temperature & precipitation fields"
+        ],
+        "geometry3d": ["Marching cubes / dual contouring / surface nets"]
+      }
+    },
+    {
+      "id": "mesh",
+      "name": "Meshes & connectivity",
+      "facet": "representation",
+      "what": "Explicit surface geometry: vertices, edges and faces, plus the adjacency that makes them traversable — indexed triangle soups at one end, half-edge and winged-edge structures at the other.",
+      "good": "Everything downstream of generation. Rendering, collision, UV mapping, skinning, export and manufacture all want a mesh, whatever the thing was originally generated as.",
+      "bad": "Boolean operations and topology change. Cutting one mesh with another is numerically fragile in a way that field- and SDF-based representations simply are not.",
+      "watch": "Manifoldness and winding are not cosmetic. A mesh that renders perfectly can still be unprintable, unsimulatable and impossible to boolean, and checking is far cheaper than the debugging.",
+      "eli5": "A shape built out of flat triangles glued edge to edge, like a paper model. The computer keeps one list of corners and another list saying which three corners make each triangle. Nearly everything ends up as one of these before you can see it.",
+      "why": "The representation facet listed SDFs, CSG, splines, subdivision trees and morphable models, but not the format all of them get converted into. Marching cubes, dual contouring, straight skeletons and every remeshing entry produce a mesh, and \"Remeshing & retopology\", \"Automatic LOD, decimation & impostors\" and \"Meshes for FEM & CFD simulation\" are catalogue entries about the representation itself rather than about anything generated with it.",
+      "importable": "trimesh and libigl in Python, pymeshlab for the MeshLab filter set, CGAL's Surface_mesh in C++, BufferGeometry in three.js.",
+      "absence": "`csg`'s own WATCH note — that mesh booleans are numerically fragile — is a statement about this representation, filed under an operator, because there was nowhere else to put it.",
+      "applies_to": {
+        "geometry3d": [
+          "Remeshing & retopology",
+          "Automatic LOD, decimation & impostors",
+          "Procedural UV unwrapping & atlasing",
+          "LiDAR & photogrammetry mesh completion",
+          "Marching cubes / dual contouring / surface nets"
+        ],
+        "engineering": ["Meshes for FEM & CFD simulation"]
+      }
+    },
+    {
+      "id": "filter",
+      "name": "Convolution & image-space operators",
+      "facet": "block",
+      "what": "Local operators over a field: blur, sharpen, gradient, Laplacian, morphological dilate and erode, warp, remap, histogram matching, and gradient-domain solves such as Poisson blending.",
+      "good": "Everything between a noise basis and a finished look — normal maps from heights, occlusion from curvature, softening, edge detection, dirt settling into crevices, seam removal.",
+      "bad": "Creating structure. A filter can only reveal, suppress or move what is already in the field, which is why a chain of filters over plain noise plateaus so quickly.",
+      "watch": "This is what a texture node graph mostly is. Naming the filters makes it obvious how few distinct operations a forty-node Substance graph actually contains.",
+      "eli5": "Every square on the graph paper looks at its neighbours and replaces its own number with a mixture of theirs. Average them and the picture goes blurry. Subtract them and only the edges survive. Nearly every photo effect you have ever used is this one trick with different mixing numbers.",
+      "why": "The catalogue's only signal-processing concept, `dsp`, is framed entirely around audio, so the same mathematics applied to a 2D field had nowhere to live. Convolution is arguably the most-used operator in the entire textures domain: \"Detail / micro-normal layers\", \"Full PBR map sets\", \"Procedural masks driven by mesh data\" and \"Halftone, dithering & engraving styles\" are filter chains, and they were being attributed to `noise` or to nothing at all.",
+      "importable": "scipy.ndimage, opencv-python, scikit-image, Pillow's ImageFilter, sharp in Node — and every fragment shader ever written to sample its own neighbours.",
+      "absence": "Floyd–Steinberg dithering sits under `samp`, which is defensible but strained: error diffusion is an image-space operator over a field, not a way of choosing where to put sample points.",
+      "applies_to": {
+        "textures": [
+          "Detail / micro-normal layers",
+          "Full PBR map sets",
+          "Procedural masks driven by mesh data"
+        ],
+        "art2d": [
+          "Halftone, dithering & engraving styles",
+          "Pixel sorting & datamosh glitch art",
+          "Contour, isoline & shaded-relief rendering"
+        ]
+      }
+    },
+    {
+      "id": "hydro",
+      "name": "Flow routing & drainage networks",
+      "facet": "block",
+      "what": "Where water goes on a surface, before anything erodes: depression filling, flow direction (D8 and multiple-flow-direction), flow accumulation, watershed delineation, and stream ordering.",
+      "good": "River networks, catchments, deltas, valley placement, irrigation and drainage layout, and any biome or settlement rule that ought to depend on water.",
+      "bad": "Cross-sectional shape and sediment. Routing tells you where the channel is, not how wide, deep or braided it is — that needs erosion or a morphodynamic model on top.",
+      "watch": "Route first, erode second. Erosion applied to an unrouted heightfield fills its own basins as it goes, and produces drainage that never reaches the sea.",
+      "eli5": "Put a drop of water on every square of the landscape and let each one run downhill to whichever neighbour is lowest. Follow all the drops and you find out which squares are trickles, which are rivers, and which patch of land drains into each one.",
+      "why": "`ero` covers moving material and `sim` covers fluid dynamics, but the graph question of what drains into what is neither — and it is the part with a standard, well-tested answer in the geoscience literature. \"River networks, watersheds & deltas\", \"Braided river channel networks\", \"Meander migration & channel belts\", \"Wetland & tidal flat morphodynamics\" and \"Irrigation network design\" are five entries across two domains with no concept between them.",
+      "importable": "richdem for high-performance depression filling and flow accumulation, pysheds for watershed delineation, whitebox for the wider geospatial toolset.",
+      "absence": "Priority-flood depression filling — the algorithm that makes any of this work on real, noisy data — appeared nowhere in the algorithm layer, because there was no concept to file it under.",
+      "applies_to": {
+        "terrain": [
+          "River networks, watersheds & deltas",
+          "Braided river channel networks",
+          "Meander migration & channel belts",
+          "Wetland & tidal flat morphodynamics"
+        ],
+        "engineering": ["Irrigation network design"]
+      }
+    },
+    {
+      "id": "texsyn",
+      "name": "Example-based texture synthesis",
+      "facet": "block",
+      "what": "Given one sample of a texture, produce more of it: non-parametric pixel and patch copying (Efros–Leung, image quilting), optimisation-based synthesis, PatchMatch correspondence, and statistics matching (Portilla–Simoncelli).",
+      "good": "Extending a photographed material, filling holes, making a non-tiling texture tileable, transferring the look of one surface onto another — every case where you have an example but not a rule.",
+      "bad": "Structured or semantic content. Copying statistics from a photograph of a keyboard gives you keyboard-flavoured mush, because the method has no idea what a key is.",
+      "watch": "It is the honest answer to \"I have a photo and I need ten square metres of it\", and it is not tiling. Tiling repeats a fixed asset; synthesis makes new pixels that were never in the sample.",
+      "eli5": "You have a small scrap of wallpaper and you need a whole wall. Look at the edge of what you have pasted up so far, hunt through the scrap for the patch that fits next to it best, paste that on, and repeat. The wall never repeats itself, and every bit of it came from the scrap.",
+      "why": "\"Example-based texture synthesis\" is a catalogue entry in its own right and \"Tile sets learned from an example bitmap\" is another, yet the only concept covering learning-from-one-image was `wfc` — which is a special case of exactly this family, and says so in its own README. Filing the general method under the special case inverts the relationship.",
+      "importable": "opencv-python (inpainting and template matching are the primitives), scikit-image, texturize for the neural variant, and the PatchMatch-based content-aware fill in most commercial editors.",
+      "absence": "WFC's documentation describes it as translating a texture synthesis problem into a constraint satisfaction problem. The problem it translates had no row here.",
+      "applies_to": {
+        "textures": ["Example-based texture synthesis", "Seamless / tileable variants"],
+        "art2d": ["Tile sets learned from an example bitmap"]
+      }
+    },
+    {
+      "id": "subdiv",
+      "name": "Subdivision & refinement",
+      "facet": "block",
+      "what": "Turn a coarse cage into a smooth surface by repeatedly splitting faces and averaging positions: Catmull–Clark on quads, Loop on triangles, Doo–Sabin, √3 — with creases and semi-sharp edges as the controls.",
+      "good": "Smooth organic surfaces from a handful of control points, level-of-detail chains, displacement bases, and anything that has to be sculptable by a human and cheap to store.",
+      "bad": "Sharp mechanical detail and exact dimensions. It approximates a limit surface, so a subdivided box is not a box unless you tell it where the creases are.",
+      "watch": "The topology of the cage is the design. Irregular vertices — anything not four-valent on a quad mesh — are where the limit surface loses curvature continuity, and they show up in a reflection long before anyone can point at why.",
+      "eli5": "Take a shape made of a few big flat panels. Cut every panel into four, then nudge each new corner towards the average of its neighbours. Do that twice and the blocky shape has gone smooth — and you still only ever edited the few big panels.",
+      "why": "\"Subdivision & displacement detailing\" is a catalogue entry, and subdivision is how essentially all character and vehicle geometry is authored, but the concept vocabulary had no word for it. `part` covers recursive subdivision of *space*, which is a different operation on a different object; the shared word was hiding that.",
+      "importable": "OpenSubdiv, which is the de facto reference and ships inside Maya, Blender and RenderMan; pymeshlab's subdivision filters; libigl's upsample and loop; three-subdivide for three.js.",
+      "absence": "Catmull–Clark 1978 and Loop 1987 were both missing from the algorithm layer, despite Catmull already appearing in it for Catmull–Rom splines.",
+      "applies_to": {
+        "geometry3d": ["Subdivision & displacement detailing", "Remeshing & retopology"]
+      }
+    },
+    {
+      "id": "colour",
+      "name": "Colour spaces & palettes",
+      "facet": "block",
+      "what": "Perceptual colour models (CIELAB, CAM16, Oklab), the transforms between them, difference metrics, harmony and interpolation rules, palette extraction by clustering, and contrast standards.",
+      "good": "Palette generation, gradients and ramps that do not go grey in the middle, theme and dark-mode derivation, recolouring, accessible contrast, and any generated artefact a human will judge aesthetically.",
+      "bad": "Meaning. It can tell you two colours are 4.7 units apart and legible together. It cannot tell you that one of them is the wrong colour for a hospital.",
+      "watch": "Interpolating in sRGB is the most common generative-art bug there is. The same two endpoints blended in Oklab and in sRGB give visibly different midpoints, and only one of the two looks like a colour.",
+      "eli5": "Colours can be written down as numbers, but the obvious numbers lie: two pairs of colours can sit the same distance apart in the computer's numbers while one pair looks identical to your eye and the other looks nothing alike. So people built better number systems, where equal distances really do look equally different — and once you have one, mixing, matching and checking colours becomes arithmetic.",
+      "why": "Seven catalogue entries across two domains are about nothing else — palette generation and harmony rules, gradients and ramps, palette extraction, accessible palettes, colour scale tokens, dark-mode derivation — and each was tagged with whatever machinery happened to be nearby. Colour is also the one axis on which a generator's output is judged instantly, by everyone.",
+      "importable": "colour-science and coloraide in Python; culori, colorjs.io and chroma-js in JavaScript; and CSS Color 4, which is the same model shipped in every browser.",
+      "absence": "No algorithm in the layer covers a colour transform, a harmony rule or a contrast metric, so the catalogue asserted that palettes are generatable without recording a single method for generating one.",
+      "applies_to": {
+        "art2d": [
+          "Palette generation & harmony rules",
+          "Gradient & ramp generation",
+          "Palette extraction & recolouring",
+          "Accessible palette generation (APCA, WCAG)",
+          "Photo mosaics & image quantisation art"
+        ],
+        "interfaces": ["Design token & colour scale generation", "Dark mode & theme derivation"]
+      }
+    },
+    {
+      "id": "topopt",
+      "name": "Topology & inverse design",
+      "facet": "block",
+      "what": "Optimise the material layout itself rather than a shape's parameters: density methods (SIMP) with sensitivity filtering, level-set methods, and adjoint-gradient inverse design where the objective is a physics simulation.",
+      "good": "Load-bearing structure at minimum mass, heat sinks, compliant mechanisms, and photonic and RF devices whose required geometry is nothing a human would think to draw.",
+      "bad": "Manufacturability, unaided. The unconstrained optimum is usually a thin organic web with no draft angle and no minimum feature size, so the constraints are most of the real work.",
+      "watch": "This is what \"generative design\" means in engineering, and it is not evolutionary. It is gradient descent on a density field using adjoint sensitivities, which is why it converges in tens of iterations rather than thousands of generations.",
+      "eli5": "Start with a solid block, and say where you will push on it and where it is bolted down. The computer works out, for every crumb of the block, how much that crumb is helping carry the load — then takes material away from the crumbs that are not helping and gives it to the ones that are. Repeat, and a skeleton appears that nobody designed.",
+      "why": "Engineering is the second largest domain in the catalogue at 69 entries, and its two flagship groups — generative and computational design, and physics and photonics inverse design — had only `evo` and `cons` to point at. Both are the wrong answer: SIMP is gradient-based rather than a search over a population, and it is an optimisation rather than a satisfaction problem. Eight entries name topology optimisation or inverse design outright.",
+      "importable": "topopt for the textbook density method, nlopt with autograd or JAX for building an adjoint loop, openmdao for the coupled multidisciplinary case — and the generative-design mode of every commercial CAD package.",
+      "absence": "SIMP and the adjoint method were both missing from the algorithm layer, which is a large part of why the catalogue's engineering half carries so many fewer citations than its games half.",
+      "applies_to": {
+        "engineering": [
+          "Topology optimisation (brackets, chassis, frames)",
+          "Lattice & infill structure generation",
+          "Compliant mechanism topology optimisation",
+          "Heat sinks, ducting & flow-optimised geometry",
+          "Nanophotonic device inverse design",
+          "Metasurface & metalens inverse design",
+          "Freeform lens & mirror design",
+          "Diffractive optical element design"
+        ]
+      }
+    }
+  ],
+
+  "_rejected": [
+    {
+      "id": "motion",
+      "name": "Data-driven motion synthesis",
+      "why_considered": "Motion graphs, motion matching and phase-functioned networks are a named, coherent family, and the animation domain has 46 entries served only by `ik`, `sim`, `markov` and `ml`.",
+      "why_rejected": "Fails the importable test. There is no motion-matching library you can install: the shipped implementations are inside engines (Ubisoft's, Unity's Kinematica) rather than in a registry. fairmotion is a motion *data* library, not an implementation of the synthesis methods, and PyPI `pymo` — which sounds like the motion-capture package — is MongoClient instrumentation. Recorded as a gap in the vocabulary rather than filled with a concept that would break the rule."
+    },
+    {
+      "id": "layout",
+      "name": "Layout",
+      "why_considered": "Treemaps, Knuth–Plass line breaking, Cassowary constraints, bin packing and editorial grids all feel like one subject.",
+      "why_rejected": "Decomposes cleanly into concepts that already exist — `part` for the subdivision cases, `cons` for the solver cases, `samp` for the packing cases. It would be a category in the facet sense, and the facet pass exists to reduce those rather than add them."
+    }
+  ],
+
+  "_contested": [
+    "filter — called a block, and it is importable and everywhere, but it is arguably the 2D half of a `dsp` that was mis-framed as audio-only. The alternative is to rename `dsp` to signal processing and put both under it, at the cost of a very large concept.",
+    "field vs mesh — both are representations, and marching cubes is precisely the converter between them, so an argument exists that they are one concept with two encodings. Kept separate because the operators that consume them share almost nothing.",
+    "topopt — the importable test passes only via an early-alpha package plus general-purpose optimisers. What makes it defensible is that the specification is famously short: Sigmund's 99-line and Andreassen's 88-line MATLAB codes are the reference, which is a stronger definition than most libraries provide.",
+    "hydro — could be argued as part of `ero`, since in practice the same tools do both. Split because the ordering matters: routing is a precondition for erosion producing connected drainage, and conflating them is what produces terrain with rivers that end in the middle of a hill.",
+    "subdiv — Catmull–Clark is a refinement scheme, which is an operator; but the limit surface it defines is a representation. Filed as a block on the grounds that the operation is what you invoke."
+  ]
 }

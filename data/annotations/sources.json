@@ -82,6 +82,124 @@
       ]
     },
     {
+      "id": "barnes-2014-priority-flood",
+      "url": "https://arxiv.org/abs/1511.04463",
+      "title": "Priority-Flood: An Optimal Depression-Filling and Watershed-Labeling Algorithm for Digital Elevation Models",
+      "kind": "paper",
+      "publisher": "Computers & Geosciences 62, 117–127 (arXiv preprint 2015)",
+      "year": 2014,
+      "description": "Justifies flow routing as a concept in its own right rather than a step inside erosion. Depression filling has an optimal algorithm — O(n) for integer elevations — that is separate from any transport model, and the authors note the whole thing is under 100 lines of C++. That combination of importable, standard and short is what the concept vocabulary was missing.",
+      "retrieved": "2026-08-17",
+      "links": [
+        { "layer": "concept", "target": "hydro", "relation": "defines", "note": "The precondition step: without it, routing on real noisy data terminates in local pits." }
+      ]
+    },
+    {
+      "id": "richdem-docs",
+      "url": "https://richdem.readthedocs.io/en/latest/",
+      "title": "RichDEM — high-performance terrain analysis",
+      "kind": "docs",
+      "publisher": "Richard Barnes",
+      "year": 2024,
+      "description": "The named importable that lets flow routing pass the concept test: depression filling, D8 and multiple-flow-direction routing, flow accumulation and watershed labelling, in one installable package rather than as a paper to reimplement.",
+      "retrieved": "2026-08-17",
+      "links": [
+        { "layer": "concept", "target": "hydro", "relation": "implements" }
+      ]
+    },
+    {
+      "id": "ottosson-2020-oklab",
+      "url": "https://bottosson.github.io/posts/oklab/",
+      "title": "A perceptual color space for image processing (Oklab)",
+      "kind": "article",
+      "publisher": "Björn Ottosson",
+      "year": 2020,
+      "description": "Why colour needed a concept of its own: the choice of space decides whether a generated gradient has a grey dead zone in the middle, and Ottosson shows the failure side by side. Also the origin of the space that CSS and every design-token generator now use for interpolation.",
+      "retrieved": "2026-08-17",
+      "links": [
+        { "layer": "concept", "target": "colour", "relation": "defines" }
+      ]
+    },
+    {
+      "id": "css-color-4",
+      "url": "https://www.w3.org/TR/css-color-4/",
+      "title": "CSS Color Module Level 4",
+      "kind": "docs",
+      "publisher": "W3C",
+      "year": 2024,
+      "description": "Makes the colour concept importable in the strongest possible sense — the perceptual spaces, difference metrics and interpolation rules are shipped in every browser, so a palette generator does not need a library at all. Used to check that Oklab, Lab, LCH and the interpolation behaviour are specified rather than conventions.",
+      "retrieved": "2026-08-17",
+      "links": [
+        { "layer": "concept", "target": "colour", "relation": "implements" },
+        { "layer": "technology", "target": "browser", "relation": "describes" }
+      ]
+    },
+    {
+      "id": "efros-1999-texture-synthesis",
+      "url": "https://people.eecs.berkeley.edu/~efros/research/EfrosLeung.html",
+      "title": "Texture Synthesis by Non-parametric Sampling",
+      "kind": "paper",
+      "publisher": "ICCV 1999",
+      "year": 1999,
+      "description": "The origin of growing a texture pixel by pixel by matching neighbourhoods against a single example, and the reason example-based synthesis is a concept rather than a trick: no model is fitted at all, the sample *is* the model. Establishes the family that WFC later generalises.",
+      "retrieved": "2026-08-17",
+      "links": [
+        { "layer": "concept", "target": "texsyn", "relation": "defines" }
+      ]
+    },
+    {
+      "id": "opensubdiv-intro",
+      "url": "https://graphics.pixar.com/opensubdiv/docs/intro.html",
+      "title": "OpenSubdiv — introduction and documentation",
+      "kind": "reference-implementation",
+      "publisher": "Pixar",
+      "year": 2024,
+      "description": "The importable that makes subdivision a block: Catmull–Clark and Loop with semi-sharp creases, hierarchical edits and GPU evaluation, in the library that Maya, Blender and RenderMan all use — so it is the de facto specification of what subdivision means in practice, not just one implementation of it.",
+      "retrieved": "2026-08-17",
+      "links": [
+        { "layer": "concept", "target": "subdiv", "relation": "implements" }
+      ]
+    },
+    {
+      "id": "sigmund-2001-99-line",
+      "url": "https://link.springer.com/article/10.1007/s001580050176",
+      "title": "A 99 line topology optimization code written in Matlab",
+      "kind": "paper",
+      "publisher": "Structural and Multidisciplinary Optimization 21, 120–127",
+      "year": 2001,
+      "description": "The reason topology optimisation is defensible as a block despite having no mature library: the specification is 99 lines, split 36 main / 12 optimality-criteria optimiser / 16 mesh-independency filter / 35 finite elements. Andreassen et al. later cut it to 88 by vectorising. A method whose complete reference implementation fits on two pages does not need a package to be pinned down.",
+      "retrieved": "2026-08-17",
+      "links": [
+        { "layer": "concept", "target": "topopt", "relation": "defines" }
+      ]
+    },
+    {
+      "id": "andreassen-2011-88-line",
+      "url": "https://link.springer.com/article/10.1007/s00158-010-0594-7",
+      "title": "Efficient topology optimization in MATLAB using 88 lines of code",
+      "kind": "paper",
+      "publisher": "Structural and Multidisciplinary Optimization 43, 1–16 (online 2010)",
+      "year": 2011,
+      "description": "Checked to confirm the shorter figure quoted for SIMP: 88 lines, reached from Sigmund's 99 by preallocating arrays and vectorising loops rather than by cutting functionality. Fixes the line count this catalogue quotes.",
+      "retrieved": "2026-08-17",
+      "links": [
+        { "layer": "concept", "target": "topopt", "relation": "verifies" }
+      ]
+    },
+    {
+      "id": "pypi-name-collisions-2026",
+      "url": "https://pypi.org/pypi/pymo/json",
+      "title": "PyPI metadata for `pymo` — a name collision, not a motion library",
+      "kind": "registry",
+      "publisher": "Python Package Index",
+      "year": 2026,
+      "description": "Checked while testing whether data-driven motion synthesis could pass the importable test. PyPI `pymo` is \"MongoClient instrumentation and factory\", not the motion-capture package the name suggests — the same failure mode that put `sdf` (Scientific Data Format) and `wfc` (WebForms Core) in this catalogue's caveat list. PyPI `meep` is likewise a task runner, not the MIT photonics solver. Both are why the motion concept was rejected rather than asserted.",
+      "retrieved": "2026-08-17",
+      "links": [
+        { "layer": "concept", "target": "ik", "relation": "verifies", "note": "The nearest existing concept to the rejected `motion` addition." }
+      ]
+    },
+    {
       "id": "unity-async-gpu-readback",
       "url": "https://docs.unity3d.com/ScriptReference/Rendering.AsyncGPUReadback.html",
       "title": "Unity — AsyncGPUReadback",

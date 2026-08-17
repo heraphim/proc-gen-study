@@ -980,12 +980,15 @@ for (const [field, values, why] of PENDING) {
 
 const spread = Object.fromEntries((data.tagSpread ?? []).map(s => [s.id, s.domains]));
 const facetMeta = data.facetMeta ?? {};
+const conceptMeta = data.conceptMeta ?? {};
 const facetCounts = {};
 for (const t of data.tags) facetCounts[t.facet] = (facetCounts[t.facet] ?? 0) + 1;
 
+const addedCount = data.tags.filter(t => t.origin === 'added').length;
 $('#blocks-stats').textContent =
   `${facetCounts.block ?? 0} blocks · ${facetCounts.representation ?? 0} representations · `
-  + `${facetCounts.category ?? 0} categories · ${facetCounts.deployment ?? 0} deployment`;
+  + `${facetCounts.category ?? 0} categories · ${facetCounts.deployment ?? 0} deployment`
+  + (addedCount ? ` · ${data.tags.length - addedCount} inherited, ${addedCount} added here` : '');
 
 const testHost = $('#block-tests');
 for (const [name, desc] of Object.entries(facetMeta.tests ?? {})) {
@@ -1035,6 +1038,20 @@ function conceptCard(t) {
     body.append(box);
   }
 
+  /* An added concept has to argue for itself on its own card: what the absence of the word
+     was costing, and what you would actually import if you accepted it. */
+  const added = conceptMeta.additions?.[t.id];
+  if (added) {
+    const box = el('div', 'addition');
+    box.append(el('div', 'prov-head', 'Why this was added'));
+    box.append(el('p', 'add-why', added.why));
+    const dl = el('dl');
+    dl.append(el('dt', null, 'Importable'), el('dd', null, added.importable));
+    if (added.absence) dl.append(el('dt', null, 'What its absence did'), el('dd', 'watch', added.absence));
+    box.append(dl);
+    body.append(box);
+  }
+
   const prov = provenanceBlock('concept', t.id);
   if (prov) body.append(prov);
 
@@ -1077,11 +1094,18 @@ filterablePage({
   items: data.tags,
   noun: 'concepts',
   searchIn: t => [t.id, t.name, t.what, t.good, t.bad, t.watch, t.eli5].filter(Boolean).join(' '),
-  filters: [{
-    key: 'facet', label: 'Kind',
-    options: FACET_ORDER.map(f => ({ id: f, label: FACET_TITLE[f].split(' — ')[0] })),
-    match: (t, id) => t.facet === id,
-  }],
+  filters: [
+    {
+      key: 'facet', label: 'Kind',
+      options: FACET_ORDER.map(f => ({ id: f, label: FACET_TITLE[f].split(' — ')[0] })),
+      match: (t, id) => t.facet === id,
+    },
+    {
+      key: 'origin', label: 'Origin', exclusive: true,
+      options: [{ id: 'source', label: 'from the reference' }, { id: 'added', label: 'added here' }],
+      match: (t, id) => (t.origin ?? 'source') === id,
+    },
+  ],
   groupBy: t => t.facet,
   groupHeader: (facet, rows) => {
     const box = el('span', 'grp-title');
@@ -1093,7 +1117,18 @@ filterablePage({
   renderItem: conceptCard,
 });
 
-for (const note of facetMeta.contested ?? []) {
+const rejectedHost = $('#concept-rejected');
+for (const r of conceptMeta.rejected ?? []) {
+  const group = el('div', 'cand-group');
+  group.append(el('div', 'cand-head', `${r.name}  (${r.id})`));
+  const dl = el('dl');
+  dl.append(el('dt', null, 'Considered because'), el('dd', null, r.why_considered));
+  dl.append(el('dt', null, 'Rejected because'), el('dd', 'watch', r.why_rejected));
+  group.append(dl);
+  rejectedHost.append(group);
+}
+
+for (const note of [...(facetMeta.contested ?? []), ...(conceptMeta.contested ?? [])]) {
   $('#facet-contested').append(el('li', null, note));
 }
 
