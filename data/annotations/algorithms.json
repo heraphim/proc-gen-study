@@ -426,6 +426,20 @@
       "url": "https://en.wikipedia.org/wiki/Centripetal_Catmull%E2%80%93Rom_spline"
     },
     {
+      "id": "chaikin",
+      "name": "Chaikin's corner cutting",
+      "concept": "subdiv",
+      "source_type": "paper",
+      "year": 1974,
+      "authors": "George Chaikin",
+      "tier": "operator",
+      "summary": "Repeatedly replace every corner with two points a quarter of the way along each adjacent edge. Converges to a quadratic B-spline.",
+      "eli5": "Take a jagged polygon. On every edge, mark the points a quarter and three quarters of the way along, and join those marks up, throwing the original corners away. The shape gets smoother and slightly smaller. Do it four times and it looks like a curve — and it is exactly a curve you could have written an equation for.",
+      "description": "Each round replaces every vertex with two, at 1/4 and 3/4 along its adjacent edges, so the polygon gains a vertex per edge and loses every original corner. The limit is precisely a uniform quadratic B-spline over the original control polygon, which was the surprise: a purely geometric, local, no-arithmetic-harder-than-a-quarter procedure produces a curve with a closed-form definition. That equivalence is the seed of the whole subdivision idea, and everything in this concept is a descendant — Catmull–Clark and Doo–Sabin are the two natural generalisations of exactly this rule to surfaces, and Loop is its triangle counterpart. For generation it remains the cheapest useful smoother: four rounds turn a cellular-automata cave outline, a routed road polyline or a hand-clicked silhouette into something that reads as drawn rather than as sampled.",
+      "citation": "Chaikin, An algorithm for high-speed curve generation, Computer Graphics and Image Processing 3(4), 346–349",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/0146664X74900288"
+    },
+    {
       "id": "penrose-tiling",
       "name": "Penrose tiling",
       "concept": "tile",
@@ -468,6 +482,20 @@
       "url": "https://en.wikipedia.org/wiki/K-d_tree"
     },
     {
+      "id": "cielab",
+      "name": "CIELAB",
+      "concept": "colour",
+      "source_type": "paper",
+      "year": 1976,
+      "authors": "Commission Internationale de l'Éclairage",
+      "tier": "operator",
+      "summary": "A colour space built so that equal numeric distances are roughly equal perceptual differences. Lightness on one axis, hue and chroma on two more.",
+      "eli5": "In the numbers a screen uses, two greens can be far apart numerically and look identical, while two blues are close numerically and look nothing alike. This space rearranges colour into three numbers — how light, how green-to-red, how blue-to-yellow — chosen so that moving the same amount always looks like roughly the same amount of change.",
+      "description": "Defined as a nonlinear transform of CIE XYZ relative to a white point: a cube-root compression of each channel modelling the eye's response to intensity, then differences taken to give L* for lightness and a*, b* for the two opponent axes. The point is uniformity — Euclidean distance in the space approximates perceived difference, so \"these two colours are equally different from that one\" becomes a computation rather than a judgement. That single property is what makes palette generation, gradient interpolation, quantisation and contrast checking tractable, and it is why interpolating in sRGB is wrong: sRGB distance has no perceptual meaning, so the midpoint of two saturated colours passes through a desaturated dip. CIELAB's own uniformity is imperfect, notably in the blue region and for large differences, which is exactly what CIEDE2000's correction terms and later spaces like CAM16-UCS and Oklab exist to address.",
+      "citation": "CIE, Colorimetry — Part 4: CIE 1976 L*a*b* colour space, CIE Publication 15; standardised 1976, now ISO/CIE 11664-4",
+      "url": "https://en.wikipedia.org/wiki/CIELAB_color_space"
+    },
+    {
       "id": "floyd-steinberg",
       "name": "Floyd–Steinberg dithering",
       "concept": "samp",
@@ -508,6 +536,34 @@
       "description": "There is no grid. Fluid is a cloud of particles, and any quantity at a point — density, pressure, velocity — is estimated by summing contributions from nearby particles weighted by a smoothing kernel that falls to zero at a fixed radius. Density comes from how crowded the neighbourhood is, pressure from density via an equation of state, and force from the pressure gradient, which is itself the analytic gradient of the kernel. Because it is purely Lagrangian, mass is conserved exactly and free surfaces need no tracking, which is why it dominates splashes and pouring. Its weaknesses are also structural: incompressibility is only approximate unless you add a pressure solve, and surface particles have incomplete neighbourhoods, so surface tension and thin sheets are persistently awkward. Invented for astrophysics, borrowed by graphics twenty-five years later.",
       "citation": "Gingold & Monaghan, Smoothed particle hydrodynamics: theory and application to non-spherical stars, MNRAS 181, 375–389",
       "url": "https://en.wikipedia.org/wiki/Smoothed-particle_hydrodynamics"
+    },
+    {
+      "id": "catmull-clark",
+      "name": "Catmull–Clark subdivision",
+      "concept": "subdiv",
+      "source_type": "paper",
+      "year": 1978,
+      "authors": "Edwin Catmull, James Clark",
+      "tier": "operator",
+      "summary": "Split every face into quads and reposition every point by weighted averaging. The industry standard smooth surface.",
+      "eli5": "For every face, mark its middle. For every edge, mark a point between its two ends and the middles of the two faces beside it. Then move each original corner towards the average of the marks around it. Join the marks up into new four-sided faces. Repeat, and a blocky cage turns into a smooth surface.",
+      "description": "Three rules per round. A face point is the average of the face's vertices. An edge point is the average of the edge's two endpoints and its two adjacent face points. Each original vertex moves to a specific weighted combination of the average of surrounding face points, the average of surrounding edge midpoints, and itself, with weights depending on its valence. Connecting face points to edge points produces all-quadrilateral faces, so after one round the mesh is quad-only regardless of what it started as. The limit surface is a bicubic B-spline wherever the mesh is regular, and only C¹ rather than C² at the irregular vertices a closed surface forces to exist — which is why reflections reveal those points before anyone can explain why. With semi-sharp creases added, this is what Pixar's OpenSubdiv implements and therefore what Maya, Blender and RenderMan mean by a subdivision surface, making it the representation most authored character and vehicle geometry actually lives in.",
+      "citation": "Catmull & Clark, Recursively generated B-spline surfaces on arbitrary topological meshes, Computer-Aided Design 10(6), 350–355",
+      "url": "https://people.eecs.berkeley.edu/~sequin/CS284/PAPERS/CatmullClark_SDSurf.pdf"
+    },
+    {
+      "id": "doo-sabin",
+      "name": "Doo–Sabin subdivision",
+      "concept": "subdiv",
+      "source_type": "paper",
+      "year": 1978,
+      "authors": "Daniel Doo, Malcolm Sabin",
+      "tier": "operator",
+      "summary": "Shrink every face towards its own centre and stitch the gaps. The corner-cutting generalisation, dual to Catmull–Clark.",
+      "eli5": "Instead of adding points inside faces, shrink each face towards its own middle so gaps open up between neighbours. Then fill the gaps: a four-sided patch along every old edge, and a patch at every old corner. The result is smooth, and every new corner has exactly three faces meeting at it.",
+      "description": "The direct surface generalisation of Chaikin's corner cutting: each face contracts towards its centroid, and the resulting holes along edges and at vertices are filled with new faces. This makes it a *dual* scheme — new vertices sit inside old faces rather than on old vertices — where Catmull–Clark is primal, and the practical consequence is that every vertex after one round has valence three, so irregularity concentrates in face count rather than vertex valence. The limit surface is a biquadratic B-spline on regular regions, one degree lower than Catmull–Clark, so it is slightly less smooth and noticeably faster to converge visually. It handles non-quad input more gracefully in some cases and is the scheme behind several CAD smoothing operations, but it lost the modelling war for a mundane reason: because new vertices are not at old vertex positions, the cage is less intuitive to sculpt with.",
+      "citation": "Doo & Sabin, Behaviour of recursive division surfaces near extraordinary points, Computer-Aided Design 10(6), 356–360",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/0010448578901100"
     },
     {
       "id": "bsp-tree",
@@ -634,6 +690,20 @@
       "description": "Two primitives over a structuring element. Erosion keeps a pixel only where the element fits entirely within the region; dilation marks every pixel the element touches. Composing them gives opening — erode then dilate — which deletes anything smaller than the element while leaving larger regions at their original size, and closing, the reverse, which fills small gaps. Because the operations are defined by set containment rather than by averaging, edges stay hard: this is the correct tool where a blur-and-threshold would round corners and shift boundaries. Extended to greyscale by replacing containment with min and max, the same operators give local minimum and maximum filters, and the difference between dilation and erosion — the morphological gradient — is an edge detector with no smoothing. In generation this is the machinery of mask cleanup: removing single-cell speckle from a cellular-automata cave, closing one-tile gaps in a corridor, growing a wall by exactly two tiles, and separating touching blobs by repeated erosion.",
       "citation": "Serra, Image Analysis and Mathematical Morphology, Academic Press, 1982; founded with Matheron at the École des Mines de Paris from 1964",
       "url": "https://en.wikipedia.org/wiki/Mathematical_morphology"
+    },
+    {
+      "id": "median-cut",
+      "name": "Median cut colour quantisation",
+      "concept": "colour",
+      "source_type": "paper",
+      "year": 1982,
+      "authors": "Paul Heckbert",
+      "tier": "operator",
+      "summary": "Choose a palette by repeatedly splitting the colour cloud at its median along its longest axis.",
+      "eli5": "You need sixteen colours that represent a whole photograph. Put every pixel's colour in one box. Find the direction the box is longest in, and cut it in half so that equal numbers of pixels fall each side. Now you have two boxes — cut the one that needs it most, and keep going until you have sixteen. The average colour of each box is a palette entry.",
+      "description": "Put all pixel colours in one bounding box. Repeatedly select a box, find its longest dimension, and split it at the median along that dimension so that each half contains an equal *number of pixels* — not an equal volume, which is the key choice and the reason it beats uniform subdivision. Continue until the target palette size is reached, then take each box's mean as a palette entry. Splitting by population means colours that occupy a lot of the image get more palette entries, so a photograph of a face spends its palette on skin rather than on the one bright pixel in the corner. This is the algorithm behind GIF and PNG-8 palettes, and it is still the fastest reasonable answer for palette *extraction* — pulling a scheme out of a reference image — where k-means over CIELAB gives better results and Lloyd relaxation, already in this table, is how you would run it.",
+      "citation": "Heckbert, Color image quantization for frame buffer display, Computer Graphics (SIGGRAPH 82) 16(3), 297–307",
+      "url": "https://dl.acm.org/doi/10.1145/800031.808580"
     },
     {
       "id": "midpoint-displacement",
@@ -832,6 +902,20 @@
       "url": "https://en.wikipedia.org/wiki/Katz%27s_back-off_model"
     },
     {
+      "id": "loop-subdivision",
+      "name": "Loop subdivision",
+      "concept": "subdiv",
+      "source_type": "paper",
+      "year": 1987,
+      "authors": "Charles Loop",
+      "tier": "operator",
+      "summary": "Split every triangle into four and average positions. The triangle counterpart to Catmull–Clark.",
+      "eli5": "Cut every triangle into four smaller triangles by marking the middle of each edge. Then nudge every point — old and new — towards the average of its neighbours, with carefully chosen weights. Repeat, and a faceted triangle mesh becomes a smooth surface, and it is still made of triangles.",
+      "description": "Each edge gets a new vertex at a weighted average of its two endpoints and the two opposite vertices of its adjacent triangles; each original vertex moves towards the average of its neighbours by an amount depending on its valence. Splitting each triangle into four keeps the mesh triangular throughout, which is the whole reason to prefer it: renderers, physics engines and GPU pipelines want triangles, so a triangle-in, triangle-out scheme avoids a conversion. The limit surface is a quartic box spline, C² except at irregular vertices where it is C¹ — the same caveat as Catmull–Clark, and the valence-dependent weight is precisely the tuning that makes those points as smooth as they can be. Loop introduced it in a master's thesis rather than a paper, which is why it is often cited indirectly. In generation it is the natural smoother for anything that came out of marching cubes or a triangle-based sculpt, and it is what libigl and most geometry-processing libraries provide.",
+      "citation": "Loop, Smooth Subdivision Surfaces Based on Triangles, master's thesis, Department of Mathematics, University of Utah, 1987",
+      "url": "https://en.wikipedia.org/wiki/Loop_subdivision_surface"
+    },
+    {
       "id": "marching-cubes",
       "name": "Marching cubes",
       "concept": "sdf",
@@ -900,6 +984,20 @@
       "description": "Two separate processes run over a heightfield. Thermal erosion handles material loosened and falling: for each cell, compare height with its neighbours, and wherever the slope exceeds a fixed talus angle, move a fraction of the difference downhill. Repeated, this produces the constant-angle scree slopes real cliffs accumulate at their base. Hydraulic erosion adds water: each cell holds some water and dissolved sediment, water flows to lower neighbours carrying sediment with it, sediment beyond the water's capacity is deposited, and some water evaporates each step. The result is drainage — connected channels, deposition in valleys — which is exactly the structure that pure fractal noise cannot have, and why this paper marks the point terrain stopped looking like crumpled paper.",
       "citation": "The synthesis and rendering of eroded fractal terrains, SIGGRAPH '89, Computer Graphics 23(3), 41–50",
       "url": "https://history.siggraph.org/learning/the-synthesis-and-rendering-of-eroded-fractal-terrains-by-musgrave-kolb-and-mace/"
+    },
+    {
+      "id": "simp",
+      "name": "SIMP density-based topology optimisation",
+      "concept": "topopt",
+      "source_type": "paper",
+      "year": 1989,
+      "authors": "Martin Bendsøe; power-law penalisation with Ole Sigmund",
+      "tier": "operator",
+      "summary": "Give every cell a density between empty and solid, penalise the in-between, and follow the gradient. The whole method is 99 lines.",
+      "eli5": "Instead of asking what shape to make, give every crumb of the block a number between 0 and 1 for how solid it is. Run the physics, and for each crumb work out how much softer the whole thing would get if you took material away from it. Take material from the crumbs that are barely helping, give it to the ones that are, and keep the total amount the same. Repeat, and a skeleton emerges.",
+      "description": "Discretise the design domain into finite elements and let each carry a density variable. Stiffness is scaled as density to a power — typically three — which is the \"penalisation\": intermediate densities become inefficient, so the optimiser is pushed towards a nearly black-and-white answer without an explicit integer constraint. Each iteration solves the finite-element problem, computes the sensitivity of compliance to each density analytically, and updates all densities at once by an optimality-criteria rule subject to a volume constraint. Two fixes are not optional and are why naive implementations fail: a sensitivity or density filter over a fixed radius, which removes the checkerboard instability and makes the answer independent of mesh resolution, and a move limit for stability. This is what commercial \"generative design\" runs, and Sigmund's 99-line MATLAB implementation — 36 lines of main program, 12 of optimiser, 16 of filter, 35 of finite elements — is the reference specification, later reduced to 88 by vectorising.",
+      "citation": "Bendsøe, Optimal shape design as a material distribution problem, Structural Optimization 1, 193–202 (1989); the reference implementation is Sigmund, A 99 line topology optimization code written in Matlab, Structural and Multidisciplinary Optimization 21, 120–127 (2001)",
+      "url": "https://link.springer.com/article/10.1007/BF01650949"
     },
     {
       "id": "ccd",
@@ -1182,6 +1280,20 @@
       "url": "https://www.semanticscholar.org/paper/Constrained-Elastic-Surface-Nets:-Generating-Smooth-Gibson/3949fce7abebcd89db0db70d286ce9d24a2d5bea"
     },
     {
+      "id": "efros-leung",
+      "name": "Efros–Leung non-parametric synthesis",
+      "concept": "texsyn",
+      "source_type": "paper",
+      "year": 1999,
+      "authors": "Alexei Efros, Thomas Leung",
+      "tier": "operator",
+      "summary": "Grow a texture one pixel at a time by finding places in the sample whose neighbourhood matches the one you have so far.",
+      "eli5": "You have a scrap of texture and want more of it. Take the next empty pixel on the edge of what you have built, look at the pixels already around it, and search the whole scrap for spots whose surroundings look like that. Copy one of those spots' centre pixels in. Repeat, one pixel at a time.",
+      "description": "For each unfilled pixel on the growing boundary, take the window of already-known neighbours, find every location in the sample whose corresponding window is within a tolerance of the best match, and copy the centre pixel from one of those at random. The randomness among near-equal matches is what stops it degenerating into a verbatim copy; the tolerance is the one dial, and setting it too tight produces exact repetition while too loose produces mush. Nothing is fitted or learned: the sample is the model, which is why the paper is the origin of the whole example-based family. Its weaknesses are also its legacy — it is O(sample size) per pixel and therefore very slow, and it can \"grow garbage\", locking into a region of the sample and repeating it, which is what patch-based and optimisation-based successors were built to avoid.",
+      "citation": "Efros & Leung, Texture synthesis by non-parametric sampling, ICCV 1999, 1033–1038",
+      "url": "https://people.eecs.berkeley.edu/~efros/research/EfrosLeung.html"
+    },
+    {
       "id": "morphable-model-3d",
       "name": "3D Morphable Model",
       "concept": "morph",
@@ -1210,6 +1322,20 @@
       "url": "https://en.wikipedia.org/wiki/Fluid_animation"
     },
     {
+      "id": "portilla-simoncelli",
+      "name": "Portilla–Simoncelli statistics matching",
+      "concept": "texsyn",
+      "source_type": "paper",
+      "year": 2000,
+      "authors": "Javier Portilla, Eero Simoncelli",
+      "tier": "operator",
+      "summary": "Measure a fixed set of statistics from the sample, then force noise to have the same ones. Nothing is copied.",
+      "eli5": "Instead of copying bits of the sample, measure it: how much of each size and direction of detail is present, and how those amounts relate to each other. Then take pure static and repeatedly nudge it until its measurements match. What comes out shares the sample's character without containing any piece of it.",
+      "description": "Decompose the sample with a steerable pyramid — a set of filters at several scales and orientations — and record a specific vocabulary of statistics: marginal moments of each band, correlations between neighbouring coefficients within a band, and correlations across scales and across orientations. Then start from white noise and alternately project it towards satisfying each statistic in turn until it converges. Because nothing is copied, the output cannot contain a fragment of the input, which matters for licensing and for scale: the model is a few thousand numbers regardless of how big the sample was. The paper is also the strongest statement of what a texture *is* — it identifies the minimal set of statistics whose match is perceptually sufficient — and that framing is what the neural style-transfer literature later rediscovered by replacing the steerable pyramid with a trained network and the hand-chosen statistics with Gram matrices.",
+      "citation": "Portilla & Simoncelli, A parametric texture model based on joint statistics of complex wavelet coefficients, International Journal of Computer Vision 40(1), 49–70",
+      "url": "https://www.cns.nyu.edu/pub/eero/portilla99-reprint.pdf"
+    },
+    {
       "id": "shuffle-bag",
       "name": "Shuffle bags and pity timers",
       "concept": "rand",
@@ -1222,6 +1348,20 @@
       "description": "Uniform random produces streaks, and players experience streaks as broken rather than random. Two standard corrections. A shuffle bag holds one token per possible outcome, draws without replacement, and refills when empty — so over each cycle every outcome appears exactly its intended number of times and long droughts are impossible; Tetris piece generation is the canonical case. A pity timer instead raises the probability of a rare outcome on each consecutive failure, so the drop rate is low early and approaches certainty at the cap, giving a bounded worst case; this is what most gacha and loot systems actually run, and the headline percentage they advertise is the average over that ramp rather than a per-roll constant. Neither is documented in a paper, and both matter more to perceived quality than almost any generator in the catalogue.",
       "citation": "Game development practice. No canonical publication; described in GDC talks and design writing.",
       "url": "https://en.wikipedia.org/wiki/Tetris#Randomizer"
+    },
+    {
+      "id": "sqrt3-subdivision",
+      "name": "√3 subdivision",
+      "concept": "subdiv",
+      "source_type": "paper",
+      "year": 2000,
+      "authors": "Leif Kobbelt",
+      "tier": "operator",
+      "summary": "Insert one vertex per triangle and flip every original edge. Triples the triangle count per round instead of quadrupling it.",
+      "eli5": "Splitting every triangle into four makes the mesh grow very fast — four times bigger each round. Instead, drop one new point in the middle of each triangle, join it to the three corners, and then flip each of the original edges so the triangles line up neatly. The mesh only grows three times per round, so you can stop closer to the size you actually wanted.",
+      "description": "One vertex per face, connected to that face's three corners, followed by an edge flip of every original edge; original vertices are then repositioned by a valence-dependent average. Triangle count multiplies by three rather than four, so two rounds of √3 give a finer granularity of control than one round of Loop and a coarser one than two — the practical motivation, since a 4× jump is often more refinement than wanted. Two rounds of √3 amount to a uniform 1-to-9 split, and the scheme is C² on regular meshes. It also adapts to local refinement more naturally than 1-to-4 schemes, because inserting a face point does not force neighbouring faces to split, which is what makes it attractive for adaptive detail on generated terrain and for meshes that must be refined only where the viewer is looking.",
+      "citation": "Kobbelt, √3-subdivision, SIGGRAPH 2000, 103–112",
+      "url": "https://www.graphics.rwth-aachen.de/media/papers/sqrt31.pdf"
     },
     {
       "id": "squarified-treemap",
@@ -1252,6 +1392,20 @@
       "url": "https://constraints.cs.washington.edu/solvers/cassowary-tochi.pdf"
     },
     {
+      "id": "ciede2000",
+      "name": "CIEDE2000 colour difference",
+      "concept": "colour",
+      "source_type": "paper",
+      "year": 2001,
+      "authors": "M. Ronnier Luo, Guihua Cui, Bryan Rigg; standardised by the CIE",
+      "tier": "operator",
+      "summary": "The corrected formula for how different two colours look, with weightings that fix CIELAB's known non-uniformities.",
+      "eli5": "Measuring colour difference as plain distance in a perceptual space is close but not right — it overestimates in the blues, and treats a difference in colourfulness as more visible than it really is at high saturation. So take the plain distance and apply a set of correction factors, one for lightness, one for chroma, one for hue, plus a rotation term for the blue region.",
+      "description": "Computed in CIELAB but with substantial machinery on top: separate weighting functions S_L, S_C and S_H that scale the lightness, chroma and hue differences according to where in the space the pair sits, and an interaction term R_T that rotates the difference ellipse in the blue-violet region where CIELAB is worst. The result correlates far better with visual assessment than plain CIELAB distance and is the reference against which industrial colour tolerance is specified. For generation it matters wherever \"different enough\" has to be decided automatically: generating a categorical palette whose entries are mutually distinguishable, checking that a procedural recolour has not collapsed two states into the same appearance, or verifying a colour-blind-safe scheme. Its cost is that it is not a metric — it violates the triangle inequality — so it cannot be used as the distance inside a clustering algorithm without care.",
+      "citation": "Luo, Cui & Rigg, The development of the CIE 2000 colour-difference formula: CIEDE2000, Color Research & Application 26(5), 340–350; CIE Publication 142",
+      "url": "https://hajim.rochester.edu/ece/sites/gsharma/ciede2000/ciede2000noteCRNA.pdf"
+    },
+    {
       "id": "cma-es",
       "name": "CMA-ES",
       "concept": "evo",
@@ -1264,6 +1418,20 @@
       "description": "Sample a population from a multivariate Gaussian, evaluate, and then update not just the mean but the *covariance matrix* of that Gaussian from the successful samples — so the distribution stretches along directions that have been paying off and shrinks across directions that have not. It also maintains an evolution path, a smoothed record of where the mean has been moving, which lets it distinguish a genuine trend from noise and adapt the overall step size accordingly. The effect is that it learns the local scaling and correlation structure of the problem, making it near-invariant to how the parameters happen to be scaled or rotated — the practical reason it works on badly conditioned problems where plain evolution strategies stall. It is the default choice for continuous, derivative-free optimisation up to a few hundred dimensions.",
       "citation": "Hansen & Ostermeier, Completely Derandomized Self-Adaptation in Evolution Strategies, Evolutionary Computation 9(2), 159–195",
       "url": "https://en.wikipedia.org/wiki/CMA-ES"
+    },
+    {
+      "id": "image-quilting",
+      "name": "Image quilting",
+      "concept": "texsyn",
+      "source_type": "paper",
+      "year": 2001,
+      "authors": "Alexei Efros, William Freeman",
+      "tier": "operator",
+      "summary": "Copy overlapping patches instead of pixels, then cut each join along its path of least difference.",
+      "eli5": "Copying one pixel at a time is slow, so copy whole squares that overlap their neighbours. The overlap will not match exactly, so instead of blending it, find the wiggly path through the overlap where the two versions differ least, and cut along that. The seam hides in whatever detail was already there.",
+      "description": "Place patches in raster order, each overlapping its already-placed neighbours, choosing among sample patches whose overlap region best matches what is already there. Then, rather than feathering the overlap — which blurs — find the minimum-cost path through it using dynamic programming over the squared difference, and cut along that path. The two ideas are separable and both mattered: patches instead of pixels bought two orders of magnitude of speed, and the min-cut seam bought quality that blending cannot, because a seam that follows existing structure is invisible while a blurred one is not. Quilting is also the origin of texture *transfer* — constrain the patch choice by a target image's brightness as well as by the overlap, and the sample's material is painted onto the target's form. In generation it remains the practical way to make a photographed material tileable or to extend it to arbitrary size.",
+      "citation": "Efros & Freeman, Image quilting for texture synthesis and transfer, SIGGRAPH 2001, 341–346",
+      "url": "https://people.eecs.berkeley.edu/~efros/research/quilting/quilting.pdf"
     },
     {
       "id": "procedural-cities",
@@ -1364,6 +1532,20 @@
       "url": "https://flam3.com/flame_draves.pdf"
     },
     {
+      "id": "graphcut-textures",
+      "name": "Graph-cut textures",
+      "concept": "texsyn",
+      "source_type": "paper",
+      "year": 2003,
+      "authors": "Vivek Kwatra, Arno Schödl, Irfan Essa, Greg Turk, Aaron Bobick",
+      "tier": "operator",
+      "summary": "Choose the seam between two overlapping patches by solving a minimum graph cut — in 2D, and in 3D for video.",
+      "eli5": "Quilting cuts each seam along a path, which works when the patches are laid out in tidy rows. But if patches can overlap any which way, the boundary is a shape, not a path. So build a network where every pixel in the overlap chooses a side, and cutting the network in the cheapest possible place gives the best boundary — even one that loops back on itself.",
+      "description": "Where image quilting finds a minimum-cost path with dynamic programming, this formulates seam placement as a labelling problem: every pixel in the overlap is assigned to one patch or the other, with a cost for disagreeing with a neighbour proportional to how differently the two patches look there. Minimising that energy is exactly a minimum graph cut, solvable optimally in polynomial time, and unlike a path it can produce boundaries of any topology — islands, holes, patches inserted into the middle of other patches. That freedom lets patches be placed in arbitrary order and position rather than in raster scan, and it extends directly to three dimensions, which is what makes video texture synthesis possible with the same machinery. It is the seam-placement half of the problem stated in its general form, and its practical descendants are everywhere in panorama stitching, object removal and terrain patch blending.",
+      "citation": "Kwatra, Schödl, Essa, Turk & Bobick, Graphcut textures: image and video synthesis using graph cuts, ACM TOG 22(3) (SIGGRAPH 2003), 277–286",
+      "url": "https://faculty.cc.gatech.edu/~turk/my_papers/graph_cuts.pdf"
+    },
+    {
       "id": "poisson-image-editing",
       "name": "Poisson image editing",
       "concept": "filter",
@@ -1404,6 +1586,20 @@
       "description": "The state is a single machine word. Each step XORs the state with a shifted copy of itself, three times, with a carefully chosen triple of shift amounts — the choice determines whether the generator achieves its full period of 2^k−1. That is the entire algorithm: no multiplication, no memory beyond one register, and it compiles to a handful of instructions. Plain xorshift fails some statistical tests because the output is a linear function of the state over GF(2), which later scrambled variants (xorshift*, xoshiro) fix by applying a non-linear output transform. For procedural generation the appeal is that it is cheap enough to run per-pixel or per-voxel without thinking about cost.",
       "citation": "Xorshift RNGs, Journal of Statistical Software 8(14), 1–6",
       "url": "https://www.jstatsoft.org/article/view/v008i14"
+    },
+    {
+      "id": "level-set-topology-optimisation",
+      "name": "Level-set topology optimisation",
+      "concept": "topopt",
+      "source_type": "paper",
+      "year": 2004,
+      "authors": "Grégoire Allaire, François Jouve, Anca-Maria Toader",
+      "tier": "operator",
+      "summary": "Represent the design as the zero level of a field and move that boundary along its shape derivative. Crisp edges throughout.",
+      "eli5": "Density methods leave a grey fuzz that has to be cleaned up at the end. Instead, describe the shape by a field where negative means solid and positive means empty — the shape is wherever the field is exactly zero. Work out which way to push the boundary to improve things, and push the field accordingly. The edge is always a real edge.",
+      "description": "The structure is the negative region of a level-set function on a fixed grid. Shape sensitivity analysis gives a velocity field on the boundary — the direction and rate at which moving each point of the surface would improve the objective — and advecting the level set by that velocity with a Hamilton–Jacobi update evolves the design. Because the boundary is implicit, topology changes such as holes merging or vanishing happen automatically, which is what shape-optimisation methods on explicit meshes cannot do. The trade against SIMP is real in both directions: the boundary stays sharp and physical quantities on it are meaningful, but new holes cannot nucleate from nowhere without extra machinery such as a topological derivative, so the initial guess matters much more. It is the natural formulation where the objective lives on the surface — heat transfer coefficients, fluid drag, optical scattering — and it is the same representation as the SDF concept, applied to optimisation rather than modelling.",
+      "citation": "Allaire, Jouve & Toader, Structural optimization using sensitivity analysis and a level-set method, Journal of Computational Physics 194(1), 363–393",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/S0021999103005044"
     },
     {
       "id": "droplet-erosion",
@@ -1460,6 +1656,20 @@
       "description": "Cells sit on a hexagonal lattice and hold a real value representing water. Cells adjacent to the frozen crystal are 'receptive'; their water is held and not diffused, and a constant addition term feeds them. All non-receptive cells diffuse toward the average of their neighbours. Each step, receptive cells that exceed one become part of the crystal. Just two parameters — the background vapour level and the addition constant — select the entire morphology, sweeping through plates, dendrites, stellar and sectored forms in a way that matches the real Nakaya diagram surprisingly well. It is a good example of a model that is genuinely mechanistic rather than imitative: the six-fold symmetry emerges from the lattice and the diffusion, and is not imposed.",
       "citation": "A local cellular model for snow crystal growth, Chaos, Solitons & Fractals 23, 1111–1119",
       "url": "https://ui.adsabs.harvard.edu/abs/2005CSF....23.1111R/abstract"
+    },
+    {
+      "id": "texture-optimization",
+      "name": "Texture optimization",
+      "concept": "texsyn",
+      "source_type": "paper",
+      "year": 2005,
+      "authors": "Vivek Kwatra, Irfan Essa, Aaron Bobick, Nipun Kwatra",
+      "tier": "operator",
+      "summary": "Define a global energy — every output neighbourhood should resemble some sample neighbourhood — and minimise it everywhere at once.",
+      "eli5": "Every previous method builds the texture in some order and can never revisit an early decision. This one writes down a single score for the whole picture — how well does every little window in it match *some* window of the sample — and then improves the whole picture at once, over and over, until the score stops falling.",
+      "description": "The energy sums, over every overlapping neighbourhood of the output, the squared distance to that neighbourhood's nearest match in the sample. Minimisation alternates two steps: find each neighbourhood's nearest sample match, then set every output pixel to the weighted average of what all the overlapping matched neighbourhoods say it should be. That is an expectation-maximisation loop, run coarse-to-fine over an image pyramid, and it converges to a texture that is locally sample-like everywhere rather than only along the path the synthesis happened to take. The global formulation is what makes it controllable — add a term for matching a flow field and the texture aligns to it, add one for a target image and you get transfer, add one for the previous frame and you get temporally coherent video. It is slower than quilting and is the method most later work builds on, including the neural variants, which replace the pixel-neighbourhood distance with a learned feature distance and keep the loop.",
+      "citation": "Kwatra, Essa, Bobick & Kwatra, Texture optimization for example-based synthesis, ACM TOG 24(3) (SIGGRAPH 2005), 795–802",
+      "url": "https://dl.acm.org/doi/10.1145/1073204.1073263"
     },
     {
       "id": "wavelet-noise",
@@ -1630,6 +1840,20 @@
       "url": "https://iquilezles.org/articles/distfunctions/"
     },
     {
+      "id": "wcag-contrast",
+      "name": "WCAG relative luminance contrast",
+      "concept": "colour",
+      "source_type": "article",
+      "year": 2008,
+      "authors": "W3C Web Accessibility Initiative",
+      "tier": "operator",
+      "summary": "A contrast ratio from relative luminance, with fixed thresholds. The check any generated palette has to pass.",
+      "eli5": "Text has to be readable against its background. So work out how much light each of the two colours sends out, add a small amount to both to account for screen glare, and divide the brighter by the darker. The answer runs from 1 (identical) to 21 (black on white), and there are fixed numbers you must beat.",
+      "description": "Linearise each sRGB channel, weight them 0.2126/0.7152/0.0722 to get relative luminance, then form (L_lighter + 0.05) / (L_darker + 0.05). The 0.05 offsets model ambient screen flare and are what stop the ratio running to infinity against pure black. Thresholds are 4.5:1 for body text and 3:1 for large text at level AA. This is the single most consequential colour computation in generated interfaces, because it is the one that is legally cited, and any theme, token scale or dark-mode derivation that does not enforce it produces output that cannot ship. It is also known to be wrong in specific ways — it is a luminance ratio rather than a perceptual model, so it over-rates dark-on-light pairs and under-rates light-on-dark, which is why the APCA candidate algorithm exists and why generators that only satisfy WCAG can still produce combinations that read badly.",
+      "citation": "W3C, Web Content Accessibility Guidelines 2.0 (2008), success criterion 1.4.3 and the relative luminance definition; carried unchanged into WCAG 2.1 and 2.2",
+      "url": "https://www.w3.org/TR/WCAG21/#contrast-minimum"
+    },
+    {
       "id": "gabor-noise",
       "name": "Gabor noise",
       "concept": "noise",
@@ -1642,6 +1866,20 @@
       "description": "Instead of interpolating a lattice, scatter randomly positioned kernels through space and sum them — sparse convolution noise. The kernel here is a Gabor kernel: a sinusoid multiplied by a Gaussian envelope. Because the Fourier transform of that kernel is a Gaussian centred on the sinusoid's frequency, the noise's power spectrum is known in closed form and is set directly by the kernel's parameters. That means orientation, principal frequency and bandwidth become explicit dials rather than emergent side effects, so you can ask for anisotropic streaks at a specific angle, or a narrow band with no harmonics. Lattice noises give you whatever spectrum their construction happens to produce; this gives you the one you asked for. The cost is that it is considerably slower.",
       "citation": "Procedural Noise using Sparse Gabor Convolution, ACM TOG 28(3), 54–64 (SIGGRAPH 2009)",
       "url": "https://www-sop.inria.fr/reves/Basilic/2009/LLDD09/LLDD09PNSGC_paper.pdf"
+    },
+    {
+      "id": "patchmatch",
+      "name": "PatchMatch",
+      "concept": "texsyn",
+      "source_type": "paper",
+      "year": 2009,
+      "authors": "Connelly Barnes, Eli Shechtman, Adam Finkelstein, Dan Goldman",
+      "tier": "operator",
+      "summary": "Find approximate nearest-neighbour patches for a whole image by guessing once, then propagating good guesses to neighbours.",
+      "eli5": "Every method above needs to know, for each little window, which window of the sample matches it best — and searching for that is the slow part. The trick: guess randomly for every window at once. Then have each window ask its neighbour \"where did you find your match?\", because if your neighbour found a good one, the spot just next to it is probably good for you. A few rounds of asking, plus a few random tries, and almost everything has found its match.",
+      "description": "Three ideas. Initialise every patch's correspondence at random. Then propagate: scan the image and let each patch test the offsets its already-scanned neighbours are using, since natural images are piecewise smooth and a good offset for one patch is usually good for the patch beside it. Then random search: test a few candidates at exponentially decreasing distances around the current best, which escapes local minima. Alternating scan directions and repeating a handful of times converges to an approximate nearest-neighbour field orders of magnitude faster than tree-based search, in memory proportional to the image. Because it makes correspondence cheap, it made interactive versions of everything above possible — this is the algorithm inside content-aware fill, reshuffling, retargeting, and most modern inpainting that is not a neural network. Its generalisation to arbitrary descriptors and to 3D makes it a general correspondence tool rather than only a texture one.",
+      "citation": "Barnes, Shechtman, Finkelstein & Goldman, PatchMatch: a randomized correspondence algorithm for structural image editing, ACM TOG 28(3) (SIGGRAPH 2009)",
+      "url": "https://gfx.cs.princeton.edu/pubs/Barnes_2009_PAR/patchmatch.pdf"
     },
     {
       "id": "recast-navmesh",
@@ -1896,6 +2134,20 @@
       "url": "https://flame.is.tue.mpg.de/"
     },
     {
+      "id": "adjoint-inverse-design",
+      "name": "Adjoint-gradient inverse design",
+      "concept": "topopt",
+      "source_type": "paper",
+      "year": 2018,
+      "authors": "Sean Molesky, Zin Lin, Alexander Piggott, Weiliang Jin, Jelena Vučković, Alejandro Rodriguez",
+      "tier": "operator",
+      "summary": "Get the gradient with respect to millions of design variables from two simulations, not millions, by solving the problem backwards.",
+      "eli5": "You want to know how each of a million knobs affects the result. Turning each one and re-running the simulation would take a million simulations. But there is a trick: run the simulation forwards once, then run a related simulation backwards once, and multiply the two answers together. That gives you the effect of every knob at the cost of two runs.",
+      "description": "For an objective depending on the solution of a linear physical system, the derivative with respect to every design variable can be assembled from the forward solution and the solution of one adjoint system — the transpose problem driven by the objective's sensitivity. Two solves total, regardless of whether there are ten design variables or ten million. That single fact is what makes it possible to optimise every voxel of a photonic device, an antenna or a heat exchanger, and it is why the resulting geometries look nothing like human designs: no designer was ever able to explore that space. Practically the loop is the same as SIMP's — density variables, a filter for minimum feature size, projection towards binary — with a wave or transport simulation in place of the finite-element structural solve, and fabrication constraints are the hard part rather than the optimisation. This review is the standard entry point and the source of the term as used in nanophotonics.",
+      "citation": "Molesky, Lin, Piggott, Jin, Vučković & Rodriguez, Inverse design in nanophotonics, Nature Photonics 12, 659–670",
+      "url": "https://arxiv.org/abs/1801.06715"
+    },
+    {
       "id": "histogram-preserving-blending",
       "name": "Histogram-preserving blending",
       "concept": "tile",
@@ -1978,6 +2230,20 @@
       "description": "The scene is not a mesh or a voxel grid but the weights of a small multilayer perceptron that maps a 5D input — position plus viewing direction — to a colour and a volume density. Render by marching rays through it and compositing samples, which is differentiable, so the network can be fitted by gradient descent directly against a set of photographs. Two details do most of the work: positional encoding, projecting the input coordinates onto a bank of sinusoids of increasing frequency, because networks otherwise cannot represent high-frequency detail; and view-dependent colour, which is what captures specularity and gloss. The consequence for this catalogue is a genuinely new representation class — scenes as learned functions, alongside meshes, SDFs and point clouds.",
       "citation": "Mildenhall et al., NeRF: Representing Scenes as Neural Radiance Fields for View Synthesis, ECCV 2020, arXiv:2003.08934",
       "url": "https://arxiv.org/abs/2003.08934"
+    },
+    {
+      "id": "oklab",
+      "name": "Oklab",
+      "concept": "colour",
+      "source_type": "article",
+      "year": 2020,
+      "authors": "Björn Ottosson",
+      "tier": "operator",
+      "summary": "A perceptual space fitted for hue uniformity and cheap to compute. Now the default for interpolation on the web.",
+      "eli5": "CIELAB is good but its hues drift: blend blue and white in it and the middle turns purple. This one was fitted specifically so that blending two colours keeps the hue you would expect, and so that the whole conversion is a couple of matrix multiplications and a cube root — cheap enough to do inside a shader.",
+      "description": "Built by optimising a simple pipeline — a matrix into an LMS-like cone space, a cube root, then a second matrix into opponent axes — against datasets of perceived hue and lightness, with the explicit design goal of hue linearity rather than of minimal average error. The consequence is the behaviour that matters for generation: gradients keep their hue instead of drifting through purple, and lightness changes do not shift apparent hue, so a tint and shade scale generated by moving L alone stays recognisably the same colour. Its cheapness is the other half of the story — no white-point adaptation, no piecewise branches, so it fits in a fragment shader and in a CSS engine. That is why CSS Color 4 adopted it, making it the first perceptual space available with no library at all, and why design-token and theme generators moved to it wholesale.",
+      "citation": "Ottosson, A perceptual color space for image processing, 2020; adopted in W3C CSS Color Module Level 4",
+      "url": "https://bottosson.github.io/posts/oklab/"
     },
     {
       "id": "hex-tiling",
