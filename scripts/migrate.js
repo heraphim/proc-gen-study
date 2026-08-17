@@ -308,9 +308,10 @@ if (existsSync(ALGO_ANNOTATIONS)) {
     seen.add(a.id);
     if (!a.url) layerProblems.push(`algorithm "${a.id}" has no citation url`);
     if (!a.description) layerProblems.push(`algorithm "${a.id}" has no description`);
-    // Not yet a hard error: the eli5 pass over the algorithm layer is still running, and
-    // the count below is how much of it is left. Becomes an error at full coverage.
-    if (a.eli5) layerStats.eli5++;
+    // Hard requirement, now that coverage is complete. An algorithm nobody can explain in
+    // plain words is one whose description is probably restating its name.
+    if (!a.eli5) layerProblems.push(`algorithm "${a.id}" has no eli5`);
+    else layerStats.eli5++;
     if (!TIERS.has(a.tier)) layerProblems.push(`algorithm "${a.id}" has invalid tier "${a.tier}"`);
     if (!SOURCE_TYPES.has(a.source_type)) layerProblems.push(`algorithm "${a.id}" has invalid source_type "${a.source_type}"`);
     ins.run(a.id, a.name, a.concept ?? null, a.year ?? null, a.authors ?? null,
