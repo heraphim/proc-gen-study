@@ -91,6 +91,15 @@
       "now": "resolved — the GitHub, crates.io and NuGet APIs are now used alongside npm and PyPI, and all four of those named libraries are recorded",
       "why": "The gap was a method limitation, not a real absence, and the README said so. Four registries were added: api.github.com/repos for the C++ and shader libraries that ship only as repositories, crates.io for Rust, and NuGet for C#. All four named examples are now rows, and the technologies table no longer has C++, Rust, C# and GLSL sitting empty.",
       "source_url": "https://api.github.com/repos/Auburn/FastNoiseLite"
+    },
+    {
+      "layer": "readme",
+      "target": "What is not done",
+      "field": "implementation coverage ratio",
+      "was": "\"94 of 184 algorithms have no implementation recorded ... That is a worse ratio than before, and honestly so: 49 implementations were added and 59 algorithms, so the layer grew faster than its coverage.\"",
+      "now": "The absolute gap grew because the denominator did. Coverage rose from 46 of 125 algorithms (36.8%) to 90 of 184 (48.9%), and concepts with no implementation fell from 13 of 28 to 10 of 36.",
+      "why": "Written during the same pass that added the rows, and wrong. The uncovered *count* rose from 79 to 94, which is unavoidable when 59 algorithms are added, but the *ratio* improved in both directions. Worth keeping as a row rather than quietly fixing, because of where it was: the section of the README whose entire job is to stop the map looking more finished than it is. A claim of self-criticism that turns out to be arithmetically false is a worse failure there than an overclaim would be somewhere else — it buys credibility it has not earned. The tell was the phrase \"grew faster than its coverage\", which sounds like a measurement and is not one; nobody had divided.",
+      "source_url": null
     }
   ]
 }

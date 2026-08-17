@@ -8,7 +8,7 @@ research sources** recording what each one settled, and the relations between al
 
 This is a research artefact, not a product. It exists to understand the territory before
 building anything, and it is deliberately honest about what it does not yet know — and about
-what it previously got wrong, which is kept as a ledger of **17 corrections** rather than
+what it previously got wrong, which is kept as a ledger of **18 corrections** rather than
 quietly edited away.
 
 ## Run
@@ -237,9 +237,11 @@ Stated plainly so the map doesn't look more finished than it is.
   consequential one — it splits the catalogue into what a seed-driven engine could serve and
   what it structurally cannot.
 - **94 of 184 algorithms have no implementation recorded**, and 10 of 36 concepts have none at
-  all. That is a worse ratio than before, and honestly so: 49 implementations were added and 59
-  algorithms, so the layer grew faster than its coverage. The method blind spot it used to
-  include — registry verification not reaching GitHub-hosted C++ — is fixed.
+  all. The absolute gap grew — it was 79 of 125 — but only because the denominator did: coverage
+  went from 36.8% of algorithms to 48.9%, and concepts with nothing attached fell from 13 of 28
+  to 10 of 36. The method blind spot this bullet used to name — registry verification not
+  reaching GitHub-hosted C++ — is fixed. What remains is a real gap, and it is concentrated in
+  the newest concepts and in anything whose reference implementation is a paper.
 - **Coverage is still lopsided by language.** Python 51 and JavaScript 47 against C++ 16, Rust
   14, C# 6 and GLSL 3. Those four were at zero and are no longer, but a C#-first reader is still
   much worse served than a Python one.
@@ -249,7 +251,7 @@ Stated plainly so the map doesn't look more finished than it is.
   missing. It emptied once and immediately refilled with 44 entries when the concept vocabulary
   widened, which is the same lesson twice. The largest known hole is coding theory —
   Reed–Solomon and the QR symbology, which five catalogue entries depend on and no concept covers.
-- **The corrections ledger is not a completeness claim either.** 17 corrections is what has been
+- **The corrections ledger is not a completeness claim either.** 18 corrections is what has been
   found, not what is there. Six of the seven concept corrections came from reading the concept
   layer against this catalogue's own algorithm layer and finding them contradicting each other,
   which is the cheapest kind of check and had not been run.
