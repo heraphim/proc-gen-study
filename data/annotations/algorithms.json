@@ -269,7 +269,7 @@
       "eli5": "One layer of noise gives soft lumps. Add a second at half the size and half the strength, then a third, then a fourth. The first layer decides the mountains and the last decides the gravel, which is how a couple of lines of arithmetic end up looking like a landscape.",
       "description": "Evaluate a noise function several times, each at double the previous frequency and a fraction of the previous amplitude, and add the results. That fraction — persistence — controls how much fine detail survives relative to coarse structure, and it is the discrete analogue of the Hurst exponent in Mandelbrot and Van Ness's fractional Brownian motion, which is where the statistical justification comes from: real terrain, coastlines and cloud edges measure as approximately self-affine, so a signal built to have the same spectral slope reads as natural. Two derived operators sit on the same loop: taking the absolute value and inverting gives ridged multifractal, producing sharp crests instead of rounded hills, and squaring gives billow. It is worth being clear that fBm imitates the statistics of erosion and tectonics without containing either.",
       "citation": "Mandelbrot & Van Ness, Fractional Brownian Motions, Fractional Noises and Applications, SIAM Review 10(4), 422–437",
-      "url": "https://users.math.yale.edu/mandelbrot/web_pdfs/052fractionalBrownianMotions.pdf"
+      "url": "https://web.archive.org/web/20191129101228/https://users.math.yale.edu/mandelbrot/web_pdfs/052fractionalBrownianMotions.pdf"
     },
     {
       "id": "a-star",
@@ -373,13 +373,13 @@
       "id": "quadtree",
       "name": "Quadtree and octree",
       "concept": "part",
-      "year": 1974,
-      "authors": "Raphael Finkel, Jon Bentley",
+      "year": 1971,
+      "authors": "Alexander Klinger (region quadtree); name from G. M. Hunter; octree from Donald Meagher",
       "tier": "operator",
       "summary": "Recursively split space into four (or eight) equal children, subdividing only where there is detail.",
       "eli5": "Cut a square into four. If a quarter is boring — entirely empty or entirely full — stop there. If it is interesting, cut it into four again. You end up spending detail only where there is detail to spend it on, which is how one structure can hold a whole country and a single street.",
-      "description": "Divide a square into four equal quadrants; subdivide any quadrant that still contains more than you want, and stop where it does not. The octree is the same in three dimensions with eight children. Because the split is always at the midpoint, a node's bounds are implied by its path from the root — no coordinates need storing, and a position maps to a leaf by reading bits of its coordinates. That gives cheap neighbour queries, level-of-detail for free (a node is a valid coarse approximation of its subtree), and adaptive resolution that costs memory only where detail exists. In generation it underlies sparse voxel worlds, terrain LOD, collision broad-phase and image quantisation. Its weakness is that axis-aligned midpoint splits ignore the data's actual shape, so badly aligned content produces deep, unbalanced trees.",
-      "citation": "Finkel & Bentley, Quad trees: a data structure for retrieval on composite keys, Acta Informatica 4, 1–9",
+      "description": "Divide a square into four equal quadrants; subdivide any quadrant that still contains more than you want, and stop where it does not. The octree is the same in three dimensions with eight children. Because the split is always at the midpoint, a node's bounds are implied by its path from the root — no coordinates need storing, and a position maps to a leaf by reading bits of its coordinates. That gives cheap neighbour queries, level-of-detail for free (a node is a valid coarse approximation of its subtree), and adaptive resolution that costs memory only where detail exists. In generation it underlies sparse voxel worlds, terrain LOD, collision broad-phase and image quantisation. Its weakness is that axis-aligned midpoint splits ignore the data's actual shape, so badly aligned content produces deep, unbalanced trees. The attribution is worth getting right because two different structures share the name. Finkel and Bentley's 1974 quadtree splits at data points, for retrieval on composite keys; the structure described here — split always at the midpoint, subdivide where there is detail — is the region quadtree, which is Klinger 1971, given this name by Hunter in 1978, and extended to three dimensions as octree encoding by Meagher in 1980. Graphics and generation use the region variety almost exclusively.",
+      "citation": "Klinger, Patterns and search statistics, 1971 (region quadtree); Hunter, Efficient computation and data structures for graphics, PhD thesis, Princeton, 1978 (the term \"quadtree\" in this sense); Meagher, Octree encoding, Rensselaer Polytechnic Institute technical report IPL-TR-80-111, 1980. Finkel & Bentley, Quad trees: a data structure for retrieval on composite keys, Acta Informatica 4, 1–9 (1974) is the *point* quadtree, a different structure.",
       "url": "https://en.wikipedia.org/wiki/Quadtree",
       "source_type": "paper"
     },
@@ -486,13 +486,13 @@
       "name": "Eller's algorithm",
       "concept": "graph",
       "source_type": "folklore",
-      "year": 1980,
+      "year": 1982,
       "authors": "Marlin Eller",
       "tier": "operator",
       "summary": "Generates a perfect maze one row at a time in constant memory. Infinite mazes with no backtracking.",
       "eli5": "Build a maze one row at a time and never look back. In the current row, randomly join some side-by-side cells into groups, then make sure every group punches at least one hole down into the next row. You hold only one row in memory at a time, so the maze can be infinitely long.",
       "description": "Process the maze row by row, holding only the current row. Each cell belongs to a set representing which cells are already connected. Within a row, randomly join horizontally adjacent cells whose sets differ, merging the sets. Then, for each set present in the row, carve at least one vertical passage down to the next row — at least one is what guarantees connectivity, and randomly carving more is what creates variety. Cells in the next row that received no vertical connection start fresh sets. On the final row, join every remaining distinct set horizontally to close the maze. The result is a perfect maze, generated in memory proportional to one row rather than the whole grid, which means the maze can be infinite in one direction — the only classic algorithm with that property. No paper; it circulated through hobbyist programming channels.",
-      "citation": "Marlin Eller, described via hobbyist programming channels; documented in Buck, Mazes for Programmers.",
+      "citation": "Marlin Eller, 1982; no original publication — described through hobbyist programming channels and documented in Buck, Mazes for Programmers, Pragmatic Bookshelf, 2015.",
       "url": "https://en.wikipedia.org/wiki/Maze_generation_algorithm"
     },
     {
@@ -815,7 +815,7 @@
       "eli5": "The cube version has a few awkward cases where you genuinely cannot tell how the surface should join up. The fix: chop each cube into tetrahedra first. A tetrahedron has four corners, so there are barely any cases and none of them is ambiguous. You get more and uglier triangles in exchange for never having to guess.",
       "description": "Marching cubes has configurations where the sign pattern at the eight corners does not determine the surface topology, and choosing wrongly leaves holes between adjacent cells. Marching tetrahedra sidesteps this by decomposing each cube into five or six tetrahedra first. A tetrahedron has only four corners and therefore just two distinct cases up to symmetry — one corner separated, or two-and-two — and neither is ambiguous, so the resulting mesh is always watertight. The cost is roughly three times as many triangles for the same field, and a visible bias in triangle orientation from the fixed decomposition. It is the usual choice when correctness matters more than triangle count, and the reason it appears in GPU and differentiable pipelines is that the case table is small enough to branch on cheaply.",
       "citation": "Doi & Koide, An efficient method of triangulating equi-valued surfaces by using tetrahedral cells, IEICE Trans. Information and Systems E74-D(1), 214–224",
-      "url": "https://handwiki.org/wiki/Marching_tetrahedra"
+      "url": "https://en.wikipedia.org/wiki/Marching_tetrahedra"
     },
     {
       "id": "mitchell-best-candidate",
@@ -850,14 +850,14 @@
       "name": "Ridged multifractal",
       "concept": "noise",
       "source_type": "article",
-      "year": 1993,
+      "year": 1994,
       "authors": "F. Kenton Musgrave",
       "tier": "operator",
       "summary": "Invert the absolute value of each noise octave and weight it by the previous one. Sharp ridges, not rounded hills.",
       "eli5": "Take a layer of noise and fold it: wherever it dips below zero, flip it back up. Smooth valleys become sharp creases. Stack several folded layers, and let each one only show up where the layer above was already high, and you get ridgelines with side spurs instead of rounded hills.",
       "description": "Take the absolute value of a signed noise octave and subtract it from one. The absolute value creates a crease wherever the noise crosses zero, and inverting turns that crease into a ridge rather than a valley. Summed across octaves this gives sharp crests — mountain ridgelines, mineral veins, lightning-like filaments — where plain fBm gives rounded lumps. Musgrave's addition beyond the basic trick is the multifractal part: weight each octave by the value of the previous one, so detail only appears where the coarser scale was already high. That is what makes the ridges sharp on peaks and the valleys smooth, which is how real terrain behaves and what plain fBm gets wrong by applying the same roughness everywhere. Published in the Texturing & Modeling book rather than as a paper.",
-      "citation": "Musgrave, in Ebert et al., Texturing & Modeling: A Procedural Approach — a book chapter, not a paper",
-      "url": "https://en.wikipedia.org/wiki/Fractional_Brownian_motion"
+      "citation": "Musgrave, in Ebert, Musgrave, Peachey, Perlin & Worley, Texturing & Modeling: A Procedural Approach, Academic Press, first edition 1994 — a book chapter, not a paper.",
+      "url": "https://userpages.cs.umbc.edu/ebert/book_toc.html"
     },
     {
       "id": "straight-skeleton",
@@ -1299,7 +1299,7 @@
       "concept": "noise",
       "year": 2007,
       "authors": "Robert Bridson, Jim Houriham, Marcus Nordenstam",
-      "tier": "source",
+      "tier": "operator",
       "summary": "Take the curl of a noise potential field. The result is exactly incompressible — turbulent flow without simulating fluid.",
       "eli5": "You want to swirl dust around without it ever piling up or thinning out. Build a bumpy hill out of noise, then at every point travel *along* the hill's contour lines instead of up or down them. Nothing can accumulate, because you only ever move sideways — and it looks exactly like smoke.",
       "description": "Build a vector potential out of noise, then take its curl to get the velocity field. The curl of any field is divergence-free as a mathematical identity, so the resulting flow has no sources or sinks anywhere — particles advected through it swirl and never bunch up or thin out, which is exactly what incompressible fluid looks like. No solver, no pressure projection, no timestep: the field is a closed-form function of position and can be sampled independently at any point, which makes it trivially parallel and stable. Boundaries are handled by ramping the potential to zero near an obstacle, which makes flow slide along its surface instead of through it. It is the standard cheat for smoke, dust and magic.",
@@ -1494,13 +1494,13 @@
       "name": "Material point method",
       "concept": "sim",
       "source_type": "paper",
-      "year": 2013,
-      "authors": "Alexey Stomakhin, Craig Schroeder, Lawrence Chai, Joseph Teran, Andrew Selle",
+      "year": 1994,
+      "authors": "Deborah Sulsky, Zhen Chen, Howard Schreyer; brought into graphics by Stomakhin, Schroeder, Chai, Teran & Selle",
       "tier": "operator",
       "summary": "Particles carry material state, a grid computes forces. Handles snow, sand, mud and goo in one solver.",
       "eli5": "Little points carry what the material *is* — how squashed, how cracked, how wet. A background grid does the pushing, because pushing needs to know what is next to what. The points hand their state to the grid, the grid works out the forces, and the points collect the answer and move. One solver covers snow, sand, mud and jelly.",
-      "description": "A continuum method on a hybrid representation: particles hold mass, velocity and — crucially — a deformation gradient recording how the material around them has been stretched and sheared since rest. Each step transfers state to a background grid, computes forces there from a constitutive model applied to the deformation gradient, updates velocities, and transfers back. Changing the constitutive model changes the material without changing the solver, which is why one implementation covers snow, sand, mud, foam and viscoelastic goo. Stomakhin's paper added elastoplasticity with hardening — snow compacts as it deforms and stops springing back — and was written for Disney's *Frozen*, which is a good illustration of production driving the research rather than the reverse.",
-      "citation": "Stomakhin et al., A material point method for snow simulation, ACM TOG 32(4) (SIGGRAPH 2013)",
+      "description": "A continuum method on a hybrid representation: particles hold mass, velocity and — crucially — a deformation gradient recording how the material around them has been stretched and sheared since rest. Each step transfers state to a background grid, computes forces there from a constitutive model applied to the deformation gradient, updates velocities, and transfers back. Changing the constitutive model changes the material without changing the solver, which is why one implementation covers snow, sand, mud, foam and viscoelastic goo. Stomakhin's paper added elastoplasticity with hardening — snow compacts as it deforms and stops springing back — and was written for Disney's *Frozen*, which is a good illustration of production driving the research rather than the reverse. Its lineage matters and is easy to miss: MPM was built as an extension of FLIP — already in this table — from fluids to solid mechanics, the addition being that each particle carries the full stress tensor so that history-dependent constitutive models become possible. The 2013 snow paper is what made it famous in graphics, and is where the sand, mud and goo variants come from, but the method is nineteen years older than that.",
+      "citation": "Sulsky, Chen & Schreyer, A particle method for history-dependent materials, Computer Methods in Applied Mechanics and Engineering 118, 179–196 (1994). Graphics introduction: Stomakhin et al., A material point method for snow simulation, ACM TOG 32(4) (SIGGRAPH 2013)",
       "url": "https://en.wikipedia.org/wiki/Material_point_method"
     },
     {

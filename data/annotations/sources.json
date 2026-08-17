@@ -82,6 +82,60 @@
       ]
     },
     {
+      "id": "sulsky-1994-mpm",
+      "url": "https://ui.adsabs.harvard.edu/abs/1994CMAME.118..179S/abstract",
+      "title": "A particle method for history-dependent materials",
+      "kind": "paper",
+      "publisher": "Computer Methods in Applied Mechanics and Engineering 118, 179–196",
+      "year": 1994,
+      "description": "Settles the origin of the material point method, which this catalogue had dated to the 2013 graphics paper. It also names the lineage: MPM is an extension of the particle-in-cell code FLIP from fluids to solid mechanics, the addition being that each material point carries the full stress tensor. FLIP is separately an entry here, so the mis-dating had hidden a link inside the catalogue's own table.",
+      "retrieved": "2026-08-17",
+      "links": [
+        { "layer": "algorithm", "target": "mpm", "relation": "corrects", "note": "Nineteen years earlier than the date recorded, and the parent method was already in the table." },
+        { "layer": "algorithm", "target": "flip", "relation": "describes", "note": "Named as the method MPM extends." }
+      ]
+    },
+    {
+      "id": "wikipedia-quadtree",
+      "url": "https://en.wikipedia.org/wiki/Quadtree",
+      "title": "Quadtree — region, point and point-region variants",
+      "kind": "wiki",
+      "publisher": "Wikipedia",
+      "year": 2026,
+      "description": "Used to separate two structures that share one name. Region quadtrees are Klinger 1971, the term in this sense is from Hunter's 1978 Princeton thesis, and octree encoding is Meagher 1980; Finkel & Bentley 1974 — which this catalogue was citing — is the point quadtree, which splits at data points rather than at midpoints. Graphics uses the region variety.",
+      "retrieved": "2026-08-17",
+      "links": [
+        { "layer": "algorithm", "target": "quadtree", "relation": "corrects", "note": "The entry described a region quadtree while citing the point quadtree paper." }
+      ]
+    },
+    {
+      "id": "buck-mazes-ellers",
+      "url": "https://www.oreilly.com/library/view/mazes-for-programmers/9781680501315/f_0087.html",
+      "title": "Eller's Algorithm — Mazes for Programmers",
+      "kind": "book",
+      "publisher": "Jamis Buck, Pragmatic Bookshelf",
+      "year": 2015,
+      "description": "The source the catalogue already cited for Eller's algorithm, read properly: it dates the algorithm to 1982, not 1980, and describes it as combining Sidewinder's row-at-a-time structure with Kruskal's set-merging to avoid Sidewinder's bias.",
+      "retrieved": "2026-08-17",
+      "links": [
+        { "layer": "algorithm", "target": "ellers-algorithm", "relation": "corrects" }
+      ]
+    },
+    {
+      "id": "ebert-texturing-modeling",
+      "url": "https://userpages.cs.umbc.edu/ebert/book_toc.html",
+      "title": "Texturing & Modeling: A Procedural Approach — contents",
+      "kind": "book",
+      "publisher": "Ebert, Musgrave, Peachey, Perlin & Worley; Academic Press",
+      "year": 1994,
+      "description": "Fixes the date on ridged multifractal, and is the right link for a citation whose point is that it is a book chapter rather than a paper. The first edition is 1994; the catalogue said 1993 and linked to Wikipedia's article on fractional Brownian motion, which is the thing ridged multifractal modifies and says nothing about the modification.",
+      "retrieved": "2026-08-17",
+      "links": [
+        { "layer": "algorithm", "target": "ridged-multifractal", "relation": "corrects" },
+        { "layer": "algorithm", "target": "value-noise", "relation": "describes", "note": "Also the documented source for value noise, which has no origin paper." }
+      ]
+    },
+    {
       "id": "barnes-2014-priority-flood",
       "url": "https://arxiv.org/abs/1511.04463",
       "title": "Priority-Flood: An Optimal Depression-Filling and Watershed-Labeling Algorithm for Digital Elevation Models",

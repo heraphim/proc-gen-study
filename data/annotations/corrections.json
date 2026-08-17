@@ -1,5 +1,69 @@
 {
   "_about": "Everything this catalogue asserted and later found to be wrong, kept as a row instead of a quiet edit. `was` is what it said before; `why` is what changed the answer.",
   "_why": "The README already lists errors inherited from the source data and leaves them visible on purpose. This is the same policy applied to the project's own output: a catalogue that silently corrects itself gives no way to judge how often it is wrong.",
-  "corrections": []
+  "corrections": [
+    {
+      "layer": "algorithm",
+      "target": "mpm",
+      "field": "year / authors / citation",
+      "was": "2013 — Stomakhin, Schroeder, Chai, Teran & Selle, A material point method for snow simulation",
+      "now": "1994 — Sulsky, Chen & Schreyer, A particle method for history-dependent materials, CMAME 118, 179–196; Stomakhin et al. 2013 recorded as the graphics introduction",
+      "why": "The catalogue dated the material point method to the SIGGRAPH paper that made it famous, nineteen years after the method was published. The mis-dating hid a lineage that runs through this very table: MPM was built as an extension of FLIP — already an entry here, dated 1986 — from fluids to solid mechanics, the addition being that each particle carries the full stress tensor so history-dependent materials become possible. Dating it 2013 severed a link the model exists to show.",
+      "source_url": "https://ui.adsabs.harvard.edu/abs/1994CMAME.118..179S/abstract"
+    },
+    {
+      "layer": "algorithm",
+      "target": "quadtree",
+      "field": "year / authors / citation",
+      "was": "1974 — Finkel & Bentley, Quad trees: a data structure for retrieval on composite keys, Acta Informatica 4, 1–9",
+      "now": "1971 — Klinger for the region quadtree, the name from Hunter's 1978 thesis, the octree from Meagher 1980; Finkel & Bentley recorded as the point quadtree, a different structure",
+      "why": "Two different structures share the name, and the catalogue cited the wrong one. Finkel and Bentley's quadtree splits at data points for retrieval on composite keys. The structure the entry actually describes — always split at the midpoint, subdivide only where there is detail — is the region quadtree, and it is the one graphics and generation use almost exclusively. Same word, different data structure, different paper, three years earlier.",
+      "source_url": "https://en.wikipedia.org/wiki/Quadtree"
+    },
+    {
+      "layer": "algorithm",
+      "target": "ellers-algorithm",
+      "field": "year",
+      "was": "1980",
+      "now": "1982",
+      "why": "Buck's Mazes for Programmers, which is the citation the entry already gives, dates Eller's algorithm to 1982. The catalogue's 1980 appears to have been an approximation to the decade rather than a read of the source it names.",
+      "source_url": "https://www.oreilly.com/library/view/mazes-for-programmers/9781680501315/f_0087.html"
+    },
+    {
+      "layer": "algorithm",
+      "target": "ridged-multifractal",
+      "field": "year / url",
+      "was": "1993, linking to Wikipedia's fractional Brownian motion article",
+      "now": "1994, linking to the table of contents of the book the chapter is in",
+      "why": "Two problems in one row. Texturing & Modeling: A Procedural Approach was first published in 1994, not 1993 — and for a citation whose whole point is that it is a book chapter rather than a paper, the year should be the book's. The URL pointed at the Wikipedia article for fBm, which is the thing ridged multifractal is a modification *of* and says nothing about the modification.",
+      "source_url": "https://userpages.cs.umbc.edu/ebert/book_toc.html"
+    },
+    {
+      "layer": "algorithm",
+      "target": "marching-tetrahedra",
+      "field": "url",
+      "was": "https://handwiki.org/wiki/Marching_tetrahedra",
+      "now": "https://en.wikipedia.org/wiki/Marching_tetrahedra",
+      "why": "Found by checking all 125 citation URLs: handwiki.org times out on connect. It was also a mirror of the Wikipedia article it has been replaced with, so nothing is lost.",
+      "source_url": null
+    },
+    {
+      "layer": "algorithm",
+      "target": "fbm",
+      "field": "url",
+      "was": "https://users.math.yale.edu/mandelbrot/web_pdfs/052fractionalBrownianMotions.pdf",
+      "now": "an Internet Archive snapshot of the same PDF",
+      "why": "Also found by the URL sweep: the Yale host's TLS certificate no longer matches its own name, so the link fails for anything that validates certificates. The paper is the correct one and the archived copy is identical.",
+      "source_url": null
+    },
+    {
+      "layer": "algorithm",
+      "target": "curl-noise",
+      "field": "tier",
+      "was": "source",
+      "now": "operator",
+      "why": "A source takes nothing but a seed and parameters. Curl noise takes the curl of a potential field built from noise, so something goes in — it cannot produce a flow field without a noise basis underneath it. Filed as a source, it claimed to be usable in place of Perlin or simplex noise rather than on top of one. Same correction as the concept-level one on `noise`, one layer down.",
+      "source_url": "https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph2007-curlnoise.pdf"
+    }
+  ]
 }
