@@ -12,10 +12,19 @@ permissions:
   pages: write
   id-token: write
 
-# One deploy at a time; let a running one finish rather than publishing half a site.
+# Two groups on purpose, learned from watching this fail.
+#
+# A run of pushes in quick succession used to queue a build *and* a deploy per commit, and
+# GitHub started answering the action downloads with 429 Too Many Requests — four deploy jobs
+# died at "Set up job" without ever reaching a step. The builds had all succeeded; only the
+# redundant deploys failed, and the next successful run published the same content anyway.
+#
+# So: builds cancel when a newer commit arrives, because a build for a superseded commit is
+# work nobody wants. Deploys do not, because cancelling mid-publish is the one case where you
+# could leave a half-written site.
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: pages-build-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -53,6 +62,9 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

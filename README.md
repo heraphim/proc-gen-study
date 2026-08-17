@@ -29,9 +29,14 @@ npm run migrate
 ## Publish
 
 `.github/workflows/pages.yml` publishes the catalogue to GitHub Pages on every push to `main`
-(or on demand from the Actions tab). It rebuilds the database from source, builds `dist/`, and
-deploys it. **One-time setup:** repo *Settings → Pages → Build and deployment → Source →
-GitHub Actions*, otherwise the deploy step fails with a 404.
+(or on demand from the Actions tab). It rebuilds the database from source, runs every code
+sample, builds `dist/`, and deploys it. **One-time setup:** repo *Settings → Pages → Build and
+deployment → Source → GitHub Actions*, otherwise the deploy step fails with a 404.
+
+Builds cancel when a newer commit arrives; deploys do not. That split is not theoretical — a
+run of pushes in quick succession had four deploy jobs killed by GitHub answering `429 Too Many
+Requests` to the action download, before any step ran. The builds had all passed and the next
+successful run published the same content, but the redundant deploys were pure waste.
 
 Pages serves files, not Node, so `npm run build` freezes what the server would have computed:
 `/api/bootstrap.json` becomes a real file, each client-side route gets its own copy of the shell
