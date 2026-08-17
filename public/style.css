@@ -984,6 +984,10 @@ td.null { color: var(--ink-3); font-style: italic; }
 .subgrp-year { font-family: var(--mono); font-size: 10.5px; color: var(--accent); }
 .subgrp-body { display: grid; gap: 8px; padding: 2px 0 10px; }
 .subgrp .grp-note { font-size: 10.5px; }
+.subgrp-code { margin-bottom: 2px; }
+.warn-text { color: var(--warn); }
+.subgrp-code .prov-head { margin-bottom: 5px; color: var(--accent); }
+.subgrp-code .code-sample { margin-top: 0; }
 
 /* ---------- algorithm implementation chips ---------- */
 

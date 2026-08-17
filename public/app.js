@@ -37,7 +37,7 @@ const NO_SUBGROUP = '(no algorithm)';
 
 function filterablePage({
   toolbar, host, items, searchIn, filters = [], groupBy, groupHeader,
-  subGroupBy, subGroupHeader, subGroupOrder,
+  subGroupBy, subGroupHeader, subGroupOrder, subGroupIntro, extraSubGroups, extraGroups,
   renderItem, noun, groupOrder, emptyText = 'Nothing matches those filters.',
 }) {
   const st = { q: '', active: new Map(filters.map(f => [f.key, new Set()])), collapsed: new Set(), cardsCollapsed: false };
@@ -181,6 +181,13 @@ function filterablePage({
       if (!groups.has(g)) groups.set(g, []);
       groups.get(g).push(it);
     }
+
+    /* Groups with no items of their own. Only in the unfiltered view: every filter here is a
+       property of an item, so a group holding none cannot satisfy one, and showing it anyway
+       would mean a filtered count that does not match what is on screen. */
+    const unfiltered = !st.q && [...st.active.values()].every(s => s.size === 0);
+    if (unfiltered) for (const g of extraGroups?.() ?? []) if (!groups.has(g)) groups.set(g, []);
+
     const keys = [...groups.keys()];
     if (groupOrder) keys.sort((a, b) => groupOrder(a, b, groups));
 
@@ -220,6 +227,13 @@ function filterablePage({
             subs.get(sk).push(it);
           }
         }
+        // Sub-groups that exist even with no items in them. On the implementations page these
+        // are algorithms with reference code and no package — which is information, not a gap:
+        // the method is short enough that nobody bothered to wrap it.
+        if (unfiltered) {
+          for (const extra of extraSubGroups?.(key) ?? []) if (!subs.has(extra)) subs.set(extra, []);
+        }
+
         const subKeys = [...subs.keys()];
         subKeys.sort((a, b) => {
           if (a === NO_SUBGROUP) return 1;                 // the orphan bucket goes last
@@ -239,6 +253,8 @@ function filterablePage({
             sub.classList.toggle('collapsed');
           });
           const sbody = el('div', 'subgrp-body');
+          const intro = subGroupIntro?.(sk, subs.get(sk), key);
+          if (intro) sbody.append(intro);
           for (const it of subs.get(sk)) sbody.append(place(it));
           sub.append(shead, sbody);
           body.append(sub);
@@ -1186,8 +1202,8 @@ const algorithms = data.algorithms ?? [];
 
 $('#algo-stats').textContent =
   `${algorithms.length} with checked citations · `
-  + `${algorithms.filter(a => (a.code ?? []).length).length} with working code inside the card · `
-  + `${Object.values(algoMeta.candidates ?? {}).reduce((n, a) => n + a.length, 0)} candidates awaiting one`;
+  + `${algorithms.filter(a => (a.code ?? []).length).length} with working code, on the implementations page · `
+  + `${Object.values(algoMeta.candidates ?? {}).reduce((n, a) => n + a.length, 0)} candidates awaiting a citation`;
 $('#algo-rule').textContent = algoMeta.rule ?? '';
 
 function algoCard(a) {
@@ -1208,8 +1224,6 @@ function algoCard(a) {
     body.append(cite);
   }
 
-  for (const s of a.code ?? []) body.append(codeBlock(s));
-
   const prov = provenanceBlock('algorithm', a.id);
   if (prov) body.append(prov);
 
@@ -1229,8 +1243,8 @@ function algoCard(a) {
             title: 'Not academically published — admitted deliberately, and labelled.' }
         : null,
       (a.code ?? []).length
-        ? { cls: 'src-badge s-code', text: `${a.code.length === 1 ? a.code[0].lines + ' lines' : a.code.length + ' samples'}`,
-            title: 'The whole mechanism, as running code, inside the card.' }
+        ? { cls: 'src-badge s-code', text: 'has code',
+            title: 'Working code for this algorithm is on the implementations page, under this algorithm\'s heading.' }
         : null,
       corrected
         ? { cls: 'src-badge', text: corrected === 1 ? 'corrected' : `${corrected} corrections`,
@@ -1276,7 +1290,7 @@ filterablePage({
   items: algorithms,
   noun: 'algorithms',
   searchIn: a => [a.name, a.authors, a.summary, a.description, a.eli5, a.citation, a.concept_tag,
-    a.year, ...(a.code ?? []).map(c => c.code)].filter(Boolean).join(' '),
+    a.year].filter(Boolean).join(' '),
   filters: [
     {
       key: 'facet', label: 'Concept kind',
@@ -1297,11 +1311,6 @@ filterablePage({
       key: 'impl', label: 'Implementations', exclusive: true,
       options: [{ id: 'yes', label: 'has one' }, { id: 'no', label: 'none' }],
       match: (a, id) => (id === 'yes') === ((implByAlgorithm[a.id] ?? []).length > 0),
-    },
-    {
-      key: 'code', label: 'Code', exclusive: true,
-      options: [{ id: 'yes', label: 'in the card' }, { id: 'no', label: 'not yet' }],
-      match: (a, id) => (id === 'yes') === ((a.code ?? []).length > 0),
     },
   ],
   groupBy: a => a.concept_tag ?? '—',
@@ -1341,6 +1350,7 @@ $('#impl-stats').textContent =
   + `${new Set(implementations.map(i => i.concept_tag)).size} concepts and `
   + `${new Set(implementations.map(i => i.ecosystem)).size} registries · `
   + `covering ${coveredAlgos.size} of ${algorithms.length} algorithms · `
+  + `${algorithms.filter(a => (a.code ?? []).length).length} with reference code shown here · `
   + `${new Set(implementations.flatMap(i => i.technologies)).size} technologies`;
 $('#impl-method').textContent = implMeta.method ?? '';
 $('#impl-caveat').textContent = implMeta.caveat ?? '';
@@ -1395,7 +1405,10 @@ filterablePage({
   items: implementations,
   noun: 'implementations',
   searchIn: i => [i.package, i.description, i.ecosystem, i.role, i.concept_tag,
-    ...(i.algorithms ?? [])].filter(Boolean).join(' '),
+    ...(i.algorithms ?? []),
+    // The code shown under an algorithm heading is searchable from the packages under it.
+    ...(i.algorithms ?? []).flatMap(a => (algoById[a]?.code ?? []).map(c => c.code)),
+  ].filter(Boolean).join(' '),
   filters: [
     {
       key: 'tech', label: 'Technology',
@@ -1416,6 +1429,12 @@ filterablePage({
       key: 'algo', label: 'Algorithm link', exclusive: true,
       options: [{ id: 'yes', label: 'linked' }, { id: 'no', label: 'orphan' }],
       match: (i, id) => (id === 'yes') === ((i.algorithms ?? []).length > 0),
+    },
+    {
+      key: 'code', label: 'Reference code', exclusive: true,
+      options: [{ id: 'yes', label: 'shown here' }, { id: 'no', label: 'not yet' }],
+      match: (i, id) => (id === 'yes')
+        === (i.algorithms ?? []).some(a => (algoById[a]?.code ?? []).length > 0),
     },
   ],
   /* Two levels: the concept a package serves, then the specific algorithm it implements.
@@ -1451,6 +1470,14 @@ filterablePage({
     if (techs.size) {
       box.append(el('span', 'grp-note',
         [...techs].map(t => techById[t]?.name?.split(' /')[0] ?? t).join(' · ')));
+    } else if ((a?.code ?? []).length) {
+      // A heading with no packages under it means one of two different things. Say which.
+      const elsewhere = implByAlgorithm[algoId] ?? [];
+      box.append(elsewhere.length
+        ? el('span', 'grp-note', `implemented by ${elsewhere.map(i => i.package).join(', ')}, `
+            + `filed under ${[...new Set(elsewhere.map(i => i.concept_tag))].join(' and ')}`)
+        : el('span', 'grp-note warn-text',
+            'nothing on any registry wraps this — the code below is the whole method'));
     }
     return box;
   },
@@ -1459,6 +1486,37 @@ filterablePage({
   subGroupOrder: (a, b, subs) => subs.get(b).length - subs.get(a).length
     || (algoById[a]?.year ?? 0) - (algoById[b]?.year ?? 0)
     || a.localeCompare(b),
+  /* Reference code sits above the packages that implement the same algorithm, because that is
+     the comparison it exists for: this is the mechanism, and these are the libraries that wrap
+     it. On the algorithms page it was next to the citation, where it read as an illustration. */
+  /* Every algorithm with code gets a heading under its own concept, whether or not a package
+     lands there. Two separate reasons it might not: nothing implements it at all (Conway's
+     Life, Tracery), or the packages that do are filed under a different concept — scipy
+     implements the Halton sequence but is filed under `vor`, so `samp` would never have shown
+     it. Existing headings are left alone; this only fills gaps. */
+  extraSubGroups: concept => algorithms
+    .filter(a => a.concept_tag === concept && (a.code ?? []).length)
+    .map(a => a.id),
+  // ...and the concepts those algorithms belong to, which may have no packages at all — `ca`,
+  // `fractal`, `gram`, `rd` and `tile` all have code and nothing on any registry.
+  extraGroups: () => [...new Set(algorithms
+    .filter(a => (a.code ?? []).length && !(implByAlgorithm[a.id] ?? []).length)
+    .map(a => a.concept_tag))],
+  /* Only under the algorithm's own concept. A package carries its own concept, so `lygia` —
+     filed under `shader` — drags fBm, Worley, domain warping, SDF primitives and Oklab into a
+     second group each. The packages belong in both places; 60 lines of code does not. */
+  subGroupIntro: (algoId, rows, concept) => {
+    const a = algoById[algoId];
+    if (!a || a.concept_tag !== concept) return null;
+    const samples = a.code ?? [];
+    if (!samples.length) return null;
+    const box = el('div', 'subgrp-code');
+    box.append(el('div', 'prov-head', samples.length === 1
+      ? 'Reference implementation, the whole mechanism'
+      : `Reference implementations (${samples.length})`));
+    for (const s of samples) box.append(codeBlock(s));
+    return box;
+  },
   renderItem: implRow,
 });
 

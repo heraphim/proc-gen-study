@@ -131,8 +131,8 @@ ever using the word "terrain", which is why the same code also weathers a textur
 |---|---|
 | `/` | What procedural generation is, what it buys you, a verified history, how this project structures it |
 | `/basic-blocks` | The 36 concepts, faceted, each with an ELI5, the blocks hiding inside each category named, the eight added ones arguing for themselves, and the candidates that were rejected |
-| `/algorithms` | 184 algorithms, grouped by concept, each with a mechanism description, an ELI5 and a checked source; 26 with runnable code in a collapsible block |
-| `/implementations` | 120 packages, grouped by concept and then by the algorithm they implement, with the technologies they run on |
+| `/algorithms` | 184 algorithms, grouped by concept, each with a mechanism description, a plain-language explanation and a checked source |
+| `/implementations` | 120 packages, grouped by concept and then by the algorithm they implement, with the technologies they run on and, where the whole method fits in under 100 lines, the reference code above the libraries that wrap it |
 | `/catalogue` | The 841 entries. Filters serialise into the query string, so a filtered view is a shareable URL |
 | `/definitions` | The three layers explained, with a worked terrain pipeline |
 | `/sources` | The 37 research sources, split by whether they overturned a claim or confirmed one, plus the full corrections ledger |
