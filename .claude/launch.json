@@ -5,7 +5,14 @@
       "name": "catalogue",
       "runtimeExecutable": "node",
       "runtimeArgs": ["server.js"],
-      "port": 4173
+      "port": 4173,
+      "autoPort": true
+    },
+    {
+      "name": "pages-preview",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["scripts/serve-dist.js"],
+      "port": 4174
     }
   ]
 }

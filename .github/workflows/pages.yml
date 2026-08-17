@@ -1,0 +1,56 @@
+name: Publish catalogue to Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# What the deploy needs: read the repo, write a Pages deployment, and mint the OIDC
+# token deploy-pages uses to prove the artifact came from this workflow run.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time; let a running one finish rather than publishing half a site.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # node:sqlite is unflagged from Node 24; migrate and the build both use it.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Rebuild the database from source
+        run: npm run migrate
+
+      - name: Build the static site
+        run: npm run build
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

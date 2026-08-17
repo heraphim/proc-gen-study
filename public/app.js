@@ -6,6 +6,10 @@ const el = (tag, cls, text) => {
   return n;
 };
 
+/** Where the app is mounted: `/` under server.js, `/<repo>/` when published to GitHub
+    Pages. Always ends in a slash; every in-app URL and fetch is built from it. */
+const BASE = new URL('.', document.baseURI).pathname;
+
 const state = {
   data: null,
   search: '',
@@ -314,7 +318,7 @@ function entityCard({ cls = '', title, id, badges = [], metrics = [], relations 
   return card;
 }
 
-const data = await fetch('/api/bootstrap').then(r => r.json());
+const data = await fetch(`${BASE}api/bootstrap.json`).then(r => r.json());
 state.data = data;
 
 const tagName = Object.fromEntries(data.tags.map(t => [t.id, t.name]));
@@ -695,7 +699,7 @@ for (const d of [...data.domains].sort((a, b) => b.count - a.count)) {
 const byName = new Map(data.entries.map(e => [e.name, e]));
 
 /* ---------------- routing ---------------- */
-// path <-> view id. Kept in sync with ROUTES in server.js.
+// path <-> view id. Kept in sync with ROUTES in lib/catalogue.js.
 const ROUTES = {
   '/': 'overview',
   '/basic-blocks': 'blocks',
@@ -710,6 +714,16 @@ const ROUTES = {
 };
 const PATHS = Object.fromEntries(Object.entries(ROUTES).map(([p, v]) => [v, p]));
 
+/** Route <-> address bar. Under a base path the published site serves `/repo/catalogue/`,
+    so the trailing slash comes off before the route table is consulted. */
+const routeToUrl = route => BASE + route.slice(1);
+const urlToRoute = () => {
+  const p = location.pathname.startsWith(BASE)
+    ? `/${location.pathname.slice(BASE.length)}`
+    : location.pathname;
+  return p.length > 1 ? p.replace(/\/+$/, '') : p;
+};
+
 let currentView = 'overview';
 
 function showView(name, { push = true } = {}) {
@@ -723,7 +737,7 @@ function showView(name, { push = true } = {}) {
 
 /** The catalogue's filters live in the query string, so a filtered view is a shareable URL. */
 function writeUrl(replace = false) {
-  const path = PATHS[currentView] ?? '/';
+  const path = routeToUrl(PATHS[currentView] ?? '/');
   const q = new URLSearchParams();
   if (currentView === 'catalogue') {
     if (state.search) q.set('q', state.search);
@@ -737,7 +751,7 @@ function writeUrl(replace = false) {
 }
 
 function readUrl() {
-  const view = ROUTES[location.pathname] ?? 'overview';
+  const view = ROUTES[urlToRoute()] ?? 'overview';
   const q = new URLSearchParams(location.search);
   state.search = q.get('q') ?? '';
   $('#search').value = state.search;
@@ -1283,7 +1297,12 @@ filterablePage({
   }),
 });
 
-/* ---------------- SQL console ---------------- */
+/* ---------------- SQL console ----------------
+   The console POSTs SQL back to the server, so the static build ships neither the tab
+   nor the view. When they are absent this section stays inert and /sql stops routing. */
+
+const sqlEnabled = Boolean($('#view-sql'));
+if (!sqlEnabled) delete ROUTES['/sql'];
 
 const EXAMPLES = [
   ['Entries per domain', `SELECT d.name AS domain, COUNT(*) AS entries
@@ -1361,25 +1380,27 @@ ORDER BY domains DESC, operators DESC`],
 FROM entry`],
 ];
 
-const sel = $('#sql-examples');
-EXAMPLES.forEach(([label, sql], i) => {
-  const o = el('option', null, label);
-  o.value = String(i);
-  sel.append(o);
-});
-sel.addEventListener('change', () => {
-  if (sel.value === '') return;
-  $('#sql-input').value = EXAMPLES[Number(sel.value)][1];
-  sel.value = '';
-  runSql();
-});
+if (sqlEnabled) {
+  const sel = $('#sql-examples');
+  EXAMPLES.forEach(([label, sql], i) => {
+    const o = el('option', null, label);
+    o.value = String(i);
+    sel.append(o);
+  });
+  sel.addEventListener('change', () => {
+    if (sel.value === '') return;
+    $('#sql-input').value = EXAMPLES[Number(sel.value)][1];
+    sel.value = '';
+    runSql();
+  });
 
-$('#sql-input').value = EXAMPLES[0][1];
+  $('#sql-input').value = EXAMPLES[0][1];
+}
 
 async function runSql() {
   const host = $('#sql-result');
   host.textContent = '';
-  const res = await fetch('/api/query', {
+  const res = await fetch(`${BASE}api/query`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ sql: $('#sql-input').value }),
@@ -1418,12 +1439,13 @@ async function runSql() {
   host.append(wrap);
 }
 
-$('#sql-run').addEventListener('click', runSql);
-$('#sql-input').addEventListener('keydown', e => {
-  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') runSql();
-});
+if (sqlEnabled) {
+  $('#sql-run').addEventListener('click', runSql);
+  $('#sql-input').addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') runSql();
+  });
 
-$('#schema-text').textContent = `entry(id, group_id, name, description, position,
+  $('#schema-text').textContent = `entry(id, group_id, name, description, position,
       tier, output_type, input_class, compute_cost,
       deterministic, realtime, difficulty, confidence, notes)
 grp(id, domain_id, name, position)
@@ -1448,6 +1470,7 @@ Empty until the classification passes run:
   entry.confidence      attested | plausible | unverified
   tag.facet             mechanism | representation | deployment
   entry_uses            which sources/operators a generator is built from`;
+}
 
 readUrl();
-runSql();
+if (sqlEnabled) runSql();

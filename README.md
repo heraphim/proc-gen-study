@@ -22,6 +22,27 @@ To rebuild the database from source:
 npm run migrate
 ```
 
+## Publish
+
+`.github/workflows/pages.yml` publishes the catalogue to GitHub Pages on every push to `main`
+(or on demand from the Actions tab). It rebuilds the database from source, builds `dist/`, and
+deploys it. **One-time setup:** repo *Settings → Pages → Build and deployment → Source →
+GitHub Actions*, otherwise the deploy step fails with a 404.
+
+Pages serves files, not Node, so `npm run build` freezes what the server would have computed:
+`/api/bootstrap.json` becomes a real file, each client-side route gets its own copy of the shell
+(so deep links are a 200, not a redirect), `404.html` catches everything else, and the `/sql`
+console — which needs a live database to POST to — is left out of the published build.
+
+To check that build the way Pages will serve it, mounted at the same base path:
+
+```bash
+npm run build && npm run preview
+```
+
+The base path defaults to `/` and comes from `BASE_PATH` (`--base=` also works); the workflow
+passes the one `actions/configure-pages` reports, so a rename of the repo needs no edit here.
+
 ## The model
 
 The catalogue arrived as a flat list of 841 things tagged with 28 labels. That structure mixed
@@ -86,7 +107,7 @@ ever using the word "terrain", which is why the same code also weathers a textur
 | `/catalogue` | The 841 entries. Filters serialise into the query string, so a filtered view is a shareable URL |
 | `/definitions` | The three layers explained, with a worked terrain pipeline |
 | `/case-studies` `/pitfalls` `/tools` | The original reference material |
-| `/sql` | Read-only SQL console over the database |
+| `/sql` | Read-only SQL console over the database. Local only — not in the published build |
 
 Every list page shares one shell: search, horizontal filters (checkbox / radio / dropdown chosen
 by what the filter is), live counts that exclude their own filter, and independent collapse for
@@ -143,8 +164,11 @@ go the other way.
 source/     the original single-file HTML reference — still the source of truth for entries
 data/       annotations (committed) and catalogue.db (derived, gitignored)
 db/         schema
-scripts/    migrate.js — HTML + annotations -> SQLite, idempotent, fails loudly
-server.js   static files + /api/bootstrap + /api/query
+scripts/    migrate.js      — HTML + annotations -> SQLite, idempotent, fails loudly
+            build-static.js — the same read layer, frozen into dist/ for Pages
+            serve-dist.js   — serves dist/ the way Pages does, for checking a build
+lib/        catalogue.js — the read layer: bootstrap payload, SQL console, route list
+server.js   static files + /api/bootstrap.json + /api/query
 public/     the browser UI
 ```
 
