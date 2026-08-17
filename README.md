@@ -1,11 +1,15 @@
 # Procedural Generation Catalogue
 
 A research map of what can be made with procedural generation, and of the machinery that makes
-it. **841 catalogued techniques** across 23 domains, **125 algorithms** with checked citations,
-**71 registry-verified implementations**, and the relations between them.
+it. **841 catalogued techniques** across 23 domains, **36 concepts** each with a plain-language
+explanation, **184 algorithms** with checked citations, **26 of them with working code short
+enough to read**, **120 registry-verified implementations** across five registries, **37
+research sources** recording what each one settled, and the relations between all of it.
 
 This is a research artefact, not a product. It exists to understand the territory before
-building anything, and it is deliberately honest about what it does not yet know.
+building anything, and it is deliberately honest about what it does not yet know — and about
+what it previously got wrong, which is kept as a ledger of **17 corrections** rather than
+quietly edited away.
 
 ## Run
 
@@ -62,25 +66,45 @@ concept ──uses──▶ concept
 
 | Facet | Count | Meaning |
 |---|---|---|
-| block | 15 | Irreducible, used across unrelated domains, and something concrete implements it |
-| representation | 5 | A format for holding structure, not a way of making it |
+| block | 21 | Irreducible, used across unrelated domains, and something concrete implements it |
+| representation | 7 | A format for holding structure, not a way of making it |
 | category | 6 | Fails the importable test — a bag containing blocks that were never named |
 | deployment | 2 | Where or how something runs. Not a concept at all |
 
 The test that does the work is **importable**: `sim` is used in 21 of 23 domains, wider than
 anything but `rand`, and still fails — there is no "simulator" you can import. That is why it
-became a dumping ground for everything unclassifiable.
+became a dumping ground for everything unclassifiable. The same test is what keeps concepts
+out: `motion` was considered and rejected because there is no motion-matching library you can
+install, and the package whose name suggests otherwise turns out to be database instrumentation.
+
+28 of the 36 came from the original reference. Eight were added here — `field`, `mesh`,
+`filter`, `hydro`, `texsyn`, `subdiv`, `colour`, `topopt` — each of which had to name a real
+package and say what its absence had been costing. Two were the operator layer's own substrate
+going unnamed: everything in the catalogue passes fields and meshes around, and neither had a
+word.
+
+Every concept also carries an **ELI5** — the idea with no jargon, in something a child could
+picture. That is not decoration. A concept that cannot be explained without its own vocabulary
+has not been pinned down, and writing these forced several descriptions to be rewritten rather
+than translated.
 
 **Algorithms** — named, pinned-down methods. Perlin noise, Fortune's sweepline, FABRIK,
 Knuth–Plass. This is the only level that has papers, which is why the original catalogue had no
 citations: it never had this layer. Some concepts have algorithms; many, like cobblestone
-paving, have none of their own and only wire others together.
+paving, have none of their own and only wire others together. Every algorithm carries an ELI5
+too, and 26 carry the whole method as **working code under 100 lines**, run before it was
+recorded and rejected by the build if it is longer.
 
 **Implementations** — runnable code. Linked to algorithms, not concepts, and many-to-many:
-`scipy` implements six algorithms across four concepts; simplex noise has six implementations.
+`scipy` implements six algorithms across four concepts; simplex noise has nine implementations
+in seven languages.
 
 **Technologies** — languages and runtimes. A separate axis: a property of where code can run,
 not of the idea it implements.
+
+**Sources** — every URL consulted while checking a claim, with the question it answered and
+what it bears on. 11 of the 62 links are marked `corrects`, meaning that source overturned
+something this catalogue had already asserted.
 
 ### Cutting across all of it: three layers
 
@@ -101,11 +125,12 @@ ever using the word "terrain", which is why the same code also weathers a textur
 | Route | What's there |
 |---|---|
 | `/` | What procedural generation is, what it buys you, a verified history, how this project structures it |
-| `/basic-blocks` | The 28 concepts, faceted, with the blocks hiding inside each category named |
-| `/algorithms` | 125 algorithms, grouped by concept, each with a mechanism description and a checked source |
-| `/implementations` | 71 packages, grouped by concept, with the algorithms they implement and the technologies they run on |
+| `/basic-blocks` | The 36 concepts, faceted, each with an ELI5, the blocks hiding inside each category named, the eight added ones arguing for themselves, and the candidates that were rejected |
+| `/algorithms` | 184 algorithms, grouped by concept, each with a mechanism description, an ELI5 and a checked source; 26 with runnable code in a collapsible block |
+| `/implementations` | 120 packages, grouped by concept and then by the algorithm they implement, with the technologies they run on |
 | `/catalogue` | The 841 entries. Filters serialise into the query string, so a filtered view is a shareable URL |
 | `/definitions` | The three layers explained, with a worked terrain pipeline |
+| `/sources` | The 37 research sources, split by whether they overturned a claim or confirmed one, plus the full corrections ledger |
 | `/case-studies` `/pitfalls` `/tools` | The original reference material |
 | `/sql` | Read-only SQL console over the database. Local only — not in the published build |
 
@@ -125,21 +150,33 @@ important techniques — domain warping, pity timers, falling-sand — and so mi
 as more academic than it is. Filter on `source_type = 'paper'` to get the strict set back.
 
 ```
-paper                    107
+paper                    160
+folklore                   9
+article                    9
 reference-implementation   6
-folklore                   6
-article                    6
 ```
 
-**Implementations** were resolved against `registry.npmjs.org` or `pypi.org` before being written
-down. Of 83 candidates, six 404ed and five resolved to unrelated projects sharing a name — PyPI
-`sdf` is *Scientific Data Format*, `wfc` is *WebForms Core*. Those would have shipped as
-confident, checkable lies.
+**Implementations** were resolved against a registry before being written down: npm, PyPI,
+crates.io, NuGet, or the GitHub API for the C++ and shader libraries that ship only as a
+repository. Of the original 83 candidates, six 404ed and five resolved to unrelated projects
+sharing a name — PyPI `sdf` is *Scientific Data Format*, `wfc` is *WebForms Core*. The same trap
+caught two more later: PyPI `pymo` is MongoClient instrumentation, not motion capture, and PyPI
+`meep` is a task runner, not the photonics solver. All of those would have shipped as confident,
+checkable lies.
+
+**Code samples are executed on every deploy.** `npm run check-samples` extracts each sample,
+runs it, and fails if any does not execute; the workflow runs it before building, and the
+migration rejects a sample over 100 lines. So "the whole mechanism fits in under 100 lines and
+runs as written" is enforced rather than asserted. One sample disagreed with its own algorithm's
+description and the description lost.
 
 **The build fails on bad annotations.** An override that matches no entry, an algorithm with no
-citation or no description, a reference to an unknown concept or technology, an implementation
-not marked verified — all abort the migration rather than silently doing nothing. This has caught
-four real errors, including a phantom `npm:markovify` that does not exist.
+citation, description, ELI5 or valid tier, a concept with no ELI5, a correction whose "was" no
+longer matches the text it claims to correct, an added concept without a named importable
+package, a source with no description or a duplicate URL, a code sample that is empty or too
+long, a reference to an unknown concept, algorithm or technology, an implementation not marked
+verified — all abort the migration rather than silently doing nothing. This has caught six real
+errors, including a phantom `npm:markovify` that does not exist.
 
 ### Annotations
 
@@ -150,23 +187,33 @@ a reviewable diff you can argue with line by line:
 |---|---|
 | `tier.json` | source/operator/generator per entry, as a default per domain plus exceptions |
 | `facet.json` | the four-way concept split, with the blocks hiding inside each category |
-| `algorithms.json` | 125 algorithms with citations, descriptions and source types |
-| `implementations.json` | registry-verified packages |
+| `concepts.json` | ELI5 per concept, corrections to the prose carried over from the source HTML, the eight added concepts, and the candidates rejected |
+| `algorithms.json` | 184 algorithms with citations, descriptions, ELI5s and source types |
+| `code-samples.json` | 26 working samples, held as arrays of lines so a change reads as a diff |
+| `implementations.json` | registry-verified packages across five registries |
 | `implementation-algorithms.json` | which implementation implements which algorithm |
 | `technologies.json` | languages, runtimes, platforms |
+| `sources.json` | every URL consulted, what it settled, and what it is attached to |
+| `corrections.json` | what this catalogue said, what it says now, and why |
 
-Each file carries `_contested` or `_orphan_reason` notes recording calls that could reasonably
-go the other way.
+Each file carries `_contested`, `_rejected` or `_orphan_reason` notes recording calls that could
+reasonably go the other way.
+
+A concept correction has to quote the text it replaces. If the source HTML changes underneath
+it, the build fails rather than applying a stale fix.
 
 ## Layout
 
 ```
 source/     the original single-file HTML reference — still the source of truth for entries
 data/       annotations (committed) and catalogue.db (derived, gitignored)
+            annotations/ holds ten files: tier, facet, concepts, algorithms, code-samples,
+            implementations, implementation-algorithms, technologies, sources, corrections
 db/         schema
-scripts/    migrate.js      — HTML + annotations -> SQLite, idempotent, fails loudly
-            build-static.js — the same read layer, frozen into dist/ for Pages
-            serve-dist.js   — serves dist/ the way Pages does, for checking a build
+scripts/    migrate.js       — HTML + annotations -> SQLite, idempotent, fails loudly
+            check-samples.js — runs every code sample; CI fails if one does not execute
+            build-static.js  — the same read layer, frozen into dist/ for Pages
+            serve-dist.js    — serves dist/ the way Pages does, for checking a build
 lib/        catalogue.js — the read layer: bootstrap payload, SQL console, route list
 server.js   static files + /api/bootstrap.json + /api/query
 public/     the browser UI
@@ -177,23 +224,37 @@ public/     the browser UI
 Stated plainly so the map doesn't look more finished than it is.
 
 - **`entry_uses` has 0 rows.** Nothing records which generator is built from which sources and
-  operators. This is the piece that would make the model do work rather than just describe.
+  operators. This is the piece that would make the model do work rather than just describe. The
+  eight added concepts contributed 41 `entry_tag` rows by naming the entries they apply to,
+  which is a start on the same problem at a coarser grain.
 - **8 of 9 entry fields are empty** across all 841: `output_type`, `input_class`, `compute_cost`,
   `deterministic`, `realtime`, `difficulty`, `confidence`, `notes`. `input_class` is the
   consequential one — it splits the catalogue into what a seed-driven engine could serve and
   what it structurally cannot.
-- **79 of 125 algorithms have no implementation recorded**, and 13 of 28 concepts have none at
-  all. Partly a real gap; partly a method blind spot, since registry verification cannot reach
-  GitHub-hosted C++ (FastNoiseLite, mxgmn's WFC, Recast, CGAL). That needs a different check.
-- **Only JavaScript and Python are populated.** C++, Rust, C#, GLSL and WASM exist in the
-  technologies table with nothing attached.
+- **94 of 184 algorithms have no implementation recorded**, and 10 of 36 concepts have none at
+  all. That is a worse ratio than before, and honestly so: 49 implementations were added and 59
+  algorithms, so the layer grew faster than its coverage. The method blind spot it used to
+  include — registry verification not reaching GitHub-hosted C++ — is fixed.
+- **Coverage is still lopsided by language.** Python 51 and JavaScript 47 against C++ 16, Rust
+  14, C# 6 and GLSL 3. Those four were at zero and are no longer, but a C#-first reader is still
+  much worse served than a Python one.
+- **26 of 184 algorithms have code.** The ones without are a mix of genuinely-too-large — marching
+  cubes' 256-case table, CP-SAT, anything with a trained model — and simply not done yet.
 - **An empty candidate queue is not completeness.** It means nothing currently identified is
-  missing. `rand` and `markov` looked finished for exactly that reason until someone asked.
+  missing. It emptied once and immediately refilled with 44 entries when the concept vocabulary
+  widened, which is the same lesson twice. The largest known hole is coding theory —
+  Reed–Solomon and the QR symbology, which five catalogue entries depend on and no concept covers.
+- **The corrections ledger is not a completeness claim either.** 17 corrections is what has been
+  found, not what is there. Six of the seven concept corrections came from reading the concept
+  layer against this catalogue's own algorithm layer and finding them contradicting each other,
+  which is the cheapest kind of check and had not been run.
 - Gap-hunting outside games, and an honest difficulty distribution, have not been started.
 
 ## Known errors carried over from the source data
 
-Left in place deliberately rather than quietly patched, so the provenance stays visible.
+Left in place deliberately rather than quietly patched, so the provenance stays visible. These
+are errors in `source/`, not in the layers built on top of it — for those, see the corrections
+ledger on `/sources`.
 
 - The **AlphaChip** case study reads as settled. Nature added an editor's note in 2023, the paper
   carries an expression of concern, and Cheng & Kahng failed to reproduce it. It is a live dispute.
@@ -208,3 +269,22 @@ Left in place deliberately rather than quietly patched, so the provenance stays 
 - **Euclidean rhythms** are said to produce "most world rhythms". Toussaint's claim is that
   *many* traditional rhythms are Euclidean.
 - Reading list: "Roguelike Basin / RogueBasin wiki" — only *RogueBasin* is a real name.
+
+## Errors this project made and has since fixed
+
+The full ledger is on `/sources`; the pattern is worth stating here. The most productive check
+was not reading further into the literature — it was reading the catalogue against itself.
+
+- Two concept cards contradicted the algorithm layer of this same catalogue. `ero` said erosion
+  cannot be iterated interactively while listing Mei's GPU erosion, which has been interactive
+  since 2007; `lsys` said L-systems have no global awareness while listing open L-systems, which
+  exist to give them exactly that.
+- Two algorithm records were misattributed. `mpm` was dated to the 2013 graphics paper rather
+  than Sulsky 1994 — which hid the fact that it descends from FLIP, already a row here. `quadtree`
+  cited Finkel & Bentley's *point* quadtree while describing a *region* quadtree, a different
+  structure from a different paper three years earlier.
+- The implementations file had noticed one of its own anomalies and explained it wrongly. It
+  observed that many npm release dates clustered in mid-2022, guessed at a bulk registry
+  operation, and advised the reader not to read them as abandonment. The dates were simply the
+  day the original lookup ran; several of those packages last shipped a decade ago.
+- The README claimed Knuth–Plass was in the algorithm layer. It was not, until now.

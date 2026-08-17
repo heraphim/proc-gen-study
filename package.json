@@ -6,6 +6,7 @@
   "description": "Research catalogue of procedural generation techniques. SQLite-backed, served locally.",
   "scripts": {
     "migrate": "node scripts/migrate.js",
+    "check-samples": "node scripts/check-samples.js",
     "build": "node scripts/build-static.js",
     "preview": "node scripts/serve-dist.js",
     "start": "node server.js",

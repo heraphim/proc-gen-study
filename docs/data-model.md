@@ -25,12 +25,12 @@ correction ──▶ (concept | algorithm | implementation | source-data | readm
 | `domain` | 23 | Top-level subject areas, from the original reference |
 | `grp` | 110 | Sub-groupings within a domain |
 | `entry` | 841 | One generatable thing. Carries the classification columns |
-| `tag` | 28 | Concepts. `facet` splits them four ways |
-| `entry_tag` | 1437 | Which concepts an entry draws on. This is a `uses` edge, not an `is-a` |
+| `tag` | 36 | Concepts. `facet` splits them four ways; `origin` separates the 28 inherited from the 8 added |
+| `entry_tag` | 1478 | Which concepts an entry draws on. This is a `uses` edge, not an `is-a` |
 | `entry_uses` | 0 | Which sources and operators a generator composes. Not yet populated |
 
 `entry_tag` deserves a note: "cobblestone paving is tagged `vor`" *means* "uses Voronoi". The
-1437 assignments are therefore already a composition graph, just at the coarsest possible grain.
+1478 assignments are therefore already a composition graph, just at the coarsest possible grain.
 Refining it means replacing `vor` with the two or three specific concepts an entry actually
 leans on.
 
@@ -38,11 +38,11 @@ leans on.
 
 | Table | Rows | Notes |
 |---|---|---|
-| `algorithm` | 125 | Named methods. `source_type` records how well-sourced |
-| `implementation` | 71 | Packages, registry-verified |
-| `implementation_algorithm` | 104 | Many-to-many. The important link |
+| `algorithm` | 184 | Named methods. `source_type` records how well-sourced |
+| `implementation` | 120 | Packages, verified against npm, PyPI, crates.io, NuGet or the GitHub API |
+| `implementation_algorithm` | 262 | Many-to-many. The important link |
 | `technology` | 11 | Languages, runtimes, platforms |
-| `implementation_technology` | 71 | Where an implementation can run |
+| `implementation_technology` | 172 | Where an implementation can run |
 
 `implementation` also keeps a `concept_tag`. That is deliberate redundancy: an implementation
 with a concept but no algorithm link is a **signal**, not an omission. Either the algorithm it
@@ -125,8 +125,14 @@ silent no-ops.
 
 Two endpoints, both read-only.
 
-`GET /api/bootstrap` returns everything the UI needs in one payload (~380 KB). All filtering
-happens client-side; there is no per-query round trip.
+`GET /api/bootstrap` returns everything the UI needs in one payload. All filtering happens
+client-side; there is no per-query round trip.
+
+It is now ~869 KB, up from ~380 KB, and the growth is worth naming because it is the price of
+this design rather than a leak: 350 KB is the 841 entries, 361 KB is the algorithm layer, and
+within that 59 KB is code samples and 65 KB is ELI5 prose. Everything gzips to roughly a fifth
+of that over the wire. If it doubles again, the answer is to split the algorithm layer into its
+own lazily-fetched payload rather than to trim the prose.
 
 `POST /api/query` takes `{ sql }` and runs it. `SELECT` and `WITH` only, one statement at a
 time, against a read-only connection. This is what makes the SQL page possible and is the main
@@ -135,19 +141,41 @@ payoff of moving off the flat HTML file.
 ## Adding to the data
 
 **A new algorithm** — add to `data/annotations/algorithms.json` with `id`, `name`, `concept`,
-`year`, `authors`, `tier`, `source_type`, `summary`, `description`, `citation`, `url`. Check the
-URL resolves before committing. `npm run migrate` will reject it if anything is missing.
+`year`, `authors`, `tier`, `source_type`, `summary`, `eli5`, `description`, `citation`, `url`.
+Check the URL resolves before committing. `npm run migrate` will reject it if anything is
+missing, including the `eli5`.
 
-**A new implementation** — verify it against its registry first:
+**A new implementation** — verify it against its registry first, and read what comes back rather
+than only the status code. A 200 proves the package exists; it does not prove it is the thing you
+meant, and that mistake has been made four times in this file's history:
 
 ```bash
-curl -s -o /dev/null -w '%{http_code}' https://registry.npmjs.org/PACKAGE
-curl -s -o /dev/null -w '%{http_code}' https://pypi.org/pypi/PACKAGE/json
+curl -s https://registry.npmjs.org/PACKAGE | head -c 400
+curl -s https://pypi.org/pypi/PACKAGE/json | head -c 400
+curl -s https://crates.io/api/v1/crates/PACKAGE | head -c 400
+curl -s https://api.nuget.org/v3-flatcontainer/package/index.json
+curl -s https://api.github.com/repos/OWNER/REPO | head -c 400
 ```
 
 Then add it to `implementations.json` with `verified: true`, and map it in
 `implementation-algorithms.json`. An empty algorithm list is acceptable and meaningful — record
 why in `_orphan_reason`.
 
+**A new code sample** — write it as a file, run it, and only then add it to
+`code-samples.json` as an array of lines. It must be the whole mechanism, must print something
+that demonstrates or checks its own claim, and must be under 100 lines. The migration enforces
+the last of those; the other two are on you.
+
+**A new source** — add it to `sources.json` with a `description` saying what question it
+answered, not what the page is about, and at least one link into the concept, algorithm,
+implementation or technology layer. A duplicate URL or a link to a target that does not exist
+fails the build.
+
+**A correction** — never edit an assertion silently. Concept-prose corrections go in
+`concepts.json` and must quote the text they replace, so a stale correction fails the build
+rather than applying. Everything else goes in `corrections.json` with `was`, `now` and `why`.
+
 **A judgement call you are unsure about** — put it in the file's `_contested` array rather than
-leaving it invisible. Several of those have since been overturned by someone reading them.
+leaving it invisible. Several of those have since been overturned by someone reading them. If you
+considered adding a concept and decided against it, `_rejected` in `concepts.json` is where the
+reason goes, so that an empty rejection list never implies nothing was ever turned down.

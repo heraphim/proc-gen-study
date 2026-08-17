@@ -35,6 +35,12 @@ jobs:
       - name: Rebuild the database from source
         run: npm run migrate
 
+      # The algorithms page says each code sample is the whole mechanism and runs as written.
+      # The migration checks the line limit; this checks the other half, so an edit that
+      # breaks a sample fails here rather than shipping a claim that is no longer true.
+      - name: Run every code sample
+        run: npm run check-samples
+
       - name: Build the static site
         run: npm run build
         env:
