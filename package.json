@@ -10,7 +10,8 @@
     "build": "node scripts/build-static.js",
     "preview": "node scripts/serve-dist.js",
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "check-register": "node scripts/check-register.js"
   },
   "engines": {
     "node": ">=22.5"

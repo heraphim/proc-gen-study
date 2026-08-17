@@ -1,43 +1,41 @@
 {
   "_about": "The concept layer's own annotations: plain-language explanations, corrections to the prose carried over from the source HTML, and concepts this project named that the original vocabulary lacked.",
-  "_why_eli5": "A concept you cannot explain without its own jargon is a concept you have not finished understanding. Writing these caught real vagueness — `sim`, `kit` and `shader` were the hardest, which is consistent with three of them being the ones the facet pass had already flagged as not really concepts.",
+  "_why_eli5": "Plain language for someone who does not know the field — not baby talk. \"Explain like I'm five\" is an idiom for \"drop the jargon\", and the first pass took it literally, producing text full of tiny arrows and pretend worlds that patronised the reader without explaining any more. Rewritten for an adult who happens not to know this subject. The check it performs is unchanged and still worth running: a concept that cannot be stated without its own vocabulary has not been pinned down, and writing these forced several descriptions to be rewritten rather than translated.",
   "_rules": {
     "eli5": "No jargon, no name-dropping, and it must be something a child could picture. Every concept needs one; the migration fails without it.",
     "corrections": "A correction never silently rewrites the source HTML. It records `field`, `was`, `now` and `why`, so the change is arguable and the provenance survives.",
     "additions": "A concept may only be added if it passes the same three tests as the originals — irreducible, widespread, importable — and the importable test must name a real package."
   },
-
   "eli5": {
-    "noise": "Crumple a sheet of paper, then smooth it out a bit. Bumps everywhere, but bumps that are close together are close in height. Noise is a machine that gives you a number for any spot you ask about, and nearby spots get similar numbers — which is why it looks like hills and clouds instead of television static.",
-    "fractal": "Draw a tree. Now draw a smaller copy of the same tree at the end of every branch, and keep doing that. A fractal is a shape built out of smaller copies of itself, so you can zoom in forever and there is always more detail waiting.",
-    "lsys": "Start with one letter and a rule like \"every A turns into AB\". Apply it over and over and the word grows on its own. Now read the letters as orders for a pen — draw, turn left, remember this spot, come back to it — and the growing word draws a plant.",
-    "gram": "Mad Libs for shapes. One rule says a building is a bottom, some middles and a roof. Another says a middle is a row of windows. Keep swapping each word for what its rule says until there is nothing left to swap, and a building falls out.",
-    "wfc": "Sudoku, but with pictures instead of numbers. Every square starts out allowed to be any tile. You pick one square, and that instantly tells its neighbours which tiles they are no longer allowed to be. Keep picking and telling until every square has exactly one tile and nothing clashes.",
-    "ca": "Give every square on a chessboard one tiny rule about its neighbours — \"if most of the squares touching me are wall, I become wall too\" — and let every square obey it at the same moment. Do that a few times and shapes appear that nobody drew.",
-    "rd": "Two paints on a wet page. The first makes more of itself wherever it already is. The second spreads out faster and wipes the first one away. Where the two fight you get spots and stripes, which is the same reason a leopard has spots.",
-    "vor": "Scatter seeds on the floor, then give every bit of floor to whichever seed is nearest. You get patches with straight edges that meet at corners — dried cracked mud, a giraffe's coat, a cobbled street.",
-    "samp": "Putting sprinkles on a cake. Drop them at random and some pile up while other bits stay bare. These methods place each new sprinkle a polite distance from the ones already down, so it looks scattered by hand but covers everything evenly.",
-    "graph": "Dots joined by lines. The dots are rooms, or cities, or things you have to do; the lines say which ones connect. Once you have dots and lines you can ask useful questions — can I get from here to there, and what is the shortest way.",
-    "part": "Take a rectangle and cut it in two. Cut each of those in two. Keep going until the pieces are the size you want. Now they are rooms, or panels, or boxes on a page — and because you only ever cut, nothing can overlap.",
-    "cons": "Instead of telling the computer how to build the thing, you tell it the rules it is not allowed to break — no guard works two shifts in a row, every door must be reachable — and it goes hunting for something that obeys all of them at once.",
-    "sim": "Build a tiny pretend world with rules: water runs downhill, grass grows, rabbits eat grass, foxes eat rabbits. Press play, wait, and keep whatever it made. You are not drawing the answer, you are letting it happen and then taking a photograph.",
-    "ero": "Pour water and blow wind over a lump of clay for a very long time. Bits get scraped off the high places and dropped in the low places. That is the difference between a mountain and a crumpled blanket.",
-    "agent": "Lots of tiny stupid creatures, each one following two or three rules and only able to see what is right next to it. Nobody is in charge. Somehow they still make flocks, ant trails, veins, and rivers that branch.",
-    "evo": "Make a hundred rough attempts. Throw away all but the best few. Make wonky copies of the survivors and try again. You never have to know how to build the good thing — you only have to be able to say which of two attempts is better.",
-    "markov": "Read a long list of real names and count what letter usually follows what. Then make a new name by rolling dice weighted by those counts. It sounds like the list because it copied the list's habits, not its words.",
-    "ml": "Show a computer a hundred thousand photographs of faces until it works out for itself what makes a face look like a face. Then ask it for a new one, and it invents a person who was never photographed.",
-    "morph": "Measure a thousand real faces and work out the few sliders that describe how faces actually differ — rounder, longer, older, more surprised. Now any face is just slider settings, and nudging a slider gives you a new face that still looks like a person.",
-    "sdf": "Do not store the shape. Store a rule that answers one question: how far am I from the surface, and am I inside or outside? Once you can answer that anywhere, you can glue two shapes together, round off the join, and punch holes, all with arithmetic.",
-    "csg": "Modelling with cookie cutters. Start with blocks, tubes and balls, then bolt them together, cut one out of another, or keep only the bit where they overlap. Almost anything made in a factory is a handful of those steps.",
-    "spline": "A smooth curve you steer with a few handles, like bending a wire. Then slide a shape along the wire — the cross-section of a road, a pipe, a rope — and it sweeps out the whole object as it goes.",
-    "tile": "One tile, printed again and again so that the edges line up and you cannot find the joins. A few special sets of tiles fit together forever without ever repeating the same arrangement twice.",
-    "ik": "You know where you want your hand to end up. The puzzle is what your elbow and shoulder have to do to get it there. Working backwards from the hand to the joints is how a game character's feet land properly on a staircase.",
-    "dsp": "Make a sound out of arithmetic instead of playing a recording. Pluck an imaginary string, wobble one note with another note, and you get a sound that comes out slightly different every time — so it never wears out from being heard twice.",
-    "kit": "A LEGO set. A person carefully makes a few pieces that snap together neatly, and then the computer clicks thousands of them into buildings. Every piece looks good because a human made it; the endless variety comes from the clicking.",
-    "shader": "Do not keep the picture. Keep the recipe, and let the graphics card work out the colour of each pixel from scratch, every single frame. Nothing takes up space, and it never goes blurry when you walk right up to it.",
-    "rand": "A dice-rolling machine that only pretends to be random: feed it the same starting number and it rolls exactly the same sequence every time, forever. That is how a game can hand you an entire world in exchange for one short code."
+    "noise": "A function that returns a value for any position you ask about, where nearby positions return similar values. That continuity is the entire difference between noise and static, and it is why the output reads as hills, cloud and marbling rather than as a random value per pixel. Ask about the same position twice and you get the same answer, so nothing needs storing.",
+    "fractal": "A shape made of smaller copies of itself. Draw a tree, then draw a smaller version of the same tree at the end of every branch, and repeat: detail keeps appearing however far you zoom in, and all of it came from one rule applied over and over.",
+    "lsys": "Start with a short string and a rule that rewrites each symbol as a longer sequence. Apply it repeatedly and the string grows on its own. Then read the result as instructions for a pen — forward, turn, remember this position and come back to it — and the growing string draws a branching plant.",
+    "gram": "Rules that replace one thing with several more specific things. A building is a base, some middle floors and a roof; a floor is a row of bays; a bay is a wall with a window in it. Keep substituting until nothing is left to substitute, and a complete building falls out of a page of rules.",
+    "wfc": "Sudoku with tiles instead of numbers. Every cell starts able to hold any tile. Choosing one for a cell removes options from its neighbours, which removes options from theirs. Keep resolving the most constrained cell until everything is decided and no two neighbours clash.",
+    "ca": "Every cell on a grid follows one rule about its immediate neighbours, and every cell applies it in the same instant — for example, become wall if most of your neighbours are wall. Repeat for a few steps and structure appears that nobody placed.",
+    "rd": "Two substances spreading through the same sheet. The first makes more of itself; the second spreads faster and destroys the first. So each patch of the first clears a gap around itself that prevents another patch forming too close, and that fixed spacing is what produces spots and stripes.",
+    "vor": "Scatter points, then assign every position to whichever point is nearest. The result is regions with straight edges meeting at corners: cracked mud, a giraffe's markings, a cobbled street.",
+    "samp": "Placing things so they look scattered but cover evenly. Purely random placement clumps in some places and leaves bare patches in others; these methods keep each new position a minimum distance from those already placed, which is what the eye reads as natural scattering.",
+    "graph": "Things and the connections between them. The things are rooms, cities or objectives; the connections say what leads to what. Once a structure is in that form you can ask whether everything is reachable, what the shortest route is, and which connections are load-bearing.",
+    "part": "Take a region, cut it in two, then cut each piece in two, and keep going until the pieces are the size you want. They become rooms, panels or layout cells — and because you only ever cut, nothing overlaps and nothing is left uncovered.",
+    "cons": "Rather than describing how to build something, you state the rules it must not break — no guard on two consecutive shifts, every door reachable — and a solver searches for an arrangement satisfying all of them at once.",
+    "sim": "Write down the rules a system obeys, run it forward, and keep the state it reaches. Water flows downhill, grass grows, herbivores eat it, predators eat them. The result is not designed; it is what those rules produced, which is why it holds together and why it is hard to steer.",
+    "ero": "Run water and wind over a landscape for a long time. Material is removed from high ground, carried, and deposited in low ground. That transport is the difference between terrain that reads as geology and terrain that reads as a crumpled surface.",
+    "agent": "Many independent actors, each following two or three rules and each able to see only its immediate surroundings. Nothing coordinates them, and yet together they produce flocks, trails, branching networks and transport routes.",
+    "evo": "Generate many rough candidates, keep the best, produce varied copies of those, and repeat. You never need to know how to construct a good result — only how to judge which of two candidates is better.",
+    "markov": "Count which symbol tends to follow which across a body of real examples, then generate new sequences by sampling from those counts. The output resembles the source because it inherited the source's habits, not its content.",
+    "ml": "Show a model enough examples that it works out for itself what they have in common, then ask it for a new one. Nobody writes the rules; they are inferred from the data — which is also why the output is only as good, and only as licensed, as what the model was shown.",
+    "morph": "Measure a large population of real shapes, align them, and find the handful of dimensions along which they genuinely vary. Those become the controls: any face or body is a position in that space, and every position inside the measured range is still a plausible one.",
+    "sdf": "Instead of storing a shape, store a function answering one question for any point: how far away is the nearest surface, and am I inside or outside? Given that, unions, intersections, rounded joins and hollow shells all become arithmetic on the answers.",
+    "csg": "Build solids by combining simpler ones — add two together, subtract one from another, or keep only where they overlap. Most manufactured objects are a short sequence of those operations applied to boxes, cylinders and spheres.",
+    "spline": "A smooth curve controlled by a few handles. Sweep a cross-section along it — a road profile, a pipe, a cable — and the curve becomes a surface. Most of the realism is in choosing the right kind of curve for what it represents.",
+    "tile": "One piece of artwork repeated so that its edges line up and the joins are invisible. A few special sets of shapes cover an unlimited area without the arrangement ever repeating.",
+    "ik": "You know where the hand or foot has to end up; the problem is what every joint between it and the body must do to get it there. Solving backwards from the target to the joint angles is what lets a character's feet meet uneven ground.",
+    "dsp": "Produce sound by calculating it rather than by playing a recording. Model a plucked string, or modulate one tone with another, and every occurrence can differ slightly — so the sound never wears out from being heard twice.",
+    "kit": "Author a small set of pieces that fit together, then assemble them by rule. Every piece looks good because a person made it, and the variety comes from the assembly. This is what shipped games actually use.",
+    "shader": "Do not store the image; store the recipe, and let the graphics card compute each pixel from scratch every frame. Nothing takes disk space and nothing blurs when you get close, but the result exists only on screen.",
+    "rand": "A generator that behaves randomly while being completely determined by its starting number: the same seed always produces the same sequence. That reproducibility is what lets an entire world be reconstructed from a short code rather than stored."
   },
-
   "corrections": [
     {
       "concept": "ero",
@@ -105,7 +103,7 @@
       "good": "Holding whatever noise, erosion, reaction–diffusion, cellular automata or a fluid solver produces or consumes. It is the interchange format the operator layer actually passes around.",
       "bad": "Sparse or unbounded structure — a field pays for every cell whether that cell is interesting or not, and a heightfield cannot represent an overhang at all.",
       "watch": "The resolution is a design decision disguised as an implementation detail. It fixes the smallest feature you will ever be able to have, and every later stage inherits that ceiling.",
-      "eli5": "Graph paper with a number written in every square. If the number is a height you get a landscape; if it is a temperature you get a weather map; if it is how full of rock the square is, you get a cave. Almost every machine in this catalogue either fills in the squares or reads them back.",
+      "eli5": "A value at every point of a regular grid. If the value is height you have a landscape; if it is temperature, a weather map; if it is how solid the point is, a volume with caves in it. Almost everything in this catalogue either fills a grid in or reads one back.",
       "why": "It was the substrate the whole operator layer already ran on, and the only thing missing was the word. Noise writes one, erosion reads and rewrites one, marching cubes converts one into a mesh, and \"Voxel worlds\", \"Temperature & precipitation fields\" and \"Heightfields from fBm & ridged noise\" are catalogue entries whose shared object had no name. Without it, the fact that hydraulic erosion and texture weathering are the same code operating on the same thing stays invisible.",
       "importable": "numpy's ndarray for the plain case, xarray for labelled and coordinate-aware fields, zarr for chunked out-of-core ones, and DataTexture / Data3DTexture in three.js on the browser side.",
       "absence": "Marching cubes, marching tetrahedra, surface nets and dual contouring are all filed under `sdf`, which is not quite right — they consume a sampled grid, and a signed distance function is only one of the things that grid might hold.",
@@ -115,7 +113,9 @@
           "Voxel worlds & chunked infinite terrain",
           "Temperature & precipitation fields"
         ],
-        "geometry3d": ["Marching cubes / dual contouring / surface nets"]
+        "geometry3d": [
+          "Marching cubes / dual contouring / surface nets"
+        ]
       }
     },
     {
@@ -126,7 +126,7 @@
       "good": "Everything downstream of generation. Rendering, collision, UV mapping, skinning, export and manufacture all want a mesh, whatever the thing was originally generated as.",
       "bad": "Boolean operations and topology change. Cutting one mesh with another is numerically fragile in a way that field- and SDF-based representations simply are not.",
       "watch": "Manifoldness and winding are not cosmetic. A mesh that renders perfectly can still be unprintable, unsimulatable and impossible to boolean, and checking is far cheaper than the debugging.",
-      "eli5": "A shape built out of flat triangles glued edge to edge, like a paper model. The computer keeps one list of corners and another list saying which three corners make each triangle. Nearly everything ends up as one of these before you can see it.",
+      "eli5": "A surface built from flat triangles joined edge to edge. The computer keeps a list of corner positions and a list of which corners form each triangle. Nearly everything ends up in this form before it can be rendered, simulated or manufactured.",
       "why": "The representation facet listed SDFs, CSG, splines, subdivision trees and morphable models, but not the format all of them get converted into. Marching cubes, dual contouring, straight skeletons and every remeshing entry produce a mesh, and \"Remeshing & retopology\", \"Automatic LOD, decimation & impostors\" and \"Meshes for FEM & CFD simulation\" are catalogue entries about the representation itself rather than about anything generated with it.",
       "importable": "trimesh and libigl in Python, pymeshlab for the MeshLab filter set, CGAL's Surface_mesh in C++, BufferGeometry in three.js.",
       "absence": "`csg`'s own WATCH note — that mesh booleans are numerically fragile — is a statement about this representation, filed under an operator, because there was nowhere else to put it.",
@@ -138,7 +138,9 @@
           "LiDAR & photogrammetry mesh completion",
           "Marching cubes / dual contouring / surface nets"
         ],
-        "engineering": ["Meshes for FEM & CFD simulation"]
+        "engineering": [
+          "Meshes for FEM & CFD simulation"
+        ]
       }
     },
     {
@@ -149,7 +151,7 @@
       "good": "Everything between a noise basis and a finished look — normal maps from heights, occlusion from curvature, softening, edge detection, dirt settling into crevices, seam removal.",
       "bad": "Creating structure. A filter can only reveal, suppress or move what is already in the field, which is why a chain of filters over plain noise plateaus so quickly.",
       "watch": "This is what a texture node graph mostly is. Naming the filters makes it obvious how few distinct operations a forty-node Substance graph actually contains.",
-      "eli5": "Every square on the graph paper looks at its neighbours and replaces its own number with a mixture of theirs. Average them and the picture goes blurry. Subtract them and only the edges survive. Nearly every photo effect you have ever used is this one trick with different mixing numbers.",
+      "eli5": "Replace each cell's value with a combination of its neighbours' values. Weight the neighbours one way and the image softens; weight them another and only the edges survive. Most image effects, and most of what a texture node graph does, are this one operation with different weights.",
       "why": "The catalogue's only signal-processing concept, `dsp`, is framed entirely around audio, so the same mathematics applied to a 2D field had nowhere to live. Convolution is arguably the most-used operator in the entire textures domain: \"Detail / micro-normal layers\", \"Full PBR map sets\", \"Procedural masks driven by mesh data\" and \"Halftone, dithering & engraving styles\" are filter chains, and they were being attributed to `noise` or to nothing at all.",
       "importable": "scipy.ndimage, opencv-python, scikit-image, Pillow's ImageFilter, sharp in Node — and every fragment shader ever written to sample its own neighbours.",
       "absence": "Floyd–Steinberg dithering sits under `samp`, which is defensible but strained: error diffusion is an image-space operator over a field, not a way of choosing where to put sample points.",
@@ -174,7 +176,7 @@
       "good": "River networks, catchments, deltas, valley placement, irrigation and drainage layout, and any biome or settlement rule that ought to depend on water.",
       "bad": "Cross-sectional shape and sediment. Routing tells you where the channel is, not how wide, deep or braided it is — that needs erosion or a morphodynamic model on top.",
       "watch": "Route first, erode second. Erosion applied to an unrouted heightfield fills its own basins as it goes, and produces drainage that never reaches the sea.",
-      "eli5": "Put a drop of water on every square of the landscape and let each one run downhill to whichever neighbour is lowest. Follow all the drops and you find out which squares are trickles, which are rivers, and which patch of land drains into each one.",
+      "eli5": "Work out where water goes across a surface. Each cell drains to its lowest neighbour, and following those links tells you which cells carry a trickle, which carry a river, and which area of land drains into each one.",
       "why": "`ero` covers moving material and `sim` covers fluid dynamics, but the graph question of what drains into what is neither — and it is the part with a standard, well-tested answer in the geoscience literature. \"River networks, watersheds & deltas\", \"Braided river channel networks\", \"Meander migration & channel belts\", \"Wetland & tidal flat morphodynamics\" and \"Irrigation network design\" are five entries across two domains with no concept between them.",
       "importable": "richdem for high-performance depression filling and flow accumulation, pysheds for watershed delineation, whitebox for the wider geospatial toolset.",
       "absence": "Priority-flood depression filling — the algorithm that makes any of this work on real, noisy data — appeared nowhere in the algorithm layer, because there was no concept to file it under.",
@@ -185,7 +187,9 @@
           "Meander migration & channel belts",
           "Wetland & tidal flat morphodynamics"
         ],
-        "engineering": ["Irrigation network design"]
+        "engineering": [
+          "Irrigation network design"
+        ]
       }
     },
     {
@@ -196,13 +200,18 @@
       "good": "Extending a photographed material, filling holes, making a non-tiling texture tileable, transferring the look of one surface onto another — every case where you have an example but not a rule.",
       "bad": "Structured or semantic content. Copying statistics from a photograph of a keyboard gives you keyboard-flavoured mush, because the method has no idea what a key is.",
       "watch": "It is the honest answer to \"I have a photo and I need ten square metres of it\", and it is not tiling. Tiling repeats a fixed asset; synthesis makes new pixels that were never in the sample.",
-      "eli5": "You have a small scrap of wallpaper and you need a whole wall. Look at the edge of what you have pasted up so far, hunt through the scrap for the patch that fits next to it best, paste that on, and repeat. The wall never repeats itself, and every bit of it came from the scrap.",
+      "eli5": "You have a sample of a material and need much more of it. Rather than repeating the sample, look at the edge of what you have built so far, find the part of the sample that fits next to it best, and copy that across. The result never repeats, and all of it came from the sample.",
       "why": "\"Example-based texture synthesis\" is a catalogue entry in its own right and \"Tile sets learned from an example bitmap\" is another, yet the only concept covering learning-from-one-image was `wfc` — which is a special case of exactly this family, and says so in its own README. Filing the general method under the special case inverts the relationship.",
       "importable": "opencv-python (inpainting and template matching are the primitives), scikit-image, texturize for the neural variant, and the PatchMatch-based content-aware fill in most commercial editors.",
       "absence": "WFC's documentation describes it as translating a texture synthesis problem into a constraint satisfaction problem. The problem it translates had no row here.",
       "applies_to": {
-        "textures": ["Example-based texture synthesis", "Seamless / tileable variants"],
-        "art2d": ["Tile sets learned from an example bitmap"]
+        "textures": [
+          "Example-based texture synthesis",
+          "Seamless / tileable variants"
+        ],
+        "art2d": [
+          "Tile sets learned from an example bitmap"
+        ]
       }
     },
     {
@@ -213,12 +222,15 @@
       "good": "Smooth organic surfaces from a handful of control points, level-of-detail chains, displacement bases, and anything that has to be sculptable by a human and cheap to store.",
       "bad": "Sharp mechanical detail and exact dimensions. It approximates a limit surface, so a subdivided box is not a box unless you tell it where the creases are.",
       "watch": "The topology of the cage is the design. Irregular vertices — anything not four-valent on a quad mesh — are where the limit surface loses curvature continuity, and they show up in a reflection long before anyone can point at why.",
-      "eli5": "Take a shape made of a few big flat panels. Cut every panel into four, then nudge each new corner towards the average of its neighbours. Do that twice and the blocky shape has gone smooth — and you still only ever edited the few big panels.",
+      "eli5": "Take a shape made of a few large flat faces. Split each face, then move every corner towards the average of its neighbours. Two rounds of that turns a blocky cage into a smooth surface, and you are still only ever editing the few large faces.",
       "why": "\"Subdivision & displacement detailing\" is a catalogue entry, and subdivision is how essentially all character and vehicle geometry is authored, but the concept vocabulary had no word for it. `part` covers recursive subdivision of *space*, which is a different operation on a different object; the shared word was hiding that.",
       "importable": "OpenSubdiv, which is the de facto reference and ships inside Maya, Blender and RenderMan; pymeshlab's subdivision filters; libigl's upsample and loop; three-subdivide for three.js.",
       "absence": "Catmull–Clark 1978 and Loop 1987 were both missing from the algorithm layer, despite Catmull already appearing in it for Catmull–Rom splines.",
       "applies_to": {
-        "geometry3d": ["Subdivision & displacement detailing", "Remeshing & retopology"]
+        "geometry3d": [
+          "Subdivision & displacement detailing",
+          "Remeshing & retopology"
+        ]
       }
     },
     {
@@ -229,7 +241,7 @@
       "good": "Palette generation, gradients and ramps that do not go grey in the middle, theme and dark-mode derivation, recolouring, accessible contrast, and any generated artefact a human will judge aesthetically.",
       "bad": "Meaning. It can tell you two colours are 4.7 units apart and legible together. It cannot tell you that one of them is the wrong colour for a hospital.",
       "watch": "Interpolating in sRGB is the most common generative-art bug there is. The same two endpoints blended in Oklab and in sRGB give visibly different midpoints, and only one of the two looks like a colour.",
-      "eli5": "Colours can be written down as numbers, but the obvious numbers lie: two pairs of colours can sit the same distance apart in the computer's numbers while one pair looks identical to your eye and the other looks nothing alike. So people built better number systems, where equal distances really do look equally different — and once you have one, mixing, matching and checking colours becomes arithmetic.",
+      "eli5": "Writing colours as numbers the obvious way does not match how they look: two pairs can be the same distance apart numerically while one pair looks identical and the other looks nothing alike. Perceptual colour spaces fix that, and once distance means something, mixing, matching and checking legibility become arithmetic.",
       "why": "Seven catalogue entries across two domains are about nothing else — palette generation and harmony rules, gradients and ramps, palette extraction, accessible palettes, colour scale tokens, dark-mode derivation — and each was tagged with whatever machinery happened to be nearby. Colour is also the one axis on which a generator's output is judged instantly, by everyone.",
       "importable": "colour-science and coloraide in Python; culori, colorjs.io and chroma-js in JavaScript; and CSS Color 4, which is the same model shipped in every browser.",
       "absence": "No algorithm in the layer covers a colour transform, a harmony rule or a contrast metric, so the catalogue asserted that palettes are generatable without recording a single method for generating one.",
@@ -241,7 +253,10 @@
           "Accessible palette generation (APCA, WCAG)",
           "Photo mosaics & image quantisation art"
         ],
-        "interfaces": ["Design token & colour scale generation", "Dark mode & theme derivation"]
+        "interfaces": [
+          "Design token & colour scale generation",
+          "Dark mode & theme derivation"
+        ]
       }
     },
     {
@@ -252,7 +267,7 @@
       "good": "Load-bearing structure at minimum mass, heat sinks, compliant mechanisms, and photonic and RF devices whose required geometry is nothing a human would think to draw.",
       "bad": "Manufacturability, unaided. The unconstrained optimum is usually a thin organic web with no draft angle and no minimum feature size, so the constraints are most of the real work.",
       "watch": "This is what \"generative design\" means in engineering, and it is not evolutionary. It is gradient descent on a density field using adjoint sensitivities, which is why it converges in tens of iterations rather than thousands of generations.",
-      "eli5": "Start with a solid block, and say where you will push on it and where it is bolted down. The computer works out, for every crumb of the block, how much that crumb is helping carry the load — then takes material away from the crumbs that are not helping and gives it to the ones that are. Repeat, and a skeleton appears that nobody designed.",
+      "eli5": "Start from a solid block and say where it will be loaded and where it is held. The computer works out how much each part of the block contributes to carrying that load, takes material away from the parts contributing least, and puts it where it helps. Repeat, and a structure appears that nobody drew.",
       "why": "Engineering is the second largest domain in the catalogue at 69 entries, and its two flagship groups — generative and computational design, and physics and photonics inverse design — had only `evo` and `cons` to point at. Both are the wrong answer: SIMP is gradient-based rather than a search over a population, and it is an optimisation rather than a satisfaction problem. Eight entries name topology optimisation or inverse design outright.",
       "importable": "topopt for the textbook density method, nlopt with autograd or JAX for building an adjoint loop, openmdao for the coupled multidisciplinary case — and the generative-design mode of every commercial CAD package.",
       "absence": "SIMP and the adjoint method were both missing from the algorithm layer, which is a large part of why the catalogue's engineering half carries so many fewer citations than its games half.",
@@ -270,7 +285,6 @@
       }
     }
   ],
-
   "_rejected": [
     {
       "id": "motion",
@@ -285,7 +299,6 @@
       "why_rejected": "Decomposes cleanly into concepts that already exist — `part` for the subdivision cases, `cons` for the solver cases, `samp` for the packing cases. It would be a category in the facet sense, and the facet pass exists to reduce those rather than add them."
     }
   ],
-
   "_contested": [
     "filter — called a block, and it is importable and everywhere, but it is arguably the 2D half of a `dsp` that was mis-framed as audio-only. The alternative is to rename `dsp` to signal processing and put both under it, at the cost of a very large concept.",
     "field vs mesh — both are representations, and marching cubes is precisely the converter between them, so an argument exists that they are one concept with two encodings. Kept separate because the operators that consume them share almost nothing.",

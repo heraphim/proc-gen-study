@@ -88,17 +88,25 @@ package and say what its absence had been costing. Two were the operator layer's
 going unnamed: everything in the catalogue passes fields and meshes around, and neither had a
 word.
 
-Every concept also carries an **ELI5** — the idea with no jargon, in something a child could
-picture. That is not decoration. A concept that cannot be explained without its own vocabulary
-has not been pinned down, and writing these forced several descriptions to be rewritten rather
-than translated.
+Every concept also carries a **plain-language explanation** — the idea stated without its own
+vocabulary, for a reader who does not know the field. That is not decoration. A concept that
+cannot be explained without its own jargon has not been pinned down, and writing these forced
+several descriptions to be rewritten rather than translated.
+
+The first attempt at these read "explain like I'm five" literally and produced 220 explanations
+full of tiny arrows, little dots and pretend worlds — which patronised the reader without
+explaining any more than the plain version does. All 220 were rewritten, and
+`npm run check-register` now fails the build on the specific habit rather than on general tone:
+diminutives standing in for explanation, with "a little accuracy" allowed and "a little arrow"
+not.
 
 **Algorithms** — named, pinned-down methods. Perlin noise, Fortune's sweepline, FABRIK,
 Knuth–Plass. This is the only level that has papers, which is why the original catalogue had no
 citations: it never had this layer. Some concepts have algorithms; many, like cobblestone
-paving, have none of their own and only wire others together. Every algorithm carries an ELI5
-too, and 26 carry the whole method as **working code under 100 lines**, run before it was
-recorded and rejected by the build if it is longer.
+paving, have none of their own and only wire others together. Every algorithm carries a
+plain-language explanation too. 26 of them also have the whole method as **working code under
+100 lines** — shown on the implementations page rather than here, above the packages that wrap
+the same algorithm, because that juxtaposition is what the code is for.
 
 **Implementations** — runnable code. Linked to algorithms, not concepts, and many-to-many:
 `scipy` implements six algorithms across four concepts; simplex noise has nine implementations
@@ -130,7 +138,7 @@ ever using the word "terrain", which is why the same code also weathers a textur
 | Route | What's there |
 |---|---|
 | `/` | What procedural generation is, what it buys you, a verified history, how this project structures it |
-| `/basic-blocks` | The 36 concepts, faceted, each with an ELI5, the blocks hiding inside each category named, the eight added ones arguing for themselves, and the candidates that were rejected |
+| `/basic-blocks` | The 36 concepts, faceted, each with a plain-language explanation, the blocks hiding inside each category named, the eight added ones arguing for themselves, and the candidates that were rejected |
 | `/algorithms` | 184 algorithms, grouped by concept, each with a mechanism description, a plain-language explanation and a checked source |
 | `/implementations` | 120 packages, grouped by concept and then by the algorithm they implement, with the technologies they run on and, where the whole method fits in under 100 lines, the reference code above the libraries that wrap it |
 | `/catalogue` | The 841 entries. Filters serialise into the query string, so a filtered view is a shareable URL |
@@ -176,7 +184,8 @@ runs as written" is enforced rather than asserted. One sample disagreed with its
 description and the description lost.
 
 **The build fails on bad annotations.** An override that matches no entry, an algorithm with no
-citation, description, ELI5 or valid tier, a concept with no ELI5, a correction whose "was" no
+citation, description, plain-language explanation or valid tier, a concept missing its
+explanation, a correction whose "was" no
 longer matches the text it claims to correct, an added concept without a named importable
 package, a source with no description or a duplicate URL, a code sample that is empty or too
 long, a reference to an unknown concept, algorithm or technology, an implementation not marked
@@ -192,8 +201,8 @@ a reviewable diff you can argue with line by line:
 |---|---|
 | `tier.json` | source/operator/generator per entry, as a default per domain plus exceptions |
 | `facet.json` | the four-way concept split, with the blocks hiding inside each category |
-| `concepts.json` | ELI5 per concept, corrections to the prose carried over from the source HTML, the eight added concepts, and the candidates rejected |
-| `algorithms.json` | 184 algorithms with citations, descriptions, ELI5s and source types |
+| `concepts.json` | the plain-language explanation per concept, corrections to the prose carried over from the source HTML, the eight added concepts, and the candidates rejected |
+| `algorithms.json` | 184 algorithms with citations, descriptions, plain-language explanations and source types |
 | `code-samples.json` | 26 working samples, held as arrays of lines so a change reads as a diff |
 | `implementations.json` | registry-verified packages across five registries |
 | `implementation-algorithms.json` | which implementation implements which algorithm |

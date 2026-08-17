@@ -1067,13 +1067,14 @@ const FACET_TITLE = {
   deployment: 'Deployment — not concepts',
 };
 
-/* The plain-language explanation. Deliberately the first thing in the body: if the eli5
-   and the technical prose disagree, one of them is wrong, and putting them adjacent is
-   what makes that visible. */
+/* The plain-language explanation. Deliberately the first thing in the body: if this and the
+   technical prose disagree, one of them is wrong, and putting them adjacent makes that visible.
+   The heading used to read "Explain like I'm five", which was inviting the register that had to
+   be rewritten out of all 220 of these — so it says what it means instead. */
 function eli5Block(text) {
   if (!text) return null;
   const box = el('div', 'eli5');
-  box.append(el('div', 'eli5-head', "Explain like I'm five"));
+  box.append(el('div', 'eli5-head', 'In plain words'));
   box.append(el('p', 'eli5-text', text));
   return box;
 }

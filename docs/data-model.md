@@ -130,7 +130,7 @@ client-side; there is no per-query round trip.
 
 It is now ~869 KB, up from ~380 KB, and the growth is worth naming because it is the price of
 this design rather than a leak: 350 KB is the 841 entries, 361 KB is the algorithm layer, and
-within that 59 KB is code samples and 65 KB is ELI5 prose. Everything gzips to roughly a fifth
+within that 59 KB is code samples and 65 KB is plain-language explanations. Everything gzips to roughly a fifth
 of that over the wire. If it doubles again, the answer is to split the algorithm layer into its
 own lazily-fetched payload rather than to trim the prose.
 
