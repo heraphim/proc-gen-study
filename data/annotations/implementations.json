@@ -1,0 +1,1082 @@
+{
+  "_about": "Implementations, each checked against its package registry before being written down.",
+  "_method": "Every row resolved with a 200 from registry.npmjs.org or pypi.org/pypi. Six candidates 404ed and were dropped; five more resolved to unrelated projects sharing a name (PyPI `sdf` is Scientific Data Format, `wfc` is WebForms Core) and were dropped too.",
+  "_caveat": "last_release is the registry timestamp verbatim. Many npm packages report 2022-05/06, which clusters too tightly across unrelated projects to be real activity — probably a bulk metadata operation. Do not read those dates as abandonment. One package (webaudio-oscilloscope) was removed entirely: it is a visualiser, not a generation library, and was only present because registry verification confirms a package exists without confirming it is the right kind of thing. Four others were re-roled for the same reason.",
+  "_roles": {
+    "generation-library": "Produces content.",
+    "output-surface": "Turns generated data into something perceivable.",
+    "solver": "Searches for something satisfying constraints.",
+    "model": "A learned model, called rather than run.",
+    "authoring-app": "A human opens it. Cannot be called from a server.",
+    "analysis": "Analyses existing content. Feeds generation but does not generate.",
+    "infrastructure": "Numerical or runtime substrate. Implements no generative algorithm itself.",
+    "post-processing": "Transforms already-generated output."
+  },
+  "implementations": [
+    {
+      "package": "javascript-lp-solver",
+      "ecosystem": "npm",
+      "concept": "cons",
+      "role": "solver",
+      "version": "1.0.3",
+      "last_release": "2026-01-24",
+      "description": "Easy to use, JSON oriented Linear Programming and Mixed Int. Programming Solver",
+      "repo": "https://github.com/JWally/jsLPSolver",
+      "license": "Unlicense",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "logic-solver",
+      "ecosystem": "npm",
+      "concept": "cons",
+      "role": "solver",
+      "version": "2.0.1",
+      "last_release": "2022-06-19",
+      "description": "General satisfiability solver for logic problems",
+      "repo": "git://github.com/meteor/logic-solver",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "z3-solver",
+      "ecosystem": "npm",
+      "concept": "cons",
+      "role": "solver",
+      "version": "5.1.0",
+      "last_release": "2026-08-16",
+      "description": "This project provides high-level and low-level TypeScript bindings for the [Z3 theorem prover](",
+      "repo": "https://github.com/Z3Prover/z3",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "cvxpy",
+      "ecosystem": "pypi",
+      "concept": "cons",
+      "role": "solver",
+      "version": "1.9.2",
+      "last_release": "2026-06-22",
+      "description": "A domain-specific language for modeling convex optimization problems in Python.",
+      "repo": null,
+      "license": null,
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "minizinc",
+      "ecosystem": "pypi",
+      "concept": "cons",
+      "role": "solver",
+      "version": "0.10.0",
+      "last_release": "2025-02-25",
+      "description": "Access MiniZinc directly from Python",
+      "repo": null,
+      "license": "MPL-2.0",
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "ortools",
+      "ecosystem": "pypi",
+      "concept": "cons",
+      "role": "solver",
+      "version": "9.15.6755",
+      "last_release": "2026-01-14",
+      "description": "Google OR-Tools python libraries and modules",
+      "repo": "https://developers.google.com/optimization/",
+      "license": "Apache 2.0",
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "pulp",
+      "ecosystem": "pypi",
+      "concept": "cons",
+      "role": "solver",
+      "version": "3.3.2",
+      "last_release": "2026-05-25",
+      "description": "PuLP is an LP modeler written in python. PuLP can generate MPS or LP files and call GLPK, COIN ",
+      "repo": null,
+      "license": null,
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "python-constraint",
+      "ecosystem": "pypi",
+      "concept": "cons",
+      "role": "solver",
+      "version": "1.4.0",
+      "last_release": "2018-11-05",
+      "description": "python-constraint is a module implementing support for handling CSPs (Constraint Solving Proble",
+      "repo": "https://github.com/python-constraint/python-constraint",
+      "license": null,
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "z3-solver",
+      "ecosystem": "pypi",
+      "concept": "cons",
+      "role": "solver",
+      "version": "5.1.0.0",
+      "last_release": "2026-08-16",
+      "description": "an efficient SMT solver library",
+      "repo": "https://github.com/Z3Prover/z3",
+      "license": "MIT License",
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "@jscad/modeling",
+      "ecosystem": "npm",
+      "concept": "csg",
+      "role": "generation-library",
+      "version": "2.13.0",
+      "last_release": "2026-08-02",
+      "description": "Constructive Solid Geometry (CSG) Library for JSCAD",
+      "repo": "https://github.com/jscad/OpenJSCAD.org",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "csg",
+      "ecosystem": "npm",
+      "concept": "csg",
+      "role": "generation-library",
+      "version": "1.0.1",
+      "last_release": "2022-06-14",
+      "description": "Constructive solid geometry on meshes using BSP trees in JavaScript",
+      "repo": "git://github.com/thibauts/csg.js",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "three-bvh-csg",
+      "ecosystem": "npm",
+      "concept": "csg",
+      "role": "generation-library",
+      "version": "0.0.18",
+      "last_release": "2026-02-17",
+      "description": "A fast, flexible, dynamic CSG implementation on top of three-mesh-bvh",
+      "repo": "https://github.com/gkjohnson/three-bvh-csg",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "build123d",
+      "ecosystem": "pypi",
+      "concept": "csg",
+      "role": "generation-library",
+      "version": "0.11.1",
+      "last_release": "2026-07-02",
+      "description": "A python CAD programming library",
+      "repo": null,
+      "license": "Apache-2.0",
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "cadquery",
+      "ecosystem": "pypi",
+      "concept": "csg",
+      "role": "generation-library",
+      "version": "2.8.0",
+      "last_release": "2026-06-21",
+      "description": "CadQuery is a parametric  scripting language for creating and traversing CAD models",
+      "repo": "https://github.com/CadQuery/cadquery",
+      "license": "Apache Public License 2.0",
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "trimesh",
+      "ecosystem": "pypi",
+      "concept": "csg",
+      "role": "generation-library",
+      "version": "5.0.0",
+      "last_release": "2026-08-01",
+      "description": "Import, export, process, analyze and view triangular meshes.",
+      "repo": null,
+      "license": "The MIT License (MIT)\n   ",
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "soundfont-player",
+      "ecosystem": "npm",
+      "concept": "dsp",
+      "role": "output-surface",
+      "version": "0.12.0",
+      "last_release": "2022-06-26",
+      "description": "Lightweight soundfont (music instrument) loader and player for WebAudio API",
+      "repo": "https://github.com/danigb/soundfont-player",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "tone",
+      "ecosystem": "npm",
+      "concept": "dsp",
+      "role": "output-surface",
+      "version": "15.1.22",
+      "last_release": "2026-08-07",
+      "description": "A Web Audio framework for making interactive music in the browser.",
+      "repo": "https://github.com/Tonejs/Tone.js",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "librosa",
+      "ecosystem": "pypi",
+      "concept": "dsp",
+      "role": "analysis",
+      "version": "1.0.0",
+      "last_release": "2026-08-11",
+      "description": "Python module for audio and music processing",
+      "repo": "https://github.com/librosa/librosa",
+      "license": "ISC",
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "pedalboard",
+      "ecosystem": "pypi",
+      "concept": "dsp",
+      "role": "post-processing",
+      "version": "0.9.24",
+      "last_release": "2026-07-08",
+      "description": "A Python library for adding effects to audio.",
+      "repo": null,
+      "license": "GNU GENERAL PUBLIC LICENS",
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "pyo",
+      "ecosystem": "pypi",
+      "concept": "dsp",
+      "role": "output-surface",
+      "version": "1.0.5",
+      "last_release": "2023-03-26",
+      "description": "Python module to build digital signal processing program.",
+      "repo": "http://ajaxsoundstudio.com/software/pyo/",
+      "license": "LGPLv3+",
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "genetic-js",
+      "ecosystem": "npm",
+      "concept": "evo",
+      "role": "solver",
+      "version": "0.1.14",
+      "last_release": "2022-06-18",
+      "description": "Advanced genetic and evolutionary algorithm library",
+      "repo": "git://github.com/subprotocol/genetic-js",
+      "license": "BSD",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "cma",
+      "ecosystem": "pypi",
+      "concept": "evo",
+      "role": "solver",
+      "version": "4.4.4",
+      "last_release": "2026-02-25",
+      "description": "CMA-ES, Covariance Matrix Adaptation Evolution Strategy for non-linear numerical optimization i",
+      "repo": null,
+      "license": null,
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "deap",
+      "ecosystem": "pypi",
+      "concept": "evo",
+      "role": "solver",
+      "version": "1.4.4",
+      "last_release": "2026-04-17",
+      "description": "Distributed Evolutionary Algorithms in Python",
+      "repo": "https://www.github.com/deap",
+      "license": "LGPL",
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "pymoo",
+      "ecosystem": "pypi",
+      "concept": "evo",
+      "role": "solver",
+      "version": "0.6.2",
+      "last_release": "2026-06-28",
+      "description": "Multi-Objective Optimization in Python",
+      "repo": null,
+      "license": null,
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "qdpy",
+      "ecosystem": "pypi",
+      "concept": "evo",
+      "role": "solver",
+      "version": "0.1.2.2",
+      "last_release": "2023-10-31",
+      "description": "Quality-Diversity algorithms in Python",
+      "repo": "https://gitlab.com/leo.cazenille/qdpy",
+      "license": "LGPLv3",
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "graphlib",
+      "ecosystem": "npm",
+      "concept": "graph",
+      "role": "generation-library",
+      "version": "2.1.8",
+      "last_release": "2022-06-18",
+      "description": "A directed and undirected multi-graph library",
+      "repo": "https://github.com/dagrejs/graphlib",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "graphology",
+      "ecosystem": "npm",
+      "concept": "graph",
+      "role": "generation-library",
+      "version": "0.26.0",
+      "last_release": "2025-01-26",
+      "description": "A robust and multipurpose Graph object for JavaScript.",
+      "repo": "https://github.com/graphology/graphology",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "ngraph.graph",
+      "ecosystem": "npm",
+      "concept": "graph",
+      "role": "generation-library",
+      "version": "20.1.2",
+      "last_release": "2026-02-14",
+      "description": "graph data structure",
+      "repo": "https://github.com/anvaka/ngraph.graph",
+      "license": "BSD-3-Clause",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "ngraph.path",
+      "ecosystem": "npm",
+      "concept": "graph",
+      "role": "generation-library",
+      "version": "1.6.1",
+      "last_release": "2025-11-18",
+      "description": "Path finding in a graph",
+      "repo": "https://github.com/anvaka/ngraph.path",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "igraph",
+      "ecosystem": "pypi",
+      "concept": "graph",
+      "role": "generation-library",
+      "version": "1.0.0",
+      "last_release": "2025-10-23",
+      "description": "High performance graph data structures and algorithms",
+      "repo": "https://igraph.org/python",
+      "license": "GNU General Public Licens",
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "networkx",
+      "ecosystem": "pypi",
+      "concept": "graph",
+      "role": "generation-library",
+      "version": "3.6.1",
+      "last_release": "2025-12-08",
+      "description": "Python package for creating and manipulating graphs and networks",
+      "repo": null,
+      "license": null,
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "three-ik",
+      "ecosystem": "npm",
+      "concept": "ik",
+      "role": "generation-library",
+      "version": "0.1.0",
+      "last_release": "2022-05-21",
+      "description": "inverse kinematics for three.js",
+      "repo": "https://github.com/jsantell/THREE.IK",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "ikpy",
+      "ecosystem": "pypi",
+      "concept": "ik",
+      "role": "generation-library",
+      "version": "4.0.0",
+      "last_release": "2026-07-05",
+      "description": "An inverse kinematics library aiming performance and modularity",
+      "repo": "https://github.com/Phylliade/ikpy",
+      "license": null,
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "lindenmayer",
+      "ecosystem": "npm",
+      "concept": "lsys",
+      "role": "generation-library",
+      "version": "1.5.4",
+      "last_release": "2022-06-19",
+      "description": "Lindenmayer is  a L-System/LSystem library using modern (ES6) JavaScript with focus on a concis",
+      "repo": "https://github.com/nylki/lindenmayer",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "markov-chains",
+      "ecosystem": "npm",
+      "concept": "markov",
+      "role": "generation-library",
+      "version": "1.0.2",
+      "last_release": "2022-06-19",
+      "description": "A general purpose markov chain generator",
+      "repo": "git://github.com/bdchauvette/markov-chains",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "markovchain",
+      "ecosystem": "npm",
+      "concept": "markov",
+      "role": "generation-library",
+      "version": "1.0.2",
+      "last_release": "2022-06-19",
+      "description": "generates a markov chain of words based on input files",
+      "repo": "https://github.com/swang/markovchain",
+      "license": "ISC",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "markovify",
+      "ecosystem": "pypi",
+      "concept": "markov",
+      "role": "generation-library",
+      "version": "0.9.4",
+      "last_release": "2025-06-12",
+      "description": "A simple, extensible Markov chain generator. Uses include generating random semi-plausible sent",
+      "repo": "http://github.com/jsvine/markovify",
+      "license": "MIT",
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "diffusers",
+      "ecosystem": "pypi",
+      "concept": "ml",
+      "role": "model",
+      "version": "0.39.0",
+      "last_release": "2026-07-03",
+      "description": "State-of-the-art diffusion in PyTorch and JAX.",
+      "repo": "https://github.com/huggingface/diffusers",
+      "license": "Apache 2.0 License",
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "scikit-learn",
+      "ecosystem": "pypi",
+      "concept": "ml",
+      "role": "model",
+      "version": "1.9.0",
+      "last_release": "2026-06-02",
+      "description": "A set of python modules for machine learning and data mining",
+      "repo": null,
+      "license": null,
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "torch",
+      "ecosystem": "pypi",
+      "concept": "ml",
+      "role": "infrastructure",
+      "version": "2.13.0",
+      "last_release": "2026-07-08",
+      "description": "Tensors and Dynamic neural networks in Python with strong GPU acceleration",
+      "repo": null,
+      "license": null,
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "fast-simplex-noise",
+      "ecosystem": "npm",
+      "concept": "noise",
+      "role": "generation-library",
+      "version": "4.0.0",
+      "last_release": "2022-06-17",
+      "description": "A TypeScript implementation of faster simplex noise",
+      "repo": "https://github.com/joshforisha/fast-simplex-noise-js",
+      "license": "Unlicense",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "fractal-noise",
+      "ecosystem": "npm",
+      "concept": "noise",
+      "role": "generation-library",
+      "version": "2.1.0",
+      "last_release": "2023-01-25",
+      "description": "Fractal noise library",
+      "repo": "https://github.com/joshforisha/fractal-noise-js",
+      "license": "Unlicense",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "noisejs",
+      "ecosystem": "npm",
+      "concept": "noise",
+      "role": "generation-library",
+      "version": "2.1.0",
+      "last_release": "2022-06-22",
+      "description": "Perlin noise implementation",
+      "repo": "https://github.com/xixixao/noisejs",
+      "license": null,
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "open-simplex-noise",
+      "ecosystem": "npm",
+      "concept": "noise",
+      "role": "generation-library",
+      "version": "2.5.0",
+      "last_release": "2022-06-22",
+      "description": "OpenSimplex noise for TypeScript/JavaScript",
+      "repo": "https://github.com/joshforisha/open-simplex-noise-js",
+      "license": "Unlicense",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "simplex-noise",
+      "ecosystem": "npm",
+      "concept": "noise",
+      "role": "generation-library",
+      "version": "4.0.3",
+      "last_release": "2024-07-26",
+      "description": "simplex-noise is a fast simplex noise implementation in Javascript. Works in node and in the br",
+      "repo": "https://github.com/jwagner/simplex-noise.js",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "noise",
+      "ecosystem": "pypi",
+      "concept": "noise",
+      "role": "generation-library",
+      "version": "1.2.2",
+      "last_release": "2015-03-29",
+      "description": "Perlin noise for Python",
+      "repo": "https://github.com/caseman/noise",
+      "license": "UNKNOWN",
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "opensimplex",
+      "ecosystem": "pypi",
+      "concept": "noise",
+      "role": "generation-library",
+      "version": "0.4.5.1",
+      "last_release": "2024-05-01",
+      "description": "OpenSimplex is a noise generation function like Perlin or Simplex noise, but better.",
+      "repo": "https://code.larus.se/lmas/opensimplex",
+      "license": "MIT",
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "perlin-noise",
+      "ecosystem": "pypi",
+      "concept": "noise",
+      "role": "generation-library",
+      "version": "1.14",
+      "last_release": "2025-04-12",
+      "description": "Python implementation for Perlin Noise with unlimited coordinates space",
+      "repo": null,
+      "license": null,
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "vnoise",
+      "ecosystem": "pypi",
+      "concept": "noise",
+      "role": "generation-library",
+      "version": "0.1.0",
+      "last_release": "2021-02-24",
+      "description": "Vectorized, pure-Python Perlin noise library",
+      "repo": "https://github.com/plottertools/vnoise",
+      "license": "MIT",
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "alea",
+      "ecosystem": "npm",
+      "concept": "rand",
+      "role": "generation-library",
+      "version": "1.0.1",
+      "last_release": "2022-06-13",
+      "description": "Implementation of the Alea PRNG by Johannes Baagøe",
+      "repo": "https://github.com/coverslide/node-alea",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "pure-rand",
+      "ecosystem": "npm",
+      "concept": "rand",
+      "role": "generation-library",
+      "version": "8.4.2",
+      "last_release": "2026-07-10",
+      "description": " Pure random number generator written in TypeScript",
+      "repo": "https://github.com/dubzzz/pure-rand",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "random-js",
+      "ecosystem": "npm",
+      "concept": "rand",
+      "role": "generation-library",
+      "version": "2.1.0",
+      "last_release": "2024-10-22",
+      "description": "A mathematically correct random number generator library for JavaScript.",
+      "repo": "git://github.com/ckknight/random-js",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "seedrandom",
+      "ecosystem": "npm",
+      "concept": "rand",
+      "role": "generation-library",
+      "version": "3.0.5",
+      "last_release": "2022-06-26",
+      "description": "Seeded random number generator for Javascript.",
+      "repo": "git://github.com/davidbau/seedrandom",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "numpy",
+      "ecosystem": "pypi",
+      "concept": "rand",
+      "role": "generation-library",
+      "version": "2.5.2",
+      "last_release": "2026-08-09",
+      "description": "Fundamental package for array computing in Python",
+      "repo": null,
+      "license": null,
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "randomgen",
+      "ecosystem": "pypi",
+      "concept": "rand",
+      "role": "generation-library",
+      "version": "2.3.0",
+      "last_release": "2025-10-22",
+      "description": "Random generator supporting multiple PRNGs",
+      "repo": null,
+      "license": null,
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "fast-2d-poisson-disk-sampling",
+      "ecosystem": "npm",
+      "concept": "samp",
+      "role": "generation-library",
+      "version": "1.0.3",
+      "last_release": "2022-05-28",
+      "description": "Fast 2D Poisson Disk Sampling based on a modified Bridson algorithm",
+      "repo": "https://github.com/kchapelier/fast-2d-poisson-disk-sampling",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "maxrects-packer",
+      "ecosystem": "npm",
+      "concept": "samp",
+      "role": "generation-library",
+      "version": "2.7.3",
+      "last_release": "2025-08-30",
+      "description": "A max rectangle 2d bin packer for packing glyphs or images into multiple sprite-sheet/atlas",
+      "repo": "https://soimy@github.com/soimy/maxrects-packer",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "poisson-disk-sampling",
+      "ecosystem": "npm",
+      "concept": "samp",
+      "role": "generation-library",
+      "version": "2.3.1",
+      "last_release": "2022-06-24",
+      "description": "Poisson disk sampling in arbitrary dimensions",
+      "repo": "https://github.com/kchapelier/poisson-disk-sampling",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "potpack",
+      "ecosystem": "npm",
+      "concept": "samp",
+      "role": "generation-library",
+      "version": "2.1.0",
+      "last_release": "2025-07-14",
+      "description": "A tiny library for packing 2D rectangles (for sprite layouts)",
+      "repo": "https://github.com/mapbox/potpack",
+      "license": "ISC",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "poisson-disc",
+      "ecosystem": "pypi",
+      "concept": "samp",
+      "role": "generation-library",
+      "version": "0.2.1",
+      "last_release": "2021-02-05",
+      "description": "Poisson disc sampling in arbitrary dimensions using Bridson's algorithm, implemented in python ",
+      "repo": "https://github.com/diregoblin/poisson_disc_sampling",
+      "license": "BSD-2-Clause",
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "bezier-js",
+      "ecosystem": "npm",
+      "concept": "spline",
+      "role": "generation-library",
+      "version": "6.1.4",
+      "last_release": "2023-07-16",
+      "description": "A javascript library for working with Bezier curves",
+      "repo": "https://github.com/Pomax/bezierjs",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "cubic-spline",
+      "ecosystem": "npm",
+      "concept": "spline",
+      "role": "generation-library",
+      "version": "3.0.3",
+      "last_release": "2022-06-14",
+      "description": "spline interpolation",
+      "repo": "https://github.com/morganherlocker/cubic-spline",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "d3-shape",
+      "ecosystem": "npm",
+      "concept": "spline",
+      "role": "generation-library",
+      "version": "3.2.0",
+      "last_release": "2023-04-12",
+      "description": "Graphical primitives for visualization, such as lines and areas.",
+      "repo": "https://github.com/d3/d3-shape",
+      "license": "ISC",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "geomdl",
+      "ecosystem": "pypi",
+      "concept": "spline",
+      "role": "generation-library",
+      "version": "5.4.0",
+      "last_release": "2025-05-23",
+      "description": "Object-oriented B-Spline and NURBS evaluation library",
+      "repo": null,
+      "license": null,
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "d3-delaunay",
+      "ecosystem": "npm",
+      "concept": "vor",
+      "role": "generation-library",
+      "version": "6.0.4",
+      "last_release": "2023-04-01",
+      "description": "Compute the Voronoi diagram of a set of two-dimensional points.",
+      "repo": "https://github.com/d3/d3-delaunay",
+      "license": "ISC",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "delaunator",
+      "ecosystem": "npm",
+      "concept": "vor",
+      "role": "generation-library",
+      "version": "5.1.0",
+      "last_release": "2026-03-23",
+      "description": "An incredibly fast JavaScript library for Delaunay triangulation of 2D points",
+      "repo": "https://github.com/mapbox/delaunator",
+      "license": "ISC",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "voronoi",
+      "ecosystem": "npm",
+      "concept": "vor",
+      "role": "generation-library",
+      "version": "1.0.0",
+      "last_release": "2022-06-28",
+      "description": "A Javascript implementation of Steven J. Fortune's algorithm to efficiently compute Voronoi dia",
+      "repo": "https://github.com/gorhill/Javascript-Voronoi",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    },
+    {
+      "package": "freud-analysis",
+      "ecosystem": "pypi",
+      "concept": "vor",
+      "role": "generation-library",
+      "version": "3.5.0",
+      "last_release": "2025-10-08",
+      "description": "Powerful, efficient trajectory analysis in scientific Python.",
+      "repo": "https://github.com/glotzerlab/freud",
+      "license": null,
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "pyvoro",
+      "ecosystem": "pypi",
+      "concept": "vor",
+      "role": "generation-library",
+      "version": "1.3.2",
+      "last_release": "2014-09-02",
+      "description": "2D and 3D Voronoi tessellations: a python entry point for the voro++ library.",
+      "repo": "https://github.com/joe-jordan/pyvoro",
+      "license": "UNKNOWN",
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "scipy",
+      "ecosystem": "pypi",
+      "concept": "vor",
+      "role": "generation-library",
+      "version": "1.18.0",
+      "last_release": "2026-06-19",
+      "description": "Fundamental algorithms for scientific computing in Python",
+      "repo": null,
+      "license": "Copyright (c) 2001-2002 E",
+      "technologies": [
+        "python"
+      ],
+      "verified": true
+    },
+    {
+      "package": "wavefunctioncollapse",
+      "ecosystem": "npm",
+      "concept": "wfc",
+      "role": "generation-library",
+      "version": "2.1.0",
+      "last_release": "2022-06-28",
+      "description": "Javascript port of https://github.com/mxgmn/WaveFunctionCollapse",
+      "repo": "https://github.com/kchapelier/wavefunctioncollapse",
+      "license": "MIT",
+      "technologies": [
+        "js"
+      ],
+      "verified": true
+    }
+  ]
+}

@@ -1,0 +1,407 @@
+{
+  "_about": "Three-layer classification of every catalogue entry. Applied by scripts/migrate.js.",
+  "_tiers": {
+    "source": "Makes structure from a seed and parameters alone. No input representation.",
+    "operator": "Transforms one representation into another. Describable without naming the artefact.",
+    "generator": "A named artefact. Describing it requires saying what it is for."
+  },
+  "_test": "Can you describe it without saying what it is for? If yes it is a source or an operator.",
+  "_note": "Each domain declares a default tier and lists only the entries that differ. Same machinery can be an operator in one domain and a generator in another — Voronoi is an operator in `primitives` and a generator in `art2d`, where the diagram itself is the artefact. Classified by how the entry is framed, not by the underlying maths.",
+
+  "primitives": {
+    "default": "source",
+    "overrides": {
+      "Voronoi diagrams": "operator",
+      "Delaunay triangulation": "operator",
+      "Lloyd relaxation": "operator",
+      "fBm (fractal Brownian motion)": "operator",
+      "Ridged multifractal": "operator",
+      "Billow / turbulence": "operator",
+      "Domain warping": "operator",
+      "Erosion-weighted / slope-aware noise": "operator",
+      "Noise derivatives (analytic)": "operator",
+      "Distribution shaping (Gaussian, power law, Perlin-biased)": "operator",
+      "Deterministic sub-seeding by chunk / entity ID": "operator"
+    }
+  },
+
+  "textures": {
+    "default": "generator",
+    "overrides": {
+      "Full PBR map sets": "operator",
+      "Seamless / tileable variants": "operator",
+      "Trim sheets & modular texture atlases": "operator",
+      "Texture bombing by random stamping": "operator",
+      "Detail / micro-normal layers": "operator",
+      "Procedural masks driven by mesh data": "operator",
+      "Example-based texture synthesis": "operator"
+    }
+  },
+
+  "art2d": {
+    "default": "generator",
+    "overrides": {
+      "Strange attractors (Lorenz, Clifford, De Jong)": "source",
+      "Koch, dragon, Hilbert & Peano curves": "source",
+      "Palette generation & harmony rules": "source",
+      "Gradient & ramp generation": "source",
+      "Accessible palette generation (APCA, WCAG)": "source",
+      "Wallpaper groups & symmetry engines": "operator",
+      "Kaleidoscopes & mandalas": "operator",
+      "Halftone, dithering & engraving styles": "operator",
+      "Stippling & hatching (NPR)": "operator",
+      "Bitmap-to-vector tracing (Potrace)": "operator",
+      "ASCII & ANSI art conversion": "operator",
+      "Pixel sorting & datamosh glitch art": "operator",
+      "Textile repeat engineering (half-drop, brick)": "operator",
+      "Palette extraction & recolouring": "operator",
+      "Photo mosaics & image quantisation art": "operator",
+      "Automated chart design & encoding choice": "operator",
+      "Digital watermarking & steganographic embedding": "operator",
+      "Dieline & box-net unfolding": "operator",
+      "Print imposition & sheet nesting": "operator",
+      "Prepress trapping & spot-colour separation": "operator",
+      "Variable-data print personalisation": "operator",
+      "Knuth–Plass optimal line breaking": "operator",
+      "Liang hyphenation patterns": "operator",
+      "Lenticular interlacing for flip and 3D prints": "operator"
+    }
+  },
+
+  "terrain": {
+    "default": "generator",
+    "overrides": {
+      "Hydraulic erosion simulation": "operator",
+      "Thermal erosion & talus slopes": "operator",
+      "River networks, watersheds & deltas": "operator",
+      "Meander migration & channel belts": "operator",
+      "Temperature & precipitation fields": "operator",
+      "Whittaker-style biome assignment": "operator",
+      "Wind & ocean current simulation": "operator"
+    }
+  },
+
+  "vegetation": {
+    "default": "generator",
+    "overrides": {
+      "Phyllotaxis: sunflower heads, pinecones, succulents": "operator",
+      "Growth animation & age progression": "operator",
+      "Wind response & foliage animation": "operator",
+      "Vegetation scattering by biome & slope": "operator",
+      "Branch bark, taper & bifurcation detail": "operator"
+    }
+  },
+
+  "architecture": {
+    "default": "generator",
+    "overrides": {
+      "Roofs (hip, gable, mansard) from footprints": "operator",
+      "Block subdivision into building lots": "operator",
+      "Gridshell form-finding by dynamic relaxation": "operator",
+      "Tensile & membrane form-finding": "operator",
+      "Compression-only vaults via thrust networks": "operator",
+      "Freeform formwork for cast concrete": "operator",
+      "Room adjacency & circulation constraints": "operator",
+      "Site grading & stormwater drainage": "operator"
+    }
+  },
+
+  "levels": {
+    "default": "generator",
+    "overrides": {
+      "Braid, unicursal & weave mazes": "operator",
+      "Lock-and-key & progression gating": "operator",
+      "Biome & tile adjacency legality": "operator",
+      "Terrain-aware navmesh generation": "operator",
+      "Level streaming & chunk seams": "operator"
+    }
+  },
+
+  "geometry3d": {
+    "default": "generator",
+    "overrides": {
+      "Signed distance fields (SDFs)": "source",
+      "Marching cubes / dual contouring / surface nets": "operator",
+      "Metaballs & blobby surfaces": "operator",
+      "Constructive solid geometry (CSG)": "operator",
+      "Node-based procedural modelling": "operator",
+      "Subdivision & displacement detailing": "operator",
+      "Automatic LOD, decimation & impostors": "operator",
+      "Procedural UV unwrapping & atlasing": "operator",
+      "Remeshing & retopology": "operator",
+      "LiDAR & photogrammetry mesh completion": "operator",
+      "Scan-to-BIM object extraction": "operator",
+      "Greebles, nurnies & panel detail": "operator",
+      "Circle- and river-packing crease design": "operator"
+    }
+  },
+
+  "characters": {
+    "default": "generator",
+    "overrides": {
+      "Morphable face models (3DMM, FLAME, Basel)": "source",
+      "Blendshape / morph-target mixing": "operator",
+      "Latent-space sampling & attribute walks": "operator",
+      "Photo-to-face fitting (landmark & mesh regression)": "operator",
+      "Controlled facial asymmetry": "operator",
+      "Expression rigs from FACS action units": "operator",
+      "Family resemblance & genetic blending": "operator",
+      "Population & ethnicity distribution sampling": "operator",
+      "Age progression: wrinkles, sag, hairline recession": "operator",
+      "Caricature & stylisation exaggeration": "operator",
+      "Non-human & alien face topology": "operator",
+      "Skeleton generation & auto-rigging": "operator",
+      "Automatic skinning weights": "operator",
+      "Clothing draped on generated bodies": "operator",
+      "ML garment fit prediction": "operator",
+      "Crowd variation (colour, scale, mesh swap)": "operator",
+      "Muscle & fat distribution": "operator"
+    }
+  },
+
+  "animation": {
+    "default": "generator",
+    "overrides": {
+      "Foot placement & terrain adaptation IK": "operator",
+      "Look-at, aim offsets & head tracking": "operator",
+      "Full-body IK & pose solving": "operator",
+      "Climbing, ledge grabs & parkour solving": "operator",
+      "Motion matching & motion graphs": "operator",
+      "Motion in-betweening with transformers": "operator",
+      "Skeleton-aware neural motion retargeting": "operator",
+      "Motion style transfer": "operator",
+      "Ragdolls & active ragdoll control": "operator",
+      "Spring bones, jiggle & follow-through": "operator",
+      "Cloth & cape simulation": "operator",
+      "Soft-body & squash-stretch deformation": "operator",
+      "Muscle & skin sliding simulation": "operator",
+      "Impact reactions & hit responses": "operator",
+      "Breathing, blinking & idle micro-motion": "operator",
+      "Cosserat rod dynamics for cables": "operator",
+      "Yarn-level knitwear simulation": "operator",
+      "Neural real-time hair strand simulation": "operator",
+      "Lip sync from audio (visemes)": "operator",
+      "Emotional expression blending": "operator",
+      "Expression transfer across identities": "operator",
+      "Automatic cinematography & shot selection": "operator"
+    }
+  },
+
+  "vfx": {
+    "default": "generator",
+    "overrides": {
+      "Voronoi fracture & shattering": "operator",
+      "Structural collapse & constraint networks": "operator",
+      "Denting, crumpling & metal deformation": "operator",
+      "Tearing cloth, paper & flesh": "operator",
+      "Procedural weathering & ruination over time": "operator",
+      "FEM/MPM dynamic crack propagation": "operator",
+      "Contact & friction solvers": "operator",
+      "Buoyancy & floating-body simulation": "operator",
+      "Vehicle suspension & tyre dynamics": "operator",
+      "Differentiable physics for control": "operator",
+      "Dissolve, disintegration & teleport effects": "operator"
+    }
+  },
+
+  "film": {
+    "default": "generator",
+    "overrides": {
+      "Automatic rough-cut assembly": "operator",
+      "Trailer assembly from beat templates": "operator",
+      "Live multi-camera switching": "operator",
+      "Subtitle timing & caption alignment": "operator",
+      "Duration-matched automatic dubbing": "operator",
+      "Film stock, grain & lens emulation": "operator",
+      "Camera shake & operator imperfection": "operator",
+      "Motivated lighting rig automation": "operator"
+    }
+  },
+
+  "audio": {
+    "default": "generator",
+    "overrides": {
+      "Plucked strings & bells (Karplus–Strong, modal)": "source",
+      "Neural audio codecs as instruments": "source",
+      "Basslines & arpeggiation": "operator",
+      "Algorithmic orchestration & instrumentation": "operator",
+      "Automatic four-part writing & counterpoint": "operator",
+      "Figured-bass realisation": "operator",
+      "Jazz chord voicing generation": "operator",
+      "Score engraving & notation layout": "operator",
+      "Vertical remixing (stem layering)": "operator",
+      "Horizontal resequencing & transition matrices": "operator",
+      "Beat-synced gameplay & rhythm generation from audio": "operator",
+      "Style transfer & reharmonisation": "operator",
+      "Vocal variation & take randomisation": "operator",
+      "Procedural reverb & impulse responses": "operator",
+      "Geometry-based room acoustics": "operator",
+      "HRTF personalisation from ear geometry": "operator",
+      "Ambisonic scene generation & upmixing": "operator",
+      "Synth patch search & timbre matching": "operator",
+      "Sonification of scientific data": "operator",
+      "Audio description track generation": "operator",
+      "Podcast & radio segment assembly": "operator"
+    }
+  },
+
+  "text": {
+    "default": "generator",
+    "overrides": {
+      "Etymology & language drift over history": "operator",
+      "Slang, dialect & register variation": "operator",
+      "Morphological paradigm generation": "operator",
+      "Scribal glyph drift simulation": "operator",
+      "Paraphrase & back-translation rewriting": "operator",
+      "Rhetorical figure application": "operator",
+      "Constrained-decoding metrical poetry": "operator"
+    }
+  },
+
+  "gameplay": {
+    "default": "generator",
+    "overrides": {
+      "Set & synergy discovery": "operator",
+      "Difficulty grading & solution-length control": "operator",
+      "Dynamic difficulty adjustment": "operator",
+      "Tutorial adaptation to player skill": "operator",
+      "Draft pool generation & bot drafting": "operator"
+    }
+  },
+
+  "education": {
+    "default": "generator",
+    "overrides": {
+      "Worked examples with scaffolding": "operator",
+      "Distractor generation for multiple choice": "operator",
+      "Rubric & feedback generation": "operator",
+      "Reading-level adaptation": "operator",
+      "Worked-example to problem-pair generation": "operator",
+      "Prerequisite graph & learning path solving": "operator",
+      "Adaptive item banks (IRT-calibrated)": "operator"
+    }
+  },
+
+  "shaders": {
+    "default": "generator",
+    "overrides": {
+      "Triplanar & UV-free procedural texturing": "operator",
+      "Stochastic / histogram-preserving tiling": "operator",
+      "Hex-grid stochastic tile blending": "operator",
+      "Runtime wear masks from mesh data": "operator",
+      "Terrain material splatting & auto-materials": "operator",
+      "Wetness, puddles & rain response": "operator",
+      "Snow & sand deformation trails": "operator",
+      "Parallax interior mapping": "operator",
+      "Shell texturing (grass, fur, moss)": "operator",
+      "Non-photorealistic rendering (cel, ink, paint)": "operator",
+      "Halftone, dither & retro-display emulation": "operator",
+      "Procedural film grain, dust & scratches": "operator",
+      "Screen-space distortion & glitch effects": "operator"
+    }
+  },
+
+  "interfaces": {
+    "default": "operator",
+    "overrides": {
+      "Procedural CSS & style generation": "generator",
+      "Realistic filler text & mock content": "generator",
+      "Skeleton & placeholder content": "generator"
+    }
+  },
+
+  "engineering": {
+    "default": "generator",
+    "overrides": {
+      "Topology optimisation (brackets, chassis, frames)": "operator",
+      "Lattice & infill structure generation": "operator",
+      "PCB routing & chip floorplanning": "operator",
+      "3D print toolpaths & non-planar slicing": "operator",
+      "CNC toolpath & pocketing strategies": "operator",
+      "Garment pattern drafting & grading": "operator",
+      "Knitting, crochet & weaving drafts": "operator",
+      "Quilt blocks & cross-stitch charts": "operator",
+      "Woodworking joinery & cut lists": "operator",
+      "Sheet-metal unfolding & bend sequencing": "operator",
+      "Layered contour terrain models": "operator",
+      "Meshes for FEM & CFD simulation": "operator",
+      "Retrosynthesis & reaction route planning": "operator",
+      "Compliant mechanism topology optimisation": "operator",
+      "3D pipe routing through congested space": "operator",
+      "Cable & wiring harness routing": "operator",
+      "Sampling-based motion planning": "operator",
+      "Assembly sequence planning": "operator",
+      "Additive manufacturing support generation": "operator",
+      "Robotic weld path planning": "operator",
+      "Computer-aided process planning (CAPP)": "operator",
+      "Design of experiments generation": "source",
+      "Surrogate & reduced-order model generation": "operator",
+      "Tolerance stack-up simulation": "operator",
+      "Robotic grasp synthesis": "operator"
+    }
+  },
+
+  "biomed": {
+    "default": "generator",
+    "overrides": {
+      "CRISPR guide RNA design": "operator",
+      "PCR primer design": "operator",
+      "Codon optimisation for a host": "operator",
+      "Synthetic genome refactoring": "operator",
+      "Metabolic pathway design": "operator",
+      "Radiotherapy treatment planning": "operator",
+      "Orthodontic aligner staging": "operator",
+      "Surgical guide & drill path design": "operator"
+    }
+  },
+
+  "bizops": {
+    "default": "generator",
+    "overrides": {
+      "Monte Carlo scenario & stress testing": "operator",
+      "Warehouse slotting & pick path generation": "operator",
+      "Inventory policy generation": "operator",
+      "A/B & multivariate design generation": "source"
+    }
+  },
+
+  "events": {
+    "default": "generator",
+    "overrides": {
+      "Projection mapping content & warping": "operator",
+      "LED wall content & pixel mapping": "operator",
+      "Pyrotechnic safety envelope generation": "operator"
+    }
+  },
+
+  "software": {
+    "default": "generator",
+    "overrides": {
+      "Property-based test input generation": "source",
+      "Grammar-based fuzzing": "source",
+      "Diceware & passphrase generation": "source",
+      "Domain randomisation": "operator",
+      "Coverage-guided fuzzing corpora": "operator",
+      "Adversarial example generation": "operator",
+      "Differentially private synthetic data": "operator",
+      "Code generation from schemas & IDLs": "operator",
+      "Scaffolding & template systems": "operator",
+      "Program synthesis from specs or examples": "operator",
+      "Superoptimisation & instruction search": "operator",
+      "API & code documentation generation": "operator",
+      "Static site generation from datasets": "operator",
+      "Neural architecture search": "operator",
+      "Augmentation policy search": "operator"
+    }
+  },
+
+  "_contested": [
+    "primitives/Curl noise — left as source because it is consumed like a noise function, but it is really ∇× applied to a potential field, so arguably an operator.",
+    "primitives/Poisson disk sampling — source, because it makes points from a seed and a density. But 'Circle, rectangle & Apollonian packing' in art2d is a generator, because there the packing image is the artefact. Same machinery, different framing.",
+    "geometry3d/Signed distance fields — called a source, but SDFs are really a representation. This is the strongest argument for a fourth tier.",
+    "levels/maze algorithms — recursive backtracker, Prim's, Wilson's, Eller's are named after methods but produce mazes, which are artefacts. Left as generators. 'Braid, unicursal & weave mazes' is an operator because it modifies an existing maze.",
+    "textures/Full PBR map sets — an output format rather than a source, operator or generator. Fits none of the three cleanly.",
+    "bizops — nearly everything is a solver over supplied data. By the naming test a roster is an artefact, so generator. The thing that actually separates these from a dungeon generator is input class, not tier.",
+    "biomed/patient-specific implants, sockets, crowns, insoles — left as generators, but every one requires a scan. Again: input class, not tier."
+  ]
+}

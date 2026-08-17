@@ -1,0 +1,256 @@
+{
+  "_about": "Which algorithms each implementation actually implements. Many-to-many: an implementation may cover several algorithms across several concepts, and an algorithm may have many implementations.",
+  "_why": "Implementations were originally linked straight to a concept, which skipped the algorithm level entirely. `simplex-noise` does not implement 'noise' — it implements simplex noise. But `scipy` implements Voronoi, Delaunay, Halton, Sobol and B-splines across four concepts, so a single link would have been just as wrong.",
+  "_orphans": "An implementation with no algorithms listed is a signal, not an omission. Either the algorithm it implements has no row yet (bin packing), or it is not a generation library at all and was mis-roled (an oscilloscope, a sample player). Both are recorded in `_orphan_reason`.",
+  "_confidence": "Mappings are from package documentation and knowledge of the libraries, not from reading source. For large libraries the list is the generation-relevant subset, not everything they contain.",
+  "map": {
+    "npm:simplex-noise": [
+      "simplex-noise"
+    ],
+    "npm:fast-simplex-noise": [
+      "simplex-noise"
+    ],
+    "npm:open-simplex-noise": [
+      "simplex-noise"
+    ],
+    "pypi:opensimplex": [
+      "simplex-noise"
+    ],
+    "npm:noisejs": [
+      "perlin-noise",
+      "simplex-noise"
+    ],
+    "pypi:noise": [
+      "perlin-noise",
+      "simplex-noise",
+      "fbm"
+    ],
+    "pypi:perlin-noise": [
+      "perlin-noise",
+      "fbm"
+    ],
+    "pypi:vnoise": [
+      "perlin-noise"
+    ],
+    "npm:fractal-noise": [
+      "fbm"
+    ],
+    "npm:d3-delaunay": [
+      "bowyer-watson",
+      "lloyd-relaxation"
+    ],
+    "npm:delaunator": [
+      "bowyer-watson"
+    ],
+    "npm:voronoi": [
+      "fortune-sweepline"
+    ],
+    "pypi:pyvoro": [
+      "bowyer-watson"
+    ],
+    "pypi:freud-analysis": [
+      "bowyer-watson"
+    ],
+    "pypi:scipy": [
+      "bowyer-watson",
+      "halton-sequence",
+      "sobol-sequence",
+      "bridson-poisson-disk",
+      "de-boor",
+      "simplex-method"
+    ],
+    "npm:poisson-disk-sampling": [
+      "bridson-poisson-disk"
+    ],
+    "npm:fast-2d-poisson-disk-sampling": [
+      "bridson-poisson-disk"
+    ],
+    "pypi:poisson-disc": [
+      "bridson-poisson-disk"
+    ],
+    "npm:seedrandom": [
+      "xorshift"
+    ],
+    "npm:alea": [
+      "alea"
+    ],
+    "npm:pure-rand": [
+      "xorshift",
+      "mersenne-twister"
+    ],
+    "npm:random-js": [
+      "mersenne-twister"
+    ],
+    "pypi:numpy": [
+      "mersenne-twister",
+      "pcg-random"
+    ],
+    "pypi:randomgen": [
+      "pcg-random",
+      "xorshift",
+      "xoshiro",
+      "splitmix",
+      "mersenne-twister"
+    ],
+    "pypi:markovify": [
+      "shannon-ngram"
+    ],
+    "npm:markov-chains": [
+      "shannon-ngram"
+    ],
+    "npm:markovchain": [
+      "shannon-ngram"
+    ],
+    "npm:lindenmayer": [
+      "l-systems"
+    ],
+    "npm:wavefunctioncollapse": [
+      "wave-function-collapse"
+    ],
+    "npm:graphology": [
+      "kruskal",
+      "prim"
+    ],
+    "npm:graphlib": [
+      "prim"
+    ],
+    "npm:ngraph.graph": [],
+    "npm:ngraph.path": [
+      "a-star"
+    ],
+    "pypi:networkx": [
+      "kruskal",
+      "prim",
+      "wilsons-algorithm"
+    ],
+    "pypi:igraph": [
+      "kruskal",
+      "prim"
+    ],
+    "npm:three-ik": [
+      "fabrik"
+    ],
+    "pypi:ikpy": [
+      "ccd",
+      "fabrik"
+    ],
+    "npm:bezier-js": [
+      "de-casteljau"
+    ],
+    "npm:cubic-spline": [
+      "catmull-rom"
+    ],
+    "npm:d3-shape": [
+      "catmull-rom",
+      "de-casteljau"
+    ],
+    "pypi:geomdl": [
+      "de-boor",
+      "de-casteljau"
+    ],
+    "npm:csg": [
+      "bsp-booleans"
+    ],
+    "npm:@jscad/modeling": [
+      "bsp-booleans"
+    ],
+    "npm:three-bvh-csg": [
+      "robust-predicates"
+    ],
+    "pypi:trimesh": [
+      "bsp-booleans",
+      "robust-predicates",
+      "marching-cubes"
+    ],
+    "pypi:cadquery": [
+      "bsp-booleans"
+    ],
+    "pypi:build123d": [
+      "bsp-booleans"
+    ],
+    "npm:z3-solver": [
+      "dpll",
+      "simplex-method"
+    ],
+    "pypi:z3-solver": [
+      "dpll",
+      "simplex-method"
+    ],
+    "npm:logic-solver": [
+      "dpll"
+    ],
+    "pypi:python-constraint": [
+      "ac-3"
+    ],
+    "pypi:ortools": [
+      "cp-sat",
+      "simplex-method",
+      "column-generation"
+    ],
+    "pypi:minizinc": [
+      "cp-sat",
+      "ac-3"
+    ],
+    "npm:javascript-lp-solver": [
+      "simplex-method"
+    ],
+    "pypi:pulp": [
+      "simplex-method"
+    ],
+    "pypi:cvxpy": [
+      "simplex-method"
+    ],
+    "pypi:cma": [
+      "cma-es"
+    ],
+    "pypi:deap": [
+      "genetic-algorithm",
+      "genetic-programming",
+      "cma-es"
+    ],
+    "pypi:pymoo": [
+      "genetic-algorithm",
+      "cma-es",
+      "simulated-annealing"
+    ],
+    "pypi:qdpy": [
+      "map-elites",
+      "novelty-search"
+    ],
+    "npm:genetic-js": [
+      "genetic-algorithm",
+      "simulated-annealing"
+    ],
+    "pypi:torch": [],
+    "pypi:scikit-learn": [
+      "eigenfaces"
+    ],
+    "pypi:diffusers": [
+      "ddpm"
+    ],
+    "npm:tone": [
+      "fm-synthesis",
+      "karplus-strong"
+    ],
+    "pypi:pyo": [
+      "fm-synthesis",
+      "karplus-strong"
+    ],
+    "pypi:librosa": [],
+    "pypi:pedalboard": [],
+    "npm:soundfont-player": [],
+    "npm:potpack": [
+      "maxrects"
+    ],
+    "npm:maxrects-packer": [
+      "maxrects"
+    ]
+  },
+  "_orphan_reason": {
+    "npm:ngraph.graph": "A graph data structure, not an algorithm implementation.",
+    "pypi:torch": "Tensor and autograd substrate. Re-roled to `infrastructure`.",
+    "pypi:librosa": "Audio analysis, not synthesis. Re-roled to `analysis`; kept because onset detection feeds beat-synced generation.",
+    "pypi:pedalboard": "Effects processing. Re-roled to `post-processing`.",
+    "npm:soundfont-player": "Sample playback. Re-roled to `output-surface`."
+  }
+}

@@ -1,0 +1,8 @@
+# Derived — rebuild with `npm run migrate`
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+
+node_modules/
+.DS_Store

@@ -1,0 +1,16 @@
+{
+  "_about": "Languages, runtimes and execution targets. A separate axis from concepts — a property of where an implementation's code can run, not of the idea it implements.",
+  "technologies": [
+    { "id": "js", "name": "JavaScript / TypeScript", "kind": "language", "note": "Runs in the browser and in Node. The default for anything that has to be seen in a page." },
+    { "id": "python", "name": "Python", "kind": "language", "note": "Where the scientific, solver and ML stacks live. Not a browser target." },
+    { "id": "cpp", "name": "C / C++", "kind": "language", "note": "Where the fast reference implementations usually are; reachable from elsewhere via bindings or WASM." },
+    { "id": "rust", "name": "Rust", "kind": "language", "note": "Increasingly the source language for WASM-targeted generation code." },
+    { "id": "csharp", "name": "C#", "kind": "language", "note": "Unity's language; a large share of shipped game PCG is written here." },
+    { "id": "glsl", "name": "GLSL / WGSL", "kind": "language", "note": "Shader languages. Per-pixel generation, no CPU readback." },
+    { "id": "node", "name": "Node", "kind": "runtime", "note": "Server-side JavaScript. No GPU or DOM without extra work." },
+    { "id": "browser", "name": "Browser", "kind": "runtime", "note": "Canvas, WebGL, WebGPU, Web Audio. The only runtime that can both generate and display." },
+    { "id": "wasm", "name": "WebAssembly", "kind": "runtime", "note": "How C++/Rust implementations reach the browser and Node." },
+    { "id": "gpu", "name": "GPU", "kind": "platform", "note": "Massively parallel, hard to read back from, and invisible to gameplay logic on the CPU." },
+    { "id": "native", "name": "Native / desktop", "kind": "platform", "note": "Where offline simulation and baking happen when the budget is minutes rather than milliseconds." }
+  ]
+}

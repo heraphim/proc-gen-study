@@ -1,0 +1,68 @@
+{
+  "_about": "Splits the 28 concept tags into four kinds. Applied to tag.facet by scripts/migrate.js.",
+  "_tests": {
+    "irreducible": "Cannot be decomposed into other concepts in the catalogue.",
+    "widespread": "Many unrelated domains point at it.",
+    "importable": "You can name the concrete thing you would import."
+  },
+  "_kinds": {
+    "block": "Passes all three tests. Substrate — everything else is built out of these.",
+    "representation": "A format for holding structure, not a way of making it. A block makes; a representation stores.",
+    "category": "Fails the importable test. A bag containing blocks that were never named separately.",
+    "deployment": "Where or how something runs. Not a concept at all."
+  },
+  "_note": "The importable test is the one that does the work. `sim` is used in 21 of 23 domains — wider than anything but `rand` — and still fails, because there is no simulator you can import. That is why it became a dumping ground.",
+
+  "facets": {
+    "rand": "block",
+    "noise": "block",
+    "vor": "block",
+    "samp": "block",
+    "tile": "block",
+    "graph": "block",
+    "fractal": "block",
+    "ca": "block",
+    "markov": "block",
+    "lsys": "block",
+    "rd": "block",
+    "wfc": "block",
+    "ero": "block",
+    "ik": "block",
+    "dsp": "block",
+
+    "sdf": "representation",
+    "csg": "representation",
+    "spline": "representation",
+    "part": "representation",
+    "morph": "representation",
+
+    "sim": "category",
+    "cons": "category",
+    "ml": "category",
+    "evo": "category",
+    "agent": "category",
+    "gram": "category",
+
+    "shader": "deployment",
+    "kit": "deployment"
+  },
+
+  "_contains": {
+    "_about": "Blocks hiding inside each category that the catalogue never named separately. These are candidates for the algorithms layer, not records that exist yet.",
+    "sim": ["Eulerian fluid (Navier–Stokes)", "SPH", "FLIP", "MPM", "position-based dynamics", "FEM", "rigid-body contact solvers", "discrete-event simulation", "Lotka–Volterra"],
+    "cons": ["SAT", "CP-SAT", "answer set programming", "MIP / LP", "arc-consistency propagation", "backtracking search", "column generation"],
+    "ml": ["GAN", "VAE", "diffusion", "transformer", "PCA", "k-means", "NeRF", "Gaussian splatting", "reinforcement learning"],
+    "evo": ["genetic algorithm", "novelty search", "MAP-Elites", "CMA-ES", "simulated annealing", "genetic programming"],
+    "agent": ["boids", "diffusion-limited aggregation", "physarum", "space colonisation", "social force model", "random walkers"],
+    "gram": ["CGA split grammars", "Tracery", "graph grammars", "parametric grammars", "context-sensitive rewriting"]
+  },
+
+  "_contested": [
+    "dsp — called a block, but digital signal processing is really a category containing Karplus–Strong, FM, granular and modal synthesis. Those are the actual blocks. Same shape as `sim`, just smaller, so it may belong with the categories.",
+    "ero — three methods (hydraulic, thermal, aeolian) under one label. A small category rather than a block, on the same argument as `dsp`.",
+    "part — BSP, quadtrees and k-d trees are data structures, which argues representation. But recursive subdivision is an operation, which argues block. Filed as representation; could go either way.",
+    "gram — filed as a category because it spans CGA, Tracery and graph grammars, yet `lsys` is separately a block. That is deliberate: `gram` is the umbrella, `lsys` is one named formalism inside it. It does mean the two overlap.",
+    "graph — 'graph algorithms' is arguably a category too (MST, shortest path, max-flow, matching are separate blocks). Kept as a block because the underlying structure is one thing and the algorithms over it are tightly related.",
+    "tile — spans periodic tilings, aperiodic tilings, wallpaper groups and phyllotaxis. Defensible as a category."
+  ]
+}

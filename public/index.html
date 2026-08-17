@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Procedural Generation Catalogue</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='13' font-size='13'>◈</text></svg>">
+</head>
+<body>
+
+<header class="topbar">
+  <h1>Procedural Generation Catalogue</h1>
+  <nav class="tabs" id="tabs">
+    <button data-view="overview" class="active">Overview</button>
+    <button data-view="blocks">Basic blocks</button>
+    <button data-view="algorithms">Algorithms</button>
+    <button data-view="implementations">Implementations</button>
+    <button data-view="catalogue">Catalogue</button>
+    <button data-view="definitions">Definitions</button>
+    <button data-view="cases">Case studies</button>
+    <button data-view="pitfalls">Pitfalls</button>
+    <button data-view="refs">Tools &amp; reading</button>
+    <button data-view="sql">SQL</button>
+  </nav>
+  <span class="counts" id="headline"></span>
+</header>
+
+<main>
+  <!-- Overview -->
+  <section class="view active" id="view-overview">
+    <div class="content wide prose">
+
+      <div class="hero">
+        <h2>Procedural generation</h2>
+        <p class="hero-def">
+          Content described by a <em>process</em> rather than stored as data. You ship the rule
+          that makes the thing, not the thing.
+        </p>
+        <p class="hero-sub" id="hero-stats"></p>
+      </div>
+
+      <h2 class="def-h">What it actually buys you</h2>
+      <p>Five reasons, and they are not interchangeable — most projects want exactly one, and
+      picking the wrong one is how generators end up costing more than the assets they replaced.</p>
+
+      <div class="reasons">
+        <div class="reason">
+          <h3>Volume</h3>
+          <p>More content than anyone could author. 18 quintillion planets. A million guns. This is
+          the reason people quote, and the one that most often disappoints — see the oatmeal
+          problem in Pitfalls.</p>
+        </div>
+        <div class="reason">
+          <h3>Variation</h3>
+          <p>The same thing, never identical twice. Footstep sounds that don't repeat, crowds where
+          no two faces match, wear patterns unique to each object.</p>
+        </div>
+        <div class="reason">
+          <h3>Adaptation</h3>
+          <p>Content that responds at runtime to something you couldn't know in advance — the
+          player's skill, the shape of the data, the time of day, the size of the screen.</p>
+        </div>
+        <div class="reason">
+          <h3>Compression</h3>
+          <p>A seed is smaller than a world. Elite's universe was six bytes. A 96&nbsp;KB executable
+          holds a whole first-person shooter. Bandwidth and memory, not disk.</p>
+        </div>
+        <div class="reason">
+          <h3>Search</h3>
+          <p>Exploring a design space no human would walk through by hand — evolved antennas,
+          topology-optimised brackets, protein backbones, drug candidates. Here the generator isn't
+          saving labour, it's finding things people wouldn't.</p>
+        </div>
+      </div>
+
+      <h2 class="def-h">Where it's used</h2>
+      <p>The word changes by industry, which is why the field looks smaller than it is. Games call
+      it procedural generation. Engineering calls it <em>generative design</em>. Operations research
+      calls it <em>optimisation</em>. Statistics calls it <em>simulation</em>. Biology calls it
+      <em>in silico design</em>. They are substantially the same activity: declare constraints and
+      a process, let a machine emit an artefact.</p>
+      <div id="domain-spread" class="domain-spread"></div>
+
+      <h2 class="def-h">A short history</h2>
+      <p>Dates and citations below are verified. The through-line is that almost every technique
+      arrived from outside entertainment — biology, mathematics, architecture — and was borrowed
+      later.</p>
+      <ol class="timeline" id="timeline"></ol>
+
+      <h2 class="def-h">How this project structures it</h2>
+      <p>The catalogue arrived as a flat list of 841 things, tagged with 28 labels. That structure
+      mixed several different kinds of object, which made it impossible to say what any entry
+      actually <em>was</em>. What follows is the model being rebuilt in its place.</p>
+
+      <div class="model">
+        <div class="model-row">
+          <div class="model-name">Concepts</div>
+          <div class="model-body">
+            <p>Ideas about what can be made, at every grain. <strong>Noise</strong> is a coarse
+            concept; <strong>cobblestone paving</strong> is a fine one. They differ in grain, not in
+            kind, so they live in one table connected by <code>uses</code> edges.</p>
+          </div>
+        </div>
+        <div class="model-row">
+          <div class="model-name">— building blocks</div>
+          <div class="model-body">
+            <p>A concept that is <em>irreducible</em>, <em>used across unrelated domains</em>, and
+            <em>has something concrete you could import</em>. Randomness, Voronoi, noise, cellular
+            automata. Roughly fifteen of them. Everything else is built out of these.</p>
+            <p class="test">Test: simulation is used in 21 of 23 domains, more than anything except
+            randomness — and it fails, because there is no "simulator" you can import. It's a
+            category, not a block. That is exactly why it became a dumping ground.</p>
+          </div>
+        </div>
+        <div class="model-row">
+          <div class="model-name">Algorithms</div>
+          <div class="model-body">
+            <p>Named, published, pinned-down methods. Perlin noise. Fortune's sweepline. FABRIK.
+            Knuth–Plass. <strong>This is the only level that has papers</strong>, which is why the
+            catalogue has no citations today — it never had this layer. Some concepts have an
+            algorithm; many, like cobblestone paving, have none of their own and only wire others
+            together.</p>
+          </div>
+        </div>
+        <div class="model-row">
+          <div class="model-name">Implementations</div>
+          <div class="model-body">
+            <p>Runnable code implementing an algorithm. Packages, libraries, solvers. Separate from
+            authoring applications like Houdini, which a human opens rather than a program calls.</p>
+          </div>
+        </div>
+        <div class="model-row">
+          <div class="model-name">Technologies</div>
+          <div class="model-body">
+            <p>Languages and runtimes. A separate axis entirely — JavaScript, Python, Node, the GPU.
+            Not a property of a concept, a property of where its code can execute.</p>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="sub-h">Cutting across all of it: the three layers</h3>
+      <p>Independent of grain, every concept answers one question — does anything go in?</p>
+      <div id="layer-summary" class="layer-summary"></div>
+      <p class="aside">Explained properly, with a worked example, in
+        <button class="entry-ref" data-goto="definitions">Definitions</button>.</p>
+
+      <h3 class="sub-h">What is not done yet</h3>
+      <p>Stated plainly so the map doesn't look more finished than it is. The layer classification
+      is complete. The algorithm, implementation and technology levels do not exist yet — they are
+      the rebuild. Nine per-entry fields are defined and empty. And the catalogue carries known
+      errors, listed in the README, left in place deliberately rather than quietly patched.</p>
+
+    </div>
+  </section>
+
+  <!-- Catalogue -->
+  <section class="view" id="view-catalogue">
+    <aside class="sidebar">
+      <div class="field">
+        <input type="search" id="search" placeholder="Search 841 entries…" autocomplete="off" spellcheck="false">
+      </div>
+
+      <div class="facet">
+        <h2>Layer <button class="clear" data-clear="tier">clear</button></h2>
+        <ul id="tier-list" class="pills"></ul>
+        <p class="hint" id="tier-hint"></p>
+      </div>
+
+      <div class="facet">
+        <h2>Domains <button class="clear" data-clear="domain">clear</button></h2>
+        <ul id="domain-list" class="pills"></ul>
+      </div>
+
+      <div class="facet">
+        <h2>Tags <button class="clear" data-clear="tag">clear</button></h2>
+        <p class="hint">Multiple tags = entries matching <em>all</em> of them.</p>
+        <ul id="tag-list" class="pills"></ul>
+      </div>
+
+      <div class="facet">
+        <h2>Classification</h2>
+        <p class="hint" id="classified-note"></p>
+      </div>
+
+      <div class="facet">
+        <h2>Contested calls</h2>
+        <p class="hint">Judgement calls worth arguing with.</p>
+        <ul id="contested" class="notes"></ul>
+      </div>
+    </aside>
+
+    <div class="content">
+      <div class="resultbar">
+        <span id="result-count"></span>
+        <span class="filters" id="active-filters"></span>
+      </div>
+      <div id="entries"></div>
+    </div>
+  </section>
+
+  <!-- Definitions -->
+  <section class="view" id="view-definitions">
+    <div class="content wide prose">
+
+      <h2 class="def-h">The three layers</h2>
+      <p class="lede">
+        Every entry is classified as a source, an operator or a generator. The split exists because
+        the reusable machinery and the named things people ask for are not the same kind of object,
+        and the catalogue originally filed them side by side as though they were.
+      </p>
+
+      <div class="q-list">
+        <div class="q">
+          <div class="q-num">1</div>
+          <div>
+            <h3>Does anything go in?</h3>
+            <p>If no — it's a <span class="tier-badge t-source">source</span>. You hand it a seed and
+            some settings; it hands you structure. <code>perlin(x, y, seed)</code> needs nothing that
+            exists in the world. Neither does a PRNG or Poisson disk sampling.</p>
+            <p class="stat" data-stat="source"></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-num">2</div>
+          <div>
+            <h3>Something goes in — can you say what comes out without knowing what it's for?</h3>
+            <p>If yes — it's an <span class="tier-badge t-operator">operator</span>. Hydraulic erosion
+            <em>takes a heightfield, returns a heightfield with valleys cut into it.</em> You can
+            describe it completely without using the word "terrain" — which is why the same code also
+            weathers a texture and ages a metal surface. It doesn't know what the heightfield means.</p>
+            <p class="stat" data-stat="operator"></p>
+          </div>
+        </div>
+
+        <div class="q">
+          <div class="q-num">3</div>
+          <div>
+            <h3>Can you only explain it by naming the result?</h3>
+            <p>Then it's a <span class="tier-badge t-generator">generator</span>. "A fantasy world map."
+            "A staff roster." "A castle." There is no description that isn't just saying what it is.</p>
+            <p class="stat" data-stat="generator"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>A generator isn't a different kind of code — it's a wiring diagram over the other two.</strong>
+        That's why the generator layer is thin and the operator layer is fat.
+      </div>
+
+      <h2 class="def-h">Worked example: 3D terrain</h2>
+      <p>Every step below is a source or an operator that already exists in the catalogue. The
+      generator is the choice of which ones, in what order, with what parameters.</p>
+      <div id="pipeline" class="pipeline"></div>
+
+      <h2 class="def-h">The same maths lands in different layers</h2>
+      <p>This is the part that trips people up. The layer is not a property of the algorithm — it's a
+      property of how the entry is <em>written</em>. All three of these are Voronoi:</p>
+      <div id="same-maths" class="example-table"></div>
+      <p class="aside">"Voronoi diagrams" names an operation. "Cobblestone paving" names a thing you'd
+      point at. Same code, different layer, because the entry is doing a different job.</p>
+
+      <h2 class="def-h">Why separate them</h2>
+      <p>Operators get reused across domains; generators don't. Written once, hydraulic erosion serves
+      terrain, textures, weathering and ruins. Without the separation you write it several times
+      without noticing — which is roughly what the catalogue's structure encourages, since erosion
+      currently appears scattered across three domains as though it were three different things.</p>
+      <div id="reuse-table" class="example-table"></div>
+
+      <h2 class="def-h">Judgement calls worth arguing with</h2>
+      <p>These are mine, not facts. Each one could reasonably go the other way.</p>
+      <ul id="contested-full" class="contested-full"></ul>
+
+      <h2 class="def-h">Fields not yet filled</h2>
+      <p>Columns that exist in the database and are still empty. They're listed here so the shape of
+      what's coming is visible.</p>
+      <div id="pending-fields" class="field-defs"></div>
+
+    </div>
+  </section>
+
+  <!-- Basic blocks -->
+  <section class="view" id="view-blocks">
+    <div class="content wide prose">
+
+      <div class="hero">
+        <h2>Basic blocks</h2>
+        <p class="hero-def">
+          The concepts everything else is built out of. Randomness, noise, Voronoi, cellular
+          automata — irreducible, used everywhere, and each one names something you could
+          actually import.
+        </p>
+        <p class="hero-sub" id="blocks-stats"></p>
+      </div>
+
+      <h2 class="def-h">Three tests</h2>
+      <div id="block-tests" class="tests"></div>
+      <div class="callout" id="block-note"></div>
+
+      <div class="page-toolbar" id="toolbar-blocks"></div>
+      <div id="facet-groups"></div>
+
+      <h2 class="def-h">Judgement calls worth arguing with</h2>
+      <ul id="facet-contested" class="contested-full"></ul>
+
+    </div>
+  </section>
+
+  <!-- Algorithms -->
+  <section class="view" id="view-algorithms">
+    <div class="content wide prose">
+      <div class="hero">
+        <h2>Algorithms</h2>
+        <p class="hero-def">
+          Named, published methods. The only level of the model that has papers — which is why the
+          catalogue had no citations before this table existed.
+        </p>
+        <p class="hero-sub" id="algo-stats"></p>
+      </div>
+
+      <div class="callout" id="algo-rule"></div>
+      <div class="page-toolbar" id="toolbar-algorithms"></div>
+      <div id="algo-list" class="algo-list"></div>
+
+      <h2 class="def-h">Candidates</h2>
+      <p>Names pulled out of the catalogue's description prose and out of the category concepts.
+      Each needs its citation checked before it gets a row — so none of them are in the database,
+      and no query over <code>algorithm</code> will ever return something unsourced. This is the
+      queue, not a claim.</p>
+      <div id="algo-candidates" class="candidates"></div>
+    </div>
+  </section>
+
+  <!-- Implementations -->
+  <section class="view" id="view-implementations">
+    <div class="content wide prose">
+      <div class="hero">
+        <h2>Implementations</h2>
+        <p class="hero-def">
+          Runnable code, grouped by the concept it serves, with the technologies it runs on.
+          Every row was resolved against its package registry before being written down.
+        </p>
+        <p class="hero-sub" id="impl-stats"></p>
+      </div>
+
+      <div class="callout" id="impl-method"></div>
+      <div class="warn-note" id="impl-caveat"></div>
+
+      <div class="page-toolbar" id="toolbar-implementations"></div>
+      <div id="impl-groups"></div>
+
+      <h2 class="def-h">Technologies</h2>
+      <p>A separate axis. Not a property of an idea — a property of where its code can run.</p>
+      <div id="tech-list" class="tech-list"></div>
+    </div>
+  </section>
+
+  <!-- Case studies -->
+  <section class="view" id="view-cases">
+    <div class="content wide">
+      <p class="lede">Shipped examples.</p>
+      <div class="page-toolbar" id="toolbar-cases"></div>
+      <div id="cases"></div>
+    </div>
+  </section>
+
+  <!-- Pitfalls -->
+  <section class="view" id="view-pitfalls">
+    <div class="content wide">
+      <div class="page-toolbar" id="toolbar-pitfalls"></div>
+      <div id="pitfalls"></div>
+    </div>
+  </section>
+
+  <!-- Tools & reading -->
+  <section class="view" id="view-refs">
+    <div class="content wide">
+      <div class="page-toolbar" id="toolbar-refs"></div>
+      <div id="refs-list"></div>
+    </div>
+  </section>
+
+  <!-- SQL -->
+  <section class="view" id="view-sql">
+    <div class="content wide">
+      <p class="lede">Read-only. <code>SELECT</code> and <code>WITH</code> only, one statement at a time.</p>
+      <textarea id="sql-input" spellcheck="false" rows="6"></textarea>
+      <div class="sql-actions">
+        <button id="sql-run">Run</button>
+        <select id="sql-examples">
+          <option value="">Load an example…</option>
+        </select>
+      </div>
+      <div id="sql-result"></div>
+      <details class="schema">
+        <summary>Schema</summary>
+        <pre id="schema-text"></pre>
+      </details>
+    </div>
+  </section>
+</main>
+
+<script type="module" src="/app.js"></script>
+</body>
+</html>
