@@ -2582,6 +2582,18 @@
       "url": "https://arxiv.org/abs/2305.17743"
     }
   ],
-  "_candidates_about": "Named in the catalogue's description prose or hiding inside the category concepts. Each needs its citation checked before it gets a row. Roughly 2 lookups each.",
-  "candidates": {}
+  "_candidates_about": "Named in the catalogue's description prose or hiding inside the category concepts. Each needs its citation checked before it gets a row. Roughly 2 lookups each. The queue was empty after the first pass and is not empty now, which is the expected consequence of widening the concept vocabulary — every new concept brings its own literature.",
+  "candidates": {
+    "cons": ["Reed–Solomon error correction", "ISO/IEC 18004 QR symbology", "arc consistency AC-2001/3.1", "lazy clause generation", "Dantzig–Wolfe decomposition"],
+    "colour": ["CAM16-UCS", "APCA contrast (WCAG 3 candidate)", "Chromatic adaptation (CAT16)", "ICtCp", "k-means palette extraction in CIELAB"],
+    "mesh": ["Approximating Catmull–Clark limit positions", "ARAP parameterisation", "xatlas chart packing", "Bounded-distortion mapping", "Half-edge collapse validity tests"],
+    "filter": ["Guided filter", "Bilateral grid", "Kuwahara filter", "Anisotropic diffusion (Perona–Malik)", "Recursive Gaussian (Deriche / Young–van Vliet)"],
+    "hydro": ["Stream-power incision model", "Barnes' parallel priority-flood", "Shreve stream magnitude", "Meander migration (Howard–Knutson)", "Braided channel morphodynamics"],
+    "texsyn": ["Wei–Levoy neighbourhood synthesis", "Lapped textures", "Image analogies", "Self-tuning texture optimisation", "Neural texture synthesis (Gatys)"],
+    "subdiv": ["Modified butterfly subdivision", "Semi-sharp crease evaluation", "Feature-adaptive GPU subdivision", "Displaced subdivision surfaces"],
+    "topopt": ["Robust formulation with erosion/dilation projections", "Heaviside projection filtering", "MMA (method of moving asymptotes)", "Density-based fluid topology optimisation"],
+    "field": ["Sparse voxel octrees", "Brickmaps / VDB sparse grids", "Signed distance field baking with narrow bands", "Z-order / Morton curve indexing"],
+    "sim": ["Vorticity confinement", "APIC transfer", "Shallow-water equations", "Discrete element method"],
+    "ml": ["StyleGAN adaptive instance normalisation", "Consistency models", "ControlNet conditioning", "Flow matching"]
+  }
 }

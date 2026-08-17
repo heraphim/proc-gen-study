@@ -1141,6 +1141,7 @@ const algorithms = data.algorithms ?? [];
 
 $('#algo-stats').textContent =
   `${algorithms.length} with checked citations · `
+  + `${algorithms.filter(a => (a.code ?? []).length).length} with working code inside the card · `
   + `${Object.values(algoMeta.candidates ?? {}).reduce((n, a) => n + a.length, 0)} candidates awaiting one`;
 $('#algo-rule').textContent = algoMeta.rule ?? '';
 
@@ -1251,6 +1252,11 @@ filterablePage({
       key: 'impl', label: 'Implementations', exclusive: true,
       options: [{ id: 'yes', label: 'has one' }, { id: 'no', label: 'none' }],
       match: (a, id) => (id === 'yes') === ((implByAlgorithm[a.id] ?? []).length > 0),
+    },
+    {
+      key: 'code', label: 'Code', exclusive: true,
+      options: [{ id: 'yes', label: 'in the card' }, { id: 'no', label: 'not yet' }],
+      match: (a, id) => (id === 'yes') === ((a.code ?? []).length > 0),
     },
   ],
   groupBy: a => a.concept_tag ?? '—',
