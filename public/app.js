@@ -29,8 +29,15 @@ const hashString = str => {
   return h;
 };
 
+/* `subGroupBy` returns an *array* of keys, so an item can appear under more than one — which
+   is the point on the implementations page, where scipy implements six algorithms and the
+   question "what implements Delaunay?" should be answerable by looking in one place.
+   An item with no keys lands in this bucket, which sorts last. */
+const NO_SUBGROUP = '(no algorithm)';
+
 function filterablePage({
   toolbar, host, items, searchIn, filters = [], groupBy, groupHeader,
+  subGroupBy, subGroupHeader, subGroupOrder,
   renderItem, noun, groupOrder, emptyText = 'Nothing matches those filters.',
 }) {
   const st = { q: '', active: new Map(filters.map(f => [f.key, new Set()])), collapsed: new Set(), cardsCollapsed: false };
@@ -198,10 +205,46 @@ function filterablePage({
       }
 
       const body = el('div', 'grp-body');
-      for (const it of rows) {
+      const place = it => {
         const node = renderItem(it);
         if (st.cardsCollapsed && node.querySelector?.('.card-body')) node.classList.add('collapsed');
-        body.append(node);
+        return node;
+      };
+
+      if (subGroupBy) {
+        const subs = new Map();
+        for (const it of rows) {
+          const keys = subGroupBy(it);
+          for (const sk of keys.length ? keys : [NO_SUBGROUP]) {
+            if (!subs.has(sk)) subs.set(sk, []);
+            subs.get(sk).push(it);
+          }
+        }
+        const subKeys = [...subs.keys()];
+        subKeys.sort((a, b) => {
+          if (a === NO_SUBGROUP) return 1;                 // the orphan bucket goes last
+          if (b === NO_SUBGROUP) return -1;
+          return subGroupOrder ? subGroupOrder(a, b, subs) : a.localeCompare(b);
+        });
+        for (const sk of subKeys) {
+          const sub = el('div', 'subgrp');
+          const skey = `${key}//${sk}`;
+          if (st.collapsed.has(skey)) sub.classList.add('collapsed');
+          const shead = el('button', 'subgrp-head');
+          shead.append(el('span', 'grp-chevron', '▾'));
+          shead.append(subGroupHeader(sk, subs.get(sk)));
+          shead.append(el('span', 'grp-n', String(subs.get(sk).length)));
+          shead.addEventListener('click', () => {
+            st.collapsed.has(skey) ? st.collapsed.delete(skey) : st.collapsed.add(skey);
+            sub.classList.toggle('collapsed');
+          });
+          const sbody = el('div', 'subgrp-body');
+          for (const it of subs.get(sk)) sbody.append(place(it));
+          sub.append(shead, sbody);
+          body.append(sub);
+        }
+      } else {
+        for (const it of rows) body.append(place(it));
       }
       group.append(body);
       listHost.append(group);
@@ -332,6 +375,7 @@ const implByAlgorithm = {};
 for (const im of data.implementations ?? []) {
   for (const aid of im.algorithms ?? []) (implByAlgorithm[aid] ??= []).push(im);
 }
+const algoById = Object.fromEntries((data.algorithms ?? []).map(a => [a.id, a]));
 const algosByConcept = {};
 for (const a of data.algorithms ?? []) (algosByConcept[a.concept_tag] ??= []).push(a);
 const implsByConcept = {};
@@ -1290,12 +1334,16 @@ const implMeta = data.implMeta ?? {};
 const implementations = data.implementations ?? [];
 const techFilter = new Set();
 
+const coveredAlgos = new Set(implementations.flatMap(i => i.algorithms ?? []));
 $('#impl-stats').textContent =
   `${implementations.length} registry-checked across `
-  + `${new Set(implementations.map(i => i.concept_tag)).size} concepts · `
-  + `${technologies.length} technologies`;
+  + `${new Set(implementations.map(i => i.concept_tag)).size} concepts and `
+  + `${new Set(implementations.map(i => i.ecosystem)).size} registries · `
+  + `covering ${coveredAlgos.size} of ${algorithms.length} algorithms · `
+  + `${new Set(implementations.flatMap(i => i.technologies)).size} technologies`;
 $('#impl-method').textContent = implMeta.method ?? '';
 $('#impl-caveat').textContent = implMeta.caveat ?? '';
+if (implMeta.resolved) $('#impl-resolved').textContent = implMeta.resolved;
 
 function implRow(im) {
   const body = el('div');
@@ -1317,7 +1365,7 @@ function implRow(im) {
     const wrap = el('div', 'algo-cite'); wrap.append(link); body.append(wrap);
   }
 
-  const algos = (im.algorithms ?? []).map(id => algorithms.find(x => x.id === id)).filter(Boolean);
+  const algos = (im.algorithms ?? []).map(id => algoById[id]).filter(Boolean);
   const tag = tagById[im.concept_tag];
 
   return entityCard({
@@ -1369,17 +1417,47 @@ filterablePage({
       match: (i, id) => (id === 'yes') === ((i.algorithms ?? []).length > 0),
     },
   ],
+  /* Two levels: the concept a package serves, then the specific algorithm it implements.
+     A package with several algorithms appears under each of them, which is what makes the
+     inner heading answer "what implements Delaunay?" rather than "what is about Voronoi?". */
   groupBy: i => i.concept_tag,
-  groupHeader: (concept) => {
+  groupHeader: (concept, rows) => {
     const box = el('span', 'grp-title');
     box.append(el('span', 'grp-name', tagById[concept]?.name ?? concept));
     box.append(el('span', 'id', concept));
     if (tagById[concept]?.facet) {
       box.append(el('span', `facet-chip f-${tagById[concept].facet}`, tagById[concept].facet));
     }
+    const algos = new Set(rows.flatMap(r => r.algorithms ?? []));
+    if (algos.size) box.append(el('span', 'grp-note', `${algos.size} algorithm${algos.size === 1 ? '' : 's'} covered`));
     return box;
   },
   groupOrder: (a, b, groups) => groups.get(b).length - groups.get(a).length || a.localeCompare(b),
+  subGroupBy: i => (i.algorithms ?? []),
+  subGroupHeader: (algoId, rows) => {
+    const box = el('span', 'grp-title');
+    if (algoId === NO_SUBGROUP) {
+      box.append(el('span', 'subgrp-name orphan', 'No algorithm recorded'));
+      box.append(el('span', 'grp-note',
+        implMeta.orphans ?? 'Either the algorithm has no row yet, or this is not a generation library.'));
+      return box;
+    }
+    const a = algoById[algoId];
+    box.append(el('span', 'subgrp-name', a?.name ?? algoId));
+    if (a?.year) box.append(el('span', 'subgrp-year', String(a.year)));
+    if (a?.tier) box.append(el('span', `tier-badge t-${a.tier}`, a.tier));
+    const techs = new Set(rows.flatMap(r => r.technologies ?? []));
+    if (techs.size) {
+      box.append(el('span', 'grp-note',
+        [...techs].map(t => techById[t]?.name?.split(' /')[0] ?? t).join(' · ')));
+    }
+    return box;
+  },
+  // Most-implemented algorithm first inside each concept; then oldest first, since the
+  // order things were invented in is usually the order they build on each other.
+  subGroupOrder: (a, b, subs) => subs.get(b).length - subs.get(a).length
+    || (algoById[a]?.year ?? 0) - (algoById[b]?.year ?? 0)
+    || a.localeCompare(b),
   renderItem: implRow,
 });
 

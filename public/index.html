@@ -345,14 +345,22 @@
       <div class="hero">
         <h2>Implementations</h2>
         <p class="hero-def">
-          Runnable code, grouped by the concept it serves, with the technologies it runs on.
-          Every row was resolved against its package registry before being written down.
+          Runnable code, grouped by concept and then by the specific algorithm it implements,
+          with the technologies it runs on. Every row was resolved against its registry before
+          being written down.
         </p>
         <p class="hero-sub" id="impl-stats"></p>
+        <p class="hero-sub">
+          A package appears under every algorithm it implements, so the card count is larger
+          than the package count. That is deliberate: <code>scipy</code> under Delaunay,
+          Halton, Sobol, Poisson disk, B-splines and simplex is six answers to six different
+          questions, and one row under &ldquo;Voronoi&rdquo; answered none of them.
+        </p>
       </div>
 
       <div class="callout" id="impl-method"></div>
       <div class="warn-note" id="impl-caveat"></div>
+      <div class="callout" id="impl-resolved"></div>
 
       <div class="page-toolbar" id="toolbar-implementations"></div>
       <div id="impl-groups"></div>

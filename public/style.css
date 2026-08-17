@@ -966,6 +966,25 @@ td.null { color: var(--ink-3); font-style: italic; }
 .grp-n { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
 .grp-body { display: grid; gap: 10px; }
 
+/* Second level, on the implementations page: concept, then the algorithm inside it. Indented
+   and rule-marked rather than boxed, so twenty of them in a row still scan as one list. */
+.subgrp { border-left: 2px solid var(--line); padding-left: 12px; }
+.subgrp + .subgrp { margin-top: 4px; }
+.subgrp-head {
+  display: flex; align-items: baseline; gap: 8px; width: 100%;
+  background: none; border: 0; font: inherit; text-align: left; cursor: pointer;
+  padding: 5px 2px; color: var(--ink-2);
+}
+.subgrp-head:hover { color: var(--ink); }
+.subgrp-head:hover .subgrp-name { color: var(--accent); }
+.subgrp.collapsed .grp-chevron { transform: rotate(-90deg); }
+.subgrp.collapsed .subgrp-body { display: none; }
+.subgrp-name { font-size: 12.5px; font-weight: 600; color: var(--ink); }
+.subgrp-name.orphan { color: var(--warn); font-weight: 550; }
+.subgrp-year { font-family: var(--mono); font-size: 10.5px; color: var(--accent); }
+.subgrp-body { display: grid; gap: 8px; padding: 2px 0 10px; }
+.subgrp .grp-note { font-size: 10.5px; }
+
 /* ---------- algorithm implementation chips ---------- */
 
 .algo-impls { margin-top: 9px; display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
