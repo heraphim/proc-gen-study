@@ -1,8 +1,8 @@
 {
   "_about": "Named, published methods. The only level of the model that has papers — which is why the catalogue had no citations before this table existed.",
   "_rule": "An algorithm appears here only if its source was checked. `source_type` records what kind of source that is: paper (peer-reviewed), article (written up but not published academically), reference-implementation (the code is the specification), or folklore (real, widely used, no canonical origin). The rule was originally paper-only; it was widened because that excluded genuinely important techniques — domain warping, pity timers, falling-sand — and so misrepresented practice as more academic than it is. Filter on source_type to get the strict set back.",
-  "_coverage": "125 algorithms, every one with a checked source and a mechanism description. A*, MaxRects and Alea were added after the implementation join exposed them as orphans — implementations existed with no algorithm to point at, which is the layer catching its own gaps.",
-  "_queue_note": "Queue empty. Adding a concept or reading further into any literature will refill it.",
+  "_coverage": "184 algorithms, every one with a checked source, a mechanism description and a plain-language explanation. 125 came from the first pass; 59 were added afterwards, 38 of them for the eight concepts the vocabulary had been missing and 21 as gaps in concepts that already existed. A*, MaxRects and Alea were added earlier still, after the implementation join exposed them as orphans — implementations existed with no algorithm to point at, which is the layer catching its own gaps. Every concept now has at least one algorithm except `kit` and `shader`, which are deployment rather than concepts and correctly have none.",
+  "_queue_note": "Refilled and drained once. Adding the eight new concepts refilled it immediately, which is what the previous note predicted. What is still open is recorded in `candidates`; the largest known gap is coding theory — Reed–Solomon and the QR symbology — which five catalogue entries depend on and which no current concept covers.",
   "_open_question": "Resolved: the citation rule now admits non-academic sources, labelled by source_type.",
   "algorithms": [
     {
@@ -46,6 +46,20 @@
       "description": "Joining a straight line directly to a circular arc creates a discontinuity in curvature — zero on one side, constant on the other. A vehicle following it would need to snap the steering wheel instantly, which is why real roads and railways never do this. The clothoid has curvature proportional to distance travelled, so it interpolates smoothly from zero to the arc's curvature and the driver turns the wheel at a constant rate. Its coordinates are Fresnel integrals with no elementary closed form, so it is evaluated by series or lookup. It is also the correct shape for rollercoaster transitions, for the same comfort reason. Getting this right is most of what makes generated road networks read as engineered rather than drawn — the catalogue's own note that 'the right curve type is most of the realism' is pointing at exactly this.",
       "citation": "Euler, 1744; applied to railway transition curves by Talbot, 1890",
       "url": "https://en.wikipedia.org/wiki/Euler_spiral"
+    },
+    {
+      "id": "hilbert-curve",
+      "name": "Hilbert curve",
+      "concept": "fractal",
+      "source_type": "paper",
+      "year": 1891,
+      "authors": "David Hilbert, following Giuseppe Peano",
+      "tier": "source",
+      "summary": "A recursive path that visits every cell of a grid while keeping nearby positions on the path nearby in space.",
+      "eli5": "Draw a U shape in a square. Now split the square into four, put a rotated copy of the U in each quarter, and join them up into one longer path. Repeat. The path eventually passes through every single point, and — this is the useful part — two points that are close together along the path are always close together on the page.",
+      "description": "Built by recursive subdivision: each square is split into four, a rotated and reflected copy of the pattern is placed in each quadrant, and the four are joined into one continuous path. In the limit it is a continuous surjection from the unit interval onto the unit square, which is why it is called space-filling. The property that makes it useful is locality: unlike a raster scan or a Z-order curve, consecutive positions along a Hilbert curve are always spatially adjacent, so mapping 2D data to 1D along it preserves neighbourhood. That makes it the standard choice for spatial database indexing, for cache-coherent traversal of a texture or heightfield, for dithering and stippling orders that avoid directional artefacts, and for laying out a linear sequence — a genome, a network address range, a timeline — into a square without tearing it. In generative art it is drawn for its own sake, and as a plotter path it visits an entire area without ever lifting the pen or crossing itself.",
+      "citation": "Hilbert, Ueber die stetige Abbildung einer Linie auf ein Flächenstück, Mathematische Annalen 38, 459–460 (1891), following Peano's 1890 construction",
+      "url": "https://en.wikipedia.org/wiki/Hilbert_curve"
     },
     {
       "id": "lotka-volterra",
@@ -174,6 +188,20 @@
       "url": "https://en.wikipedia.org/wiki/De_Casteljau%27s_algorithm"
     },
     {
+      "id": "dijkstra",
+      "name": "Dijkstra's algorithm",
+      "concept": "graph",
+      "source_type": "paper",
+      "year": 1959,
+      "authors": "Edsger Dijkstra",
+      "tier": "operator",
+      "summary": "Expand outwards from a start node, always taking the nearest unvisited one. Shortest paths to everywhere, not just to one target.",
+      "eli5": "Start where you are, and keep a list of places you can reach with the cost of getting there. Repeatedly step to the cheapest place on that list, and update its neighbours' costs. Because you always go to the cheapest remaining place, the moment you arrive somewhere you know that was the cheapest way. When you stop, you know the cheapest route to everywhere.",
+      "description": "Maintain tentative distances and a priority queue of frontier nodes. Repeatedly extract the minimum, mark it settled — its distance is now final, which holds because no unsettled node can offer a cheaper route when edge weights are non-negative — and relax its outgoing edges. With a binary heap the cost is O((V+E) log V). A* is this algorithm plus a heuristic that biases the queue towards one target; Dijkstra is what you want when there is no single target, and that case is the more useful one for generation. A full distance field from every stair, exit or point of interest — a \"Dijkstra map\" in roguelike terminology — answers a large family of questions at once: which room is furthest from the entrance and therefore where the boss goes, how to place keys before their doors, which corridors are load-bearing for connectivity, how far a smell or a rumour has spread, and where every monster should step next simply by walking downhill in the field.",
+      "citation": "Dijkstra, A note on two problems in connexion with graphs, Numerische Mathematik 1, 269–271",
+      "url": "https://link.springer.com/article/10.1007/BF01386390"
+    },
+    {
       "id": "halton-sequence",
       "name": "Halton sequence",
       "concept": "samp",
@@ -242,6 +270,20 @@
       "description": "Pick an unassigned variable, guess a value, and propagate the consequences: any clause reduced to a single unassigned literal forces that literal, which may force others, cascading. If propagation produces a contradiction, backtrack and try the other value. That loop — decide, propagate, backtrack — is still the skeleton of modern solvers, which add conflict-driven clause learning (on failure, derive a new clause explaining why, so the same dead end is never re-entered), non-chronological backjumping, and activity-based variable ordering. Those additions are what took SAT from a theoretical curiosity to something that routinely handles millions of variables. For generation it matters because 'make me content satisfying these hard constraints' reduces to SAT surprisingly often — solvable puzzles, valid layouts, legal tile adjacency.",
       "citation": "Davis, Logemann & Loveland, A machine program for theorem-proving, CACM 5(7), 394–397",
       "url": "https://en.wikipedia.org/wiki/DPLL_algorithm"
+    },
+    {
+      "id": "fisher-yates",
+      "name": "Fisher–Yates shuffle",
+      "concept": "rand",
+      "source_type": "paper",
+      "year": 1964,
+      "authors": "Ronald Fisher and Frank Yates; in-place form by Richard Durstenfeld",
+      "tier": "operator",
+      "summary": "Walk the array backwards, swapping each element with a uniformly chosen one at or before it. Every permutation equally likely.",
+      "eli5": "To shuffle a deck properly: take the last card and swap it with any card in the deck, chosen completely at random. Then take the second-to-last and swap it with any card at or before it. Keep going. Every possible order comes out equally often — and it is easy to get wrong, because choosing from the *whole* deck each time quietly biases the result.",
+      "description": "For i from n−1 down to 1, pick j uniformly in [0, i] and swap elements i and j. Linear time, no extra memory, and exactly uniform over all n! permutations — each element ends up in each position with probability 1/n, provably. The reason it earns a row rather than being assumed is that the natural-looking variant, picking j uniformly from the whole array each time, is not uniform: it generates n^n equally likely execution paths over n! permutations, and since n! does not divide n^n some orderings must be more likely than others. That bug has shipped repeatedly, most famously in a browser-choice ballot. Two related traps also matter for generation: sorting by a random comparator is not a shuffle and its bias depends on the sort algorithm, and using a generator whose state is smaller than log2(n!) bits cannot reach every permutation at all — a 32-bit seed can produce only a vanishing fraction of the orderings of a 52-card deck. Everything in shuffle bags and weighted draw-without-replacement rests on this.",
+      "citation": "Fisher & Yates, Statistical Tables for Biological, Agricultural and Medical Research, 1938, example 12; modern in-place algorithm from Durstenfeld, Algorithm 235: Random permutation, Communications of the ACM 7(7), 420 (1964)",
+      "url": "https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle"
     },
     {
       "id": "sobol-sequence",
@@ -384,6 +426,20 @@
       "url": "https://apps.dtic.mil/sti/citations/AD0755141"
     },
     {
+      "id": "douglas-peucker",
+      "name": "Ramer–Douglas–Peucker simplification",
+      "concept": "spline",
+      "source_type": "paper",
+      "year": 1973,
+      "authors": "David Douglas, Thomas Peucker; independently Urs Ramer, 1972",
+      "tier": "operator",
+      "summary": "Keep the point furthest from the chord, recurse on both halves, and stop when nothing is further than the tolerance.",
+      "eli5": "You have a wiggly line made of a thousand points and want it made of twenty. Draw a straight line from the first point to the last, and find the original point that strays furthest from it. If it strays further than you can tolerate, keep it and repeat on the two halves. If not, throw everything in between away.",
+      "description": "Recursive divide and conquer: given a polyline and a tolerance, take the chord between its endpoints, find the vertex with the greatest perpendicular distance to that chord, and if that distance exceeds the tolerance keep the vertex and recurse on the two sub-polylines it defines; otherwise discard every interior vertex. Typically O(n log n), degrading to O(n²) in the worst case. The guarantee is a bound on maximum deviation rather than on point count, which is the right guarantee for cartography and is why it is the standard line generaliser in every GIS. Two limitations matter for generated data: it can produce self-intersections where the original did not, and it does not preserve topology between adjacent features, so simplifying two shared borders independently opens gaps — which is what topology-aware variants exist to fix. In a generation pipeline it is the compression step between something traced or routed and something drawable: extracted contours, flow-routed river polylines, marching-squares coastlines and hand-drawn input all arrive far denser than they need to be.",
+      "citation": "Douglas & Peucker, Algorithms for the reduction of the number of points required to represent a digitized line or its caricature, Cartographica: The Canadian Cartographer 10(2), 112–122 (1973); independently Ramer, An iterative procedure for the polygonal approximation of plane curves, CGIP 1(3), 1972",
+      "url": "https://www.tandfonline.com/doi/abs/10.3138/FM57-6770-U75U-7727"
+    },
+    {
       "id": "fm-synthesis",
       "name": "FM synthesis",
       "concept": "dsp",
@@ -524,6 +580,20 @@
       "url": "https://en.wikipedia.org/wiki/AC-3_algorithm"
     },
     {
+      "id": "alias-method",
+      "name": "Alias method",
+      "concept": "rand",
+      "source_type": "paper",
+      "year": 1977,
+      "authors": "Alastair Walker; simplified table construction by Michael Vose",
+      "tier": "operator",
+      "summary": "Sample from a weighted table in constant time, using one random number and one array lookup, however many outcomes there are.",
+      "eli5": "You have a loot table where some items are common and some rare. The obvious way is to walk down the list adding up chances until you pass your dice roll — slow if the list is long. Instead, chop the probabilities up in advance and pack them into a row of equal-height columns, each holding at most two outcomes. Now one roll picks a column and a second decides which of its two outcomes you get.",
+      "description": "Precompute two arrays of length n: a probability array and an alias array. Every entry represents a column of height 1/n containing one outcome and, if that outcome does not fill it, an alias filling the rest. Construction pairs over-full outcomes with under-full ones until all n columns are exactly full, which Vose's version does in O(n) with two worklists. Sampling is then: pick a column uniformly, then use one uniform draw to choose between that column's outcome and its alias. Constant time regardless of table size, against O(log n) for the binary-search-over-cumulative-sums approach and O(n) for the naive linear scan. For generation this is the right answer whenever a weighted table is sampled repeatedly and the weights are fixed — loot, encounters, name syllables, tile choice in WFC, biome assignment — and its one real limitation is that changing a single weight means rebuilding the whole table, so dynamically reweighted tables want a cumulative tree instead.",
+      "citation": "Walker, An efficient method for generating discrete random variables with general distributions, ACM Transactions on Mathematical Software 3(3), 253–256 (1977); linear-time construction from Vose, A linear algorithm for generating random numbers with a given distribution, IEEE Trans. Software Engineering 17(9), 1991",
+      "url": "https://dl.acm.org/doi/10.1145/355744.355749"
+    },
+    {
       "id": "sph",
       "name": "Smoothed particle hydrodynamics",
       "concept": "sim",
@@ -648,6 +718,34 @@
       "description": "Seed a single stuck particle. Release a new particle from far away and let it random-walk until it touches the cluster, at which point it sticks permanently; repeat. The resulting aggregate is fractal, with dimension around 1.71 in two dimensions, and it is branched rather than blobby for a reason worth understanding: a walker arriving from outside is overwhelmingly likely to hit a protruding tip before it can diffuse into a fjord between branches, so tips grow faster and shield the interior. That screening effect is the whole mechanism, and it is why the same model describes electrodeposition, mineral veins, frost, lightning channels and coral. Practical implementations cheat the random walk — release walkers from a circle just outside the current radius and take large steps in empty space — because a true walk from infinity almost never arrives.",
       "citation": "Witten & Sander, Diffusion-Limited Aggregation, a Kinetic Critical Phenomenon, Physical Review Letters 47(19), 1400–1403",
       "url": "https://link.aps.org/doi/10.1103/PhysRevLett.47.1400"
+    },
+    {
+      "id": "knuth-plass",
+      "name": "Knuth–Plass line breaking",
+      "concept": "graph",
+      "source_type": "paper",
+      "year": 1981,
+      "authors": "Donald Knuth, Michael Plass",
+      "tier": "operator",
+      "summary": "Break a paragraph by finding the shortest path through a graph of feasible breakpoints, scoring the whole paragraph rather than each line.",
+      "eli5": "Filling each line as full as it will go, one line at a time, is what most software does — and it is why paragraphs end with a lonely word or a horribly stretched line. Instead, treat every possible break point as a place you could step to, give each candidate line a badness score, and find the route through the whole paragraph with the least total badness. Sometimes a slightly worse first line saves three bad ones later.",
+      "description": "Model text as boxes, glue that can stretch and shrink, and penalties. Each potential breakpoint becomes a node, each feasible line an edge whose cost is a cubic function of how far the glue had to stretch or shrink, plus penalties for hyphenation and for consecutive lines whose looseness differs. Optimal breaking is then a shortest path through this directed acyclic graph, solved by dynamic programming with active-node pruning that keeps it near-linear in practice. The result is the visible difference between TeX and a browser: greedy first-fit optimises each line in isolation and cannot recover from an early mistake, while total-fit trades a slightly loose first line for three good ones after it. This is also the entry the catalogue's own README claimed was in the algorithm layer while it was not — and it belongs under graph algorithms rather than under typesetting, because the mechanism is a shortest path and the paper says so.",
+      "citation": "Knuth & Plass, Breaking paragraphs into lines, Software: Practice and Experience 11(11), 1119–1184",
+      "url": "https://onlinelibrary.wiley.com/doi/10.1002/spe.4380111102"
+    },
+    {
+      "id": "blinn-metaballs",
+      "name": "Metaballs / blobby molecules",
+      "concept": "sdf",
+      "source_type": "paper",
+      "year": 1982,
+      "authors": "James Blinn",
+      "tier": "source",
+      "summary": "Sum a falling-off field around each point and take a level set. Nearby blobs merge into one smooth surface.",
+      "eli5": "Put a glowing point in space whose brightness fades with distance. Add several of them together, then draw the surface where the total brightness equals some fixed amount. Two points far apart give two separate balls; move them together and the surfaces bulge towards each other and merge into one shape, all by themselves.",
+      "description": "Each source contributes a density that decays with distance — Blinn used a Gaussian, later work used cheaper polynomials with finite support — and the surface is an isosurface of the summed field. Because the field is a sum, blending is automatic and continuous: separate sources give separate components, and as they approach, the level set necks and merges without any explicit boolean. This is the earliest widely used implicit-surface modelling technique and the direct ancestor of SDF modelling, though the two differ in an important way that is easy to blur: a metaball field is a density, not a distance, so it does not support the sphere-tracing bound that makes raymarching efficient, and the polygonised result is what people historically used. Blinn's motivation was rendering electron density in molecular models, which is why the paper calls them blobby molecules. In generation they remain the right tool for organic masses defined by a handful of moving centres — clouds, slime, mercury, muscle bulk, cave chambers.",
+      "citation": "Blinn, A generalization of algebraic surface drawing, ACM Transactions on Graphics 1(3), 235–256",
+      "url": "https://dl.acm.org/doi/10.1145/357306.357310"
     },
     {
       "id": "ellers-algorithm",
@@ -832,6 +930,20 @@
       "url": "https://en.wikipedia.org/wiki/Value_noise"
     },
     {
+      "id": "ac-4",
+      "name": "AC-4 arc consistency",
+      "concept": "cons",
+      "source_type": "paper",
+      "year": 1986,
+      "authors": "Roger Mohr, Thomas Henderson",
+      "tier": "operator",
+      "summary": "Arc consistency with per-value support counters, so a deletion only wakes the values it actually affected. Optimal worst case.",
+      "eli5": "The simpler method, when it deletes an option, re-checks every neighbour from scratch. This one keeps a tally for each option of how many partners it still has, and a note of which options were relying on it. Delete an option, and you decrement exactly the tallies that depended on it. Any tally that reaches zero is another dead option.",
+      "description": "AC-3 re-examines whole arcs when a domain changes, which repeats work. AC-4 instead precomputes, for every value, a counter of how many supporting values it has in each neighbouring variable and a list of the values it itself supports. Deleting a value decrements only the counters it supported; a counter reaching zero deletes that value in turn and cascades. This reaches the optimal worst-case bound O(e·d²) against AC-3's O(e·d³), at the cost of building the support structure up front — which is why AC-3 is often faster in practice on easy instances and AC-4 wins on hard ones. It earns a row here for one specific reason: Wave Function Collapse's reference implementation uses AC-4, not AC-3, and the per-value support counters are exactly the \"compatible neighbour count\" bookkeeping that WFC code is full of. Without this entry, the catalogue described WFC as constraint propagation while listing only the propagation algorithm WFC does not use.",
+      "citation": "Mohr & Henderson, Arc and path consistency revisited, Artificial Intelligence 28(2), 225–233",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/0004370286900834"
+    },
+    {
       "id": "flip",
       "name": "FLIP",
       "concept": "sim",
@@ -858,6 +970,20 @@
       "description": "Sweep a horizontal line down the plane. Behind it, maintain the 'beach line': a sequence of parabolic arcs, each the locus of points equidistant from one already-passed site and from the sweep line. Anything behind the beach line has its Voronoi cell finalised, because no future site can be closer. Two event types drive it — a site event, where the sweep line reaches a new point and inserts an arc, and a circle event, where an arc is squeezed to nothing between its neighbours and a Voronoi vertex is emitted at the circumcentre. Both structures are balanced trees, giving O(n log n) time and O(n) space, which is optimal. The cleverness is the beach line: it converts a global nearest-neighbour problem into a local one.",
       "citation": "A sweepline algorithm for Voronoi diagrams, Proc. 2nd Annual Symposium on Computational Geometry, 313–322 (also Algorithmica 2, 1987)",
       "url": "https://dl.acm.org/doi/10.1145/10515.10549"
+    },
+    {
+      "id": "jacobian-dls",
+      "name": "Damped least-squares Jacobian IK",
+      "concept": "ik",
+      "source_type": "paper",
+      "year": 1986,
+      "authors": "Charles Wampler; independently Yoshihiko Nakamura and Hideo Hanafusa",
+      "tier": "operator",
+      "summary": "Linearise the whole chain into a matrix, solve for joint changes, and damp the solve so singular poses do not explode.",
+      "eli5": "Work out, for every joint, which way the hand would move if you turned that joint a little. That gives a table relating all the joints to the hand. Invert the table to find the joint turns that move the hand where you want. The catch: when the arm is straight, the table becomes unsolvable and the answer flies off to infinity — so add a small fudge that trades a little accuracy for never exploding.",
+      "description": "The Jacobian relates joint velocities to end-effector velocity. Inverting it — or pseudo-inverting it, since chains are usually redundant — gives the joint change needed for a desired end-effector change, applied iteratively. Near a singularity, where the chain loses a degree of freedom because it is fully extended or aligned, the pseudo-inverse's singular values approach zero and the requested joint velocities approach infinity, producing the violent snapping that plagued early IK. Damped least squares solves min ‖JΔθ − Δx‖² + λ²‖Δθ‖² instead, which bounds the solution at the cost of not reaching the target exactly; λ is the whole trade, and adaptive schemes raise it only near singularities. Unlike CCD and FABRIK, this formulation generalises cleanly to multiple simultaneous targets, orientation as well as position, joint-limit and balance constraints via null-space projection, and weighted priorities — which is why full-body and robotics solvers are built on it while games often prefer the cheaper heuristics.",
+      "citation": "Wampler, Manipulator inverse kinematic solutions based on vector formulations and damped least-squares methods, IEEE Trans. Systems, Man and Cybernetics 16(1), 93–101 (1986); Nakamura & Hanafusa, Inverse kinematic solutions with singularity robustness, ASME J. Dynamic Systems 108, 1986",
+      "url": "https://ieeexplore.ieee.org/document/4075580/"
     },
     {
       "id": "boids",
@@ -958,6 +1084,20 @@
       "url": "https://dblp.org/rec/conf/iclp/GelfondL88.html"
     },
     {
+      "id": "granular-synthesis",
+      "name": "Granular synthesis",
+      "concept": "dsp",
+      "source_type": "paper",
+      "year": 1988,
+      "authors": "Curtis Roads, building on Dennis Gabor and Iannis Xenakis",
+      "tier": "source",
+      "summary": "Build sound from thousands of millisecond-long fragments. Control the cloud statistically rather than the waveform directly.",
+      "eli5": "Chop a sound into slivers a few thousandths of a second long, then play thousands of slivers a second, choosing which ones and how fast and how loud at random within limits you set. Individually they are clicks. Together they are a texture — and by changing the statistics of the cloud rather than the sound itself, you can stretch it, freeze it or blur it.",
+      "description": "Each grain is a short windowed segment — typically 1 to 100 ms — with its own source position, amplitude, pitch and pan, and the output is the sum of many overlapping grains. Control is statistical: grain density, the distribution of pitches, how far source positions scatter, and the window shape, which matters because an abrupt window makes every grain audible as a click. The regime changes qualitatively with density and grain length, from discrete pointillistic events through a rough texture to a continuous tone, and that boundary is the expressive territory. Gabor's 1946 acoustic quantum is the theoretical origin and Xenakis composed with the idea in the 1950s, but Roads is where it becomes a synthesis technique with parameters. For generation it is the cheapest way to get endless non-repeating variation from one recorded source — wind, crowds, rain, fire, machinery — and it is also how time-stretching without pitch change works, since grains can be replayed at a different rate than they were extracted.",
+      "citation": "Roads, Introduction to granular synthesis, Computer Music Journal 12(2), 11–13 (1988); theoretical origin in Gabor, Theory of communication, J. IEE 93, 1946",
+      "url": "https://www.semanticscholar.org/paper/Introduction-to-Granular-Synthesis-Roads/fa250dfb065e6c14a45fd6b756384904e4d0ac6c"
+    },
+    {
       "id": "iterated-function-systems",
       "name": "Iterated function systems",
       "concept": "fractal",
@@ -1056,6 +1196,20 @@
       "url": "https://en.wikipedia.org/wiki/Supersampling"
     },
     {
+      "id": "digital-waveguide",
+      "name": "Digital waveguide synthesis",
+      "concept": "dsp",
+      "source_type": "paper",
+      "year": 1992,
+      "authors": "Julius Smith",
+      "tier": "source",
+      "summary": "Model a string or tube as two delay lines carrying waves in opposite directions. Physical modelling for the cost of a buffer.",
+      "eli5": "A wave on a string travels in both directions and bounces off each end. So model it as two queues of numbers, one going left and one going right, with a small filter at each end for the reflection. Add the two queues together to hear the string. It is almost nothing to compute, and it behaves like a real string because it is the same equations.",
+      "description": "The one-dimensional wave equation has an exact solution as the sum of two travelling waves moving in opposite directions, so a string or air column can be simulated as a pair of delay lines with reflection filters at the terminations — the filters encode how much energy is lost and which frequencies are damped at each end. Excitation is an impulse or a noise burst injected into the lines; the output is the sum at a pickup position. Because the underlying solution is exact, the model is not an approximation of a string but a discretisation of one, which is why it responds correctly to physical changes: shorten the delay and the pitch rises, stiffen the reflection filter and the tone brightens, add a nonlinearity at one end and you get a bowed or reed instrument rather than a plucked one. Karplus–Strong, already in this table, is the minimal special case — one delay line and a two-point averaging filter — and the waveguide formulation is the theory that explains why it works and how to extend it.",
+      "citation": "Smith, Physical modeling using digital waveguides, Computer Music Journal 16(4), 74–91",
+      "url": "https://ccrma.stanford.edu/~jos/pmudw/pmudw.pdf"
+    },
+    {
       "id": "genetic-programming",
       "name": "Genetic programming",
       "concept": "evo",
@@ -1068,6 +1222,20 @@
       "description": "Instead of a fixed-length chromosome, each individual is a program — usually an expression tree over a chosen function and terminal set. Crossover swaps randomly chosen subtrees between two parents, and mutation replaces a subtree with a fresh random one. Because the representation is variable-size, the search explores structures rather than just parameter values, which is what lets it discover the *form* of a solution and not merely tune one. In generation this is how you evolve shaders, textures, plant grammars, and behaviour trees — the classic result being that evolved expressions produce imagery nobody would have written by hand. Its characteristic pathology is bloat: trees grow ever larger with introns that do nothing, because neutral code is protective against destructive crossover, so implementations need explicit size pressure.",
       "citation": "Koza, Genetic Programming: On the Programming of Computers by Means of Natural Selection, MIT Press, 1992",
       "url": "https://en.wikipedia.org/wiki/Genetic_programming"
+    },
+    {
+      "id": "void-and-cluster",
+      "name": "Void-and-cluster blue noise",
+      "concept": "samp",
+      "source_type": "paper",
+      "year": 1993,
+      "authors": "Robert Ulichney",
+      "tier": "source",
+      "summary": "Build a blue-noise mask by repeatedly finding the biggest gap and the tightest cluster, and swapping between them.",
+      "eli5": "You want a tile of values where the bright and dark dots are as evenly spread as possible. Start anywhere. Blur what you have to find the emptiest spot and the most crowded spot, move a dot from the crowd into the void, and repeat until nothing improves. Then number every dot in the order the pattern was built, and you have a mask you can threshold at any level.",
+      "description": "Start from a random binary pattern. Filter it with a Gaussian to measure local density, then locate the tightest cluster — the 1 in the densest neighbourhood — and the largest void — the 0 in the sparsest — and move that 1 into that 0. Iterate to convergence, which yields a maximally uniform binary pattern. The clever second half is the ranking phase: remove points one at a time, always the tightest cluster, recording the order, then add points back into the largest voids, again recording the order. The resulting rank per pixel, normalised, is a threshold mask whose every threshold level is itself a good blue-noise pattern — which is what makes it usable as a dither array, and later as the precomputed blue-noise texture that real-time renderers use for sample offsets, stochastic transparency and temporal accumulation. Unlike Poisson-disk sampling it produces a tileable array of *values* rather than a set of positions, which is the form a shader can consume for free.",
+      "citation": "Ulichney, The void-and-cluster method for dither array generation, Proc. SPIE 1913, Human Vision, Visual Processing and Digital Display IV, 332–343",
+      "url": "https://www.spiedigitallibrary.org/conference-proceedings-of-spie/1913/1/Void-and-cluster-method-for-dither-array-generation/10.1117/12.152707.short"
     },
     {
       "id": "mpm",
@@ -1166,6 +1334,20 @@
       "description": "Ordinary L-systems are closed — the rules cannot see anything outside the string, which is why naive trees grow branches through each other and through the trunk. Open L-systems add query modules: special symbols that the turtle interpretation writes environmental data into, such as the light reaching that position or whether the space is already occupied. An external environment program reads the plant's current geometry, computes the answers, and writes them back; the next derivation step then has rules that branch on those values. Growth becomes a conversation rather than a monologue, which is what makes shade avoidance, pruning and competition between neighbouring plants expressible at all.",
       "citation": "Visual Models of Plants Interacting with Their Environment, SIGGRAPH '96",
       "url": "https://algorithmicbotany.org/papers/enviro.sig96.pdf"
+    },
+    {
+      "id": "sphere-tracing",
+      "name": "Sphere tracing",
+      "concept": "sdf",
+      "source_type": "paper",
+      "year": 1996,
+      "authors": "John Hart",
+      "tier": "operator",
+      "summary": "March along a ray in steps as long as the distance field allows. The reason SDF scenes can be rendered without geometry.",
+      "eli5": "You are walking along a line looking for the first thing you hit, in a world where you can always ask \"how far is the nearest object?\". So ask, then walk exactly that far — you cannot possibly have overshot, because nothing was closer than that. Ask again, walk again. Near a surface the steps get tiny, and you converge on the hit.",
+      "description": "Given a function returning a lower bound on the distance to the nearest surface, the ray can be advanced by that distance with no risk of stepping through anything: the sphere of that radius is provably empty. Iterating converges geometrically on the first intersection, and terminates when the distance drops below a threshold or the ray leaves the scene. The consequences are what made the technique matter. Any shape you can write a distance bound for is renderable with no tessellation, no acceleration structure and no memory, so booleans, blends, infinite repetition by taking coordinates modulo a period, and domain distortions all become one-line changes. Normals come free from the field's gradient, and ambient occlusion and soft shadows come nearly free from sampling the field itself. Its costs are equally characteristic: grazing rays crawl, because each step is small while the surface stays close, and any operation that breaks the distance bound — non-uniform scaling, cheap smooth-minimum blends — makes the marcher overshoot and produce holes.",
+      "citation": "Hart, Sphere tracing: a geometric method for the antialiased ray tracing of implicit surfaces, The Visual Computer 12(10), 527–545",
+      "url": "https://link.springer.com/article/10.1007/s003710050084"
     },
     {
       "id": "wilsons-algorithm",
@@ -1490,6 +1672,20 @@
       "url": "https://people.eecs.berkeley.edu/~jrs/meshpapers/JuLosassoSchaeferWarren.pdf"
     },
     {
+      "id": "improved-perlin",
+      "name": "Improved Perlin noise",
+      "concept": "noise",
+      "source_type": "paper",
+      "year": 2002,
+      "authors": "Ken Perlin",
+      "tier": "source",
+      "summary": "Perlin noise with a better interpolant and a fixed set of gradients. Removes the visible grid artefacts of the 1985 version.",
+      "eli5": "The original recipe had two flaws that showed up as faint square patterns. Its fade curve had a kink in its rate of change, which the eye catches along grid lines, and its random directions clustered towards the corners of a cube. Swap in a smoother fade curve and a fixed set of evenly spread directions, and the grid disappears.",
+      "description": "Two changes to the 1985 construction, each fixing a visible artefact. The original used the cubic 3t²−2t³, whose second derivative is non-zero at the ends, so a normal map derived from the noise shows discontinuities on the lattice planes; the replacement quintic 6t⁵−15t⁴+10t³ has zero first *and* second derivative at 0 and 1, which removes them. And instead of normalising random vectors — which distributes directions unevenly, biased towards cube corners — gradients are chosen from the 12 midpoints of a cube's edges, which are evenly spread and let the dot products be computed by additions rather than multiplications. Perlin also replaced the permutation-table lookup with a bit-manipulation hash. This is the version in Perlin's reference Java implementation and therefore the one nearly every \"Perlin noise\" library actually implements, which makes the distinction easy to miss: the 1985 paper and the code everyone runs are not the same algorithm.",
+      "citation": "Perlin, Improving noise, ACM TOG 21(3) (SIGGRAPH 2002), 681–682",
+      "url": "https://dl.acm.org/doi/10.1145/566654.566636"
+    },
+    {
       "id": "lscm",
       "name": "Least-squares conformal maps",
       "concept": "mesh",
@@ -1714,6 +1910,20 @@
       "url": "https://www.comp.nus.edu.sg/~tants/jfa/i3d06.pdf"
     },
     {
+      "id": "mcts",
+      "name": "Monte Carlo tree search",
+      "concept": "evo",
+      "source_type": "paper",
+      "year": 2006,
+      "authors": "Rémi Coulom; UCT selection rule by Levente Kocsis and Csaba Szepesvári",
+      "tier": "operator",
+      "summary": "Grow a search tree towards whatever is promising, judging each option by random play-outs rather than by a scoring function.",
+      "eli5": "You have a decision tree too big to explore. So play it out at random to the end, note who won, and record that along the path you took. Do it thousands of times, but bias where you start exploring towards the moves that have been doing well — while still occasionally trying neglected ones. The tree grows deepest where it matters.",
+      "description": "Four steps per iteration: descend the existing tree choosing children by a rule balancing observed value against how rarely they have been tried, expand one new node, run a random play-out from it to a terminal state, and back up the result along the visited path. The UCT selection rule makes the balance principled by treating each node as a multi-armed bandit. The property that matters is that no evaluation function is required — the only domain knowledge needed is the rules and a terminal outcome — and the search is anytime, improving monotonically with more iterations and interruptible at any point. For generation it belongs here rather than under game AI because it is a search over constructions: it has been used to build levels tile by tile, to generate puzzles by searching for instances a solver finds hard, to lay out dungeons under reachability constraints, and to assemble decks and rulesets, all cases where the objective is only computable by finishing the artefact and testing it. The tension worth naming is that this concept is called search-based PCG but described as generate-evaluate-mutate; MCTS is search without a population, and it fits the name rather than the description.",
+      "citation": "Coulom, Efficient selectivity and backup operators in Monte-Carlo tree search, Computers and Games 2006, 72–83; UCT from Kocsis & Szepesvári, Bandit based Monte-Carlo planning, ECML 2006",
+      "url": "https://hal.science/inria-00116992/document"
+    },
+    {
       "id": "poisson-surface-reconstruction",
       "name": "Poisson surface reconstruction",
       "concept": "mesh",
@@ -1838,6 +2048,20 @@
       "description": "A signed distance function returns, for any point, the distance to the nearest surface — negative inside. Primitives have exact closed forms: a sphere is length(p) − r, a box is a few max operations on the absolute components. Combination is then set algebra on distances: union is min, intersection is max, subtraction is max(a, −b). Rounding any shape is subtracting a constant; shelling is taking the absolute value and subtracting; infinite repetition is applying modulo to the input coordinate before evaluating, which tiles a scene at no cost. That last property is why raymarched scenes can contain unbounded detail in a few kilobytes. The collected library is a reference implementation rather than a paper — Quílez's articles and the Shadertoy corpus are the canonical source — but it is the substrate of an entire practice.",
       "citation": "Quílez, distance function articles at iquilezles.org, plus the Shadertoy corpus. Reference implementation, not a paper.",
       "url": "https://iquilezles.org/articles/distfunctions/"
+    },
+    {
+      "id": "wavelet-turbulence",
+      "name": "Wavelet turbulence",
+      "concept": "sim",
+      "source_type": "paper",
+      "year": 2008,
+      "authors": "Theodore Kim, Nils Thürey, Doug James, Markus Gross",
+      "tier": "operator",
+      "summary": "Simulate coarsely, then synthesise the missing fine detail by extrapolating the energy spectrum. Detail without the simulation cost.",
+      "eli5": "A cheap smoke simulation has the big swirls right but is missing all the fine curls, because the grid is too coarse to hold them. Rather than simulating on a huge grid, look at how much energy the small swirls you *can* see have, use the known physical rule for how that falls off, and add in invented curls at the right strength. The added detail moves with the flow, so it looks simulated.",
+      "description": "Decompose the coarse simulated velocity field with a wavelet transform to measure how energy is distributed across the scales that were resolved. Kolmogorov's theory says turbulent kinetic energy falls off as k^(−5/3), so the energy at the unresolved scales can be extrapolated rather than computed. Synthesise those scales as divergence-free curl noise, scaled to the extrapolated energy and weighted to appear only where the simulation was actually turbulent, then advect the synthetic detail along with the flow using a texture-coordinate field that is periodically regenerated to avoid unbounded stretching. The result is high-frequency detail that is spatially and temporally coherent with the underlying simulation at a fraction of the cost of simulating at that resolution, and it made the \"simulate low, upres high\" pipeline standard in film smoke and fire. It also depends directly on curl noise, already in this table, which is what supplies the incompressible synthetic band.",
+      "citation": "Kim, Thürey, James & Gross, Wavelet turbulence for fluid simulation, ACM TOG 27(3) (SIGGRAPH 2008)",
+      "url": "https://www.cs.cornell.edu/~tedkim/WTURB/wavelet_turbulence.pdf"
     },
     {
       "id": "wcag-contrast",
@@ -2134,6 +2358,20 @@
       "url": "https://flame.is.tue.mpg.de/"
     },
     {
+      "id": "transformer",
+      "name": "Transformer",
+      "concept": "ml",
+      "source_type": "paper",
+      "year": 2017,
+      "authors": "Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan Gomez, Łukasz Kaiser, Illia Polosukhin",
+      "tier": "source",
+      "summary": "Sequence modelling by attention alone: every position looks directly at every other. No recurrence, so it parallelises.",
+      "eli5": "Older models read a sequence one item at a time, carrying a summary along — so distant items got blurry and nothing could be done in parallel. This one lets every position look directly at every other position and decide for itself which ones matter. Nothing has to be remembered because everything is still in view, and every position can be processed at the same moment.",
+      "description": "Each position produces a query, a key and a value; attention weights are the softmax of query-key products, and the output is the weighted sum of values. Multiple heads let different relationships be attended to at once, and since the mechanism is order-blind, positional encodings are added to the inputs. Stacking these with feed-forward layers, residual connections and layer normalisation gives a model whose path length between any two positions is one, which is what fixed the long-range degradation of recurrent models — and, more consequentially, whose training parallelises across the whole sequence instead of stepping through it. That single property is what made scale possible and therefore what the entire subsequent generative-model era rests on. Cost is the trade: attention is quadratic in sequence length. For generation the reach is far past text — the same architecture generates music as token sequences, level layouts as tile sequences, meshes as face sequences, and is the denoising backbone in most current image diffusion models.",
+      "citation": "Vaswani et al., Attention is all you need, NeurIPS 2017",
+      "url": "https://arxiv.org/abs/1706.03762"
+    },
+    {
       "id": "adjoint-inverse-design",
       "name": "Adjoint-gradient inverse design",
       "concept": "topopt",
@@ -2232,6 +2470,20 @@
       "url": "https://arxiv.org/abs/2003.08934"
     },
     {
+      "id": "neural-cellular-automata",
+      "name": "Neural cellular automata",
+      "concept": "ca",
+      "source_type": "article",
+      "year": 2020,
+      "authors": "Alexander Mordvintsev, Ettore Randazzo, Eyvind Niklasson, Michael Levin",
+      "tier": "operator",
+      "summary": "Replace a cellular automaton's hand-written rule with a small trained network. The rule is learned, and the result regenerates when damaged.",
+      "eli5": "A cellular automaton needs somebody to invent its rule. Instead, let the rule be a tiny neural network, and train it by saying \"whatever the rule is, running it for a while starting from one live cell should produce this picture\". What you get back is a rule that grows the picture — and, because it was trained to keep producing it, regrows it if you cut a piece off.",
+      "description": "Each cell holds a small vector of channels, four of them visible as colour and alpha and the rest hidden state. The update is a fixed perception step — the cell's own state plus Sobel gradients of its neighbourhood — followed by a tiny multilayer network shared by every cell, applied stochastically so cells do not update in lockstep. Training backpropagates through many update steps towards a target image, with damaged states injected into the training pool so that persistence and regeneration are learned rather than hoped for. The result is a rule, not a picture: it is local, parallel, has no coordinate system, and grows to the target from a seed then holds it stably. This is the bridge between the `ca` and `ml` concepts and a genuinely different point on the trade-off, because the model is a few thousand parameters rather than a few hundred million, and its behaviour — self-repair without any global plan — is the property hand-written automata almost never have.",
+      "citation": "Mordvintsev, Randazzo, Niklasson & Levin, Growing Neural Cellular Automata, Distill, 2020. doi:10.23915/distill.00023",
+      "url": "https://distill.pub/2020/growing-ca/"
+    },
+    {
       "id": "oklab",
       "name": "Oklab",
       "concept": "colour",
@@ -2246,6 +2498,20 @@
       "url": "https://bottosson.github.io/posts/oklab/"
     },
     {
+      "id": "pcgrl",
+      "name": "PCGRL — level generation as a reinforcement learning task",
+      "concept": "ml",
+      "source_type": "paper",
+      "year": 2020,
+      "authors": "Ahmed Khalifa, Philip Bontrager, Sam Earle, Julian Togelius",
+      "tier": "operator",
+      "summary": "Train an agent whose actions edit a level and whose reward is how much the edit improved it. Generation becomes a policy, not a search.",
+      "eli5": "Instead of searching for a good level every time you want one, train something to *edit* levels: it looks at the current layout, changes one tile, and gets a small reward if that made the level better against the rules you care about. Once trained, it produces a level in a few dozen edits instead of thousands of attempts — and it never needed any example levels to learn from.",
+      "description": "The level is the environment state, tile edits are the actions, and the reward is the improvement in a quality measure — path length, reachability, region count — evaluated by the same kind of function a search-based generator would use as fitness. The paper defines three representations differing in how much control the agent has over where it edits: narrow, where the position is given and the agent only chooses content; turtle, where it also moves; and wide, where it chooses both position and content freely. Two things distinguish this from evolutionary search. It needs no training data, because the reward function supplies the signal, which sidesteps the small-dataset problem that limits most PCGML. And the expensive part happens once during training, so generation afterwards is a forward pass rather than a search — the difference between a generator you can call in a level-loading screen and one you cannot. The known weaknesses are limited output diversity and reward hacking, both of which are the fitness function's failings rather than the method's.",
+      "citation": "Khalifa, Bontrager, Earle & Togelius, PCGRL: procedural content generation via reinforcement learning, AIIDE 2020",
+      "url": "https://arxiv.org/abs/2001.09212"
+    },
+    {
       "id": "hex-tiling",
       "name": "Practical real-time hex-tiling",
       "concept": "tile",
@@ -2258,6 +2524,20 @@
       "description": "Heitz and Neyret's method assumes it is blending a scalar or colour signal, which breaks for normal and derivative maps where naive averaging produces wrong lighting rather than just wrong contrast. Mikkelsen's version handles those channels correctly, reduces the number of texture fetches needed per pixel, and adds practical controls for how hard the blend transitions between hex cells so artists can trade repetition against softness. It is the version that actually ships in engines, and the pairing is a good illustration of why the algorithm layer needs both entries: one paper established the method, a second made it usable.",
       "citation": "Practical Real-Time Hex-Tiling, Journal of Computer Graphics Techniques 11(3)",
       "url": "https://jcgt.org/published/0011/03/05/paper-lowres.pdf"
+    },
+    {
+      "id": "latent-diffusion",
+      "name": "Latent diffusion",
+      "concept": "ml",
+      "source_type": "paper",
+      "year": 2022,
+      "authors": "Robin Rombach, Andreas Blattmann, Dominik Lorenz, Patrick Esser, Björn Ommer",
+      "tier": "source",
+      "summary": "Run the diffusion process in a compressed latent space rather than on pixels. Two orders of magnitude cheaper, and where conditioning attaches.",
+      "eli5": "Denoising a full-size image a thousand times over is enormously expensive, and most of that work is spent on detail the eye barely notices. So first train a compressor that squashes images to a much smaller grid and back with little visible loss. Then do all the noisy-to-clean work on the small grid, and expand at the very end.",
+      "description": "Two stages. An autoencoder with a perceptual and adversarial objective compresses images to a latent grid — typically 8× smaller per side, so 64× fewer elements — retaining what matters visually while discarding imperceptible high-frequency detail. The diffusion model then operates entirely in that latent space, which cuts both training and sampling cost by roughly two orders of magnitude and is what made high-resolution generation runnable on consumer hardware. The second contribution is architectural: cross-attention layers inserted into the denoising U-Net accept an arbitrary conditioning sequence, so text, layouts, semantic maps and other images all attach through one general mechanism rather than needing bespoke models. This is the architecture behind Stable Diffusion and therefore behind most open image generation, and it is the practical answer to the `ml` concept card's complaint about control: the conditioning interface, not the diffusion, is what made these models directable.",
+      "citation": "Rombach, Blattmann, Lorenz, Esser & Ommer, High-resolution image synthesis with latent diffusion models, CVPR 2022",
+      "url": "https://arxiv.org/abs/2112.10752"
     },
     {
       "id": "gaussian-splatting",
@@ -2286,6 +2566,20 @@
       "description": "The question left open by Wang and narrowed by Penrose was whether one shape alone could force aperiodicity — the 'einstein' problem, from ein Stein, one stone. The hat is a polykite: eight kites obtained by cutting a hexagon through its edge midpoints. It tiles the plane using both the shape and its mirror image, and no arrangement of it is ever periodic. The proof works by showing the tiling decomposes into a hierarchy of larger metatiles that repeats the structure at every scale, so no translation can map it to itself. A follow-up produced the 'spectre', which achieves the same without needing reflections. Practically it offers the strongest form of repeat-free coverage from a single asset, and it is recent enough that almost nothing has been built on it.",
       "citation": "An aperiodic monotile, arXiv:2303.10798 (2023)",
       "url": "https://arxiv.org/abs/2303.10798"
+    },
+    {
+      "id": "spectre-monotile",
+      "name": "The spectre — a chiral aperiodic monotile",
+      "concept": "tile",
+      "source_type": "paper",
+      "year": 2023,
+      "authors": "David Smith, Joseph Samuel Myers, Craig Kaplan, Chaim Goodman-Strauss",
+      "tier": "operator",
+      "summary": "A single tile that tiles the plane only aperiodically and needs no reflected copies. The hat, fixed.",
+      "eli5": "The hat solved a fifty-year-old problem but with an asterisk: you also have to use its mirror image, which is arguably two tiles rather than one. Two months later the same team removed the asterisk. Take the equilateral member of the hat's family, put a wiggle in each edge so a mirrored copy physically cannot fit, and you have one shape that tiles forever without repeating and without ever being flipped over.",
+      "description": "The hat belongs to a continuous family of polygons parameterised by two edge lengths, and the equilateral member of that family — which the paper calls the Tile(1,1) — is weakly chiral: it admits aperiodic tilings using only unreflected copies, although reflected tilings also exist. Replacing its straight edges with matching curves gives the spectre family, which is strictly chiral: reflected copies simply cannot be placed, so every tiling is aperiodic and unreflected, built from a hierarchical substitution system. That closes the question the hat left open, since a monotile that requires its own mirror image is arguably not a single tile at all. For anything physical the distinction is decisive — a cut tile, a printed one-sided sheet, a set of moulded pavers cannot be flipped — and this is the entry the catalogue was missing while asserting on the concept card that the hat gave repeat-free coverage on its own.",
+      "citation": "Smith, Myers, Kaplan & Goodman-Strauss, A chiral aperiodic monotile, arXiv:2305.17743 (2023); Combinatorial Theory 4(2), 2024",
+      "url": "https://arxiv.org/abs/2305.17743"
     }
   ],
   "_candidates_about": "Named in the catalogue's description prose or hiding inside the category concepts. Each needs its citation checked before it gets a row. Roughly 2 lookups each.",
