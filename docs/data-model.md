@@ -8,10 +8,14 @@ The schema in `db/schema.sql`, and why it is shaped this way.
 domain ──< grp ──< entry ──< entry_tag >── tag
                     │                       │
                     └─< entry_uses          ├─< algorithm ──< implementation_algorithm
-                                            │                          │
+                                            │       │                  │
+                                            │       └─< code_sample    │
                                             └─< implementation ──< implementation_technology
                                                                        │
                                                                   technology
+
+source ──< source_link ──▶ (concept | algorithm | implementation | technology)
+correction ──▶ (concept | algorithm | implementation | source-data | readme)
 ```
 
 ### The catalogue side
@@ -44,6 +48,23 @@ leans on.
 with a concept but no algorithm link is a **signal**, not an omission. Either the algorithm it
 implements has no row yet, or the package is not a generation library and was mis-roled. Both
 cases have been found this way.
+
+### The evidence side
+
+| Table | Notes |
+|---|---|
+| `code_sample` | Working code for algorithms whose whole mechanism fits in under 100 lines. The limit is enforced by the migration |
+| `source` | Every URL consulted while checking a claim, with the question it answered |
+| `source_link` | What each source bears on: `layer` + `target_id` + a relation (`defines`, `verifies`, `corrects`, `disputes`, …) |
+| `correction` | What this catalogue asserted, what it now says, and why. A row, not a quiet edit |
+
+`tag.eli5` and `algorithm.eli5` hold a jargon-free explanation. This is not decoration: a
+concept that cannot be explained without its own vocabulary has not been pinned down, and
+writing these forced several descriptions to be rewritten rather than translated.
+
+`tag.origin` separates the 28 concepts inherited from the source reference from those this
+project named. An added concept starts with no `entry_tag` rows, because the HTML never used
+it — so its `applies_to` list in `concepts.json` has to earn them one entry at a time.
 
 ## Classification columns on `entry`
 
@@ -84,11 +105,17 @@ The migration aborts and rolls back on any of:
 
 - a tier override matching no entry, or more than one
 - an entry left without a tier
-- a tag left without a facet
-- an algorithm with no citation URL, no description, or an invalid `source_type`
+- a tag left without a facet, or without an `eli5`
+- an algorithm with no citation URL, no description, an invalid `source_type` or an invalid `tier`
+- two algorithms sharing an id
 - an algorithm or implementation referencing an unknown concept
 - an implementation not marked `verified`
 - an implementation-to-algorithm mapping naming an unknown package or algorithm
+- a concept correction whose `was` no longer matches the text it claims to be correcting
+- an added concept missing a facet, a reason, or a named importable package
+- an added concept's `applies_to` naming an entry that does not exist
+- a code sample over 100 lines, empty, or attached to an unknown algorithm or technology
+- a source with no description, a duplicate URL, or a link to a target that does not exist
 
 This is not defensive decoration. It has caught a phantom npm package, a stale coverage claim,
 an id that did not match its content, and several typos that would otherwise have shipped as

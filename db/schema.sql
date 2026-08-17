@@ -10,6 +10,10 @@
 
 PRAGMA foreign_keys = ON;
 
+DROP TABLE IF EXISTS source_link;
+DROP TABLE IF EXISTS source;
+DROP TABLE IF EXISTS correction;
+DROP TABLE IF EXISTS code_sample;
 DROP TABLE IF EXISTS implementation_algorithm;
 DROP TABLE IF EXISTS implementation_technology;
 DROP TABLE IF EXISTS implementation;
@@ -30,12 +34,19 @@ DROP TABLE IF EXISTS tag;
 CREATE TABLE tag (
   id       TEXT PRIMARY KEY,
   name     TEXT NOT NULL,
-  -- 'mechanism' | 'representation' | 'deployment' -- NULL until re-faceted.
+  -- 'block' | 'representation' | 'category' | 'deployment' -- NULL until faceted.
   facet    TEXT,
   what     TEXT,
   good     TEXT,
   bad      TEXT,
   watch    TEXT,
+  -- Explain-like-I'm-five: the concept with no jargon, in terms a child could picture.
+  -- Held in data/annotations/concepts.json, not in the source HTML.
+  eli5     TEXT,
+  -- 'source' if the concept came from the original reference, 'added' if this project
+  -- named it. Added concepts have no entry_tag rows from the HTML, so a count of 0 there
+  -- means "not tagged upstream", not "unused".
+  origin   TEXT NOT NULL DEFAULT 'source',
   position INTEGER
 );
 
@@ -148,6 +159,9 @@ CREATE TABLE algorithm (
   authors     TEXT,
   summary     TEXT,
   description TEXT,
+  -- Explain-like-I'm-five. Required for every algorithm: if the mechanism cannot be put
+  -- in plain words, the description above is probably describing a name, not a method.
+  eli5        TEXT,
   tier        TEXT,         -- source | operator | generator
   -- How well-sourced the entry is. Widened from paper-only after the rule proved to
   -- exclude real, widely-used techniques that were simply never published academically.
@@ -188,8 +202,73 @@ CREATE TABLE implementation_technology (
   PRIMARY KEY (implementation_id, technology_id)
 );
 
+-- ---------------------------------------------------------------------------
+-- Code samples. One per (algorithm, language), and only where the whole method
+-- fits in 100 lines — the point is to show that the mechanism *is* small, not to
+-- ship a library. The migration rejects anything longer, so the claim stays true.
+
+CREATE TABLE code_sample (
+  id           INTEGER PRIMARY KEY,
+  algorithm_id TEXT NOT NULL REFERENCES algorithm(id) ON DELETE CASCADE,
+  technology   TEXT NOT NULL REFERENCES technology(id),
+  lines        INTEGER NOT NULL,
+  note         TEXT,          -- what the sample leaves out, and how to run it
+  code         TEXT NOT NULL,
+  position     INTEGER,
+  UNIQUE (algorithm_id, technology)
+);
+
+-- ---------------------------------------------------------------------------
+-- Research sources. Every URL gathered while checking something, with what it
+-- settles and what it is attached to. `source_link.layer` says which table
+-- `target_id` points into; the migration checks that the target exists.
+
+CREATE TABLE source (
+  id          TEXT PRIMARY KEY,
+  url         TEXT NOT NULL UNIQUE,
+  title       TEXT NOT NULL,
+  -- paper | article | docs | reference-implementation | registry | wiki | book | thesis | course
+  kind        TEXT,
+  publisher   TEXT,
+  year        INTEGER,
+  -- Why this URL is here: what question it answered. Not a summary of the page.
+  description TEXT NOT NULL,
+  retrieved   TEXT,
+  position    INTEGER
+);
+
+CREATE TABLE source_link (
+  source_id TEXT NOT NULL REFERENCES source(id) ON DELETE CASCADE,
+  layer     TEXT NOT NULL,   -- concept | algorithm | implementation | technology
+  target_id TEXT NOT NULL,
+  -- defines | describes | verifies | corrects | disputes | implements | benchmarks
+  relation  TEXT NOT NULL,
+  note      TEXT,
+  PRIMARY KEY (source_id, layer, target_id, relation)
+);
+
+-- ---------------------------------------------------------------------------
+-- Every correction this project made to something it had previously asserted,
+-- kept as a row rather than a quiet edit. `was` is what the catalogue said before.
+
+CREATE TABLE correction (
+  id         INTEGER PRIMARY KEY,
+  -- concept | algorithm | implementation | source-data | readme
+  layer      TEXT NOT NULL,
+  target_id  TEXT NOT NULL,
+  field      TEXT,
+  was        TEXT,
+  now        TEXT,
+  why        TEXT NOT NULL,
+  source_url TEXT,
+  position   INTEGER
+);
+
 CREATE INDEX idx_algo_concept ON algorithm(concept_tag);
 CREATE INDEX idx_impl_concept ON implementation(concept_tag);
+CREATE INDEX idx_code_algo    ON code_sample(algorithm_id);
+CREATE INDEX idx_srclink_tgt  ON source_link(layer, target_id);
+CREATE INDEX idx_corr_target  ON correction(layer, target_id);
 
 CREATE INDEX idx_entry_group ON entry(group_id);
 CREATE INDEX idx_grp_domain  ON grp(domain_id);

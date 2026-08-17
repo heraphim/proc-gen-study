@@ -19,6 +19,13 @@ const ALGO_ANNOTATIONS = join(root, 'data', 'annotations', 'algorithms.json');
 const IMPL_ANNOTATIONS = join(root, 'data', 'annotations', 'implementations.json');
 const TECH_ANNOTATIONS = join(root, 'data', 'annotations', 'technologies.json');
 const IMPL_ALGO_ANNOTATIONS = join(root, 'data', 'annotations', 'implementation-algorithms.json');
+const CONCEPT_ANNOTATIONS = join(root, 'data', 'annotations', 'concepts.json');
+const CODE_ANNOTATIONS = join(root, 'data', 'annotations', 'code-samples.json');
+const SOURCE_ANNOTATIONS = join(root, 'data', 'annotations', 'sources.json');
+const CORRECTION_ANNOTATIONS = join(root, 'data', 'annotations', 'corrections.json');
+
+/** Longest a code sample may be. The claim on the page is "under 100 lines"; this enforces it. */
+const CODE_LINE_LIMIT = 100;
 
 /** Pull the DATA object literal out of the HTML by matching braces outside of strings. */
 function extractData(html) {
@@ -106,6 +113,87 @@ data.pitfalls.forEach((p, i) => insert.pitfall.run(p.n, p.d ?? null, i));
 data.tools.forEach((t, i) => insert.tool.run(t.n, t.d ?? null, t.c ?? null, i));
 data.reading.forEach((r, i) => insert.reading.run(r.n, r.d ?? null, r.c ?? null, i));
 
+// ---- concept annotations ---------------------------------------------------
+// Plain-language explanations, corrections to the carried-over prose, and concepts
+// this project named that the original vocabulary lacked. Runs before the facet pass
+// so that added concepts are already present when facets are checked for completeness.
+
+const conceptStats = { eli5: 0, corrected: 0, added: 0, addedLinks: 0 };
+const conceptProblems = [];
+
+if (existsSync(CONCEPT_ANNOTATIONS)) {
+  const ann = JSON.parse(readFileSync(CONCEPT_ANNOTATIONS, 'utf8'));
+
+  const addTag = db.prepare(`
+    INSERT INTO tag (id, name, facet, what, good, bad, watch, eli5, origin, position)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'added', ?)`);
+  const tagExists = db.prepare(`SELECT 1 FROM tag WHERE id = ?`);
+  const findEntry = db.prepare(`
+    SELECT e.id FROM entry e JOIN grp g ON g.id = e.group_id
+    WHERE g.domain_id = ? AND e.name = ?`);
+
+  let pos = data.algorithms.length;
+  const FACETS = new Set(['block', 'representation', 'category', 'deployment']);
+
+  for (const c of ann.additions ?? []) {
+    if (tagExists.get(c.id)) { conceptProblems.push(`added concept "${c.id}" already exists upstream`); continue; }
+    if (!FACETS.has(c.facet)) { conceptProblems.push(`added concept "${c.id}" has invalid facet "${c.facet}"`); continue; }
+    for (const field of ['name', 'what', 'good', 'bad', 'watch', 'eli5', 'why', 'importable']) {
+      if (!c[field]) conceptProblems.push(`added concept "${c.id}" is missing ${field}`);
+    }
+    addTag.run(c.id, c.name, c.facet, c.what ?? null, c.good ?? null, c.bad ?? null,
+      c.watch ?? null, c.eli5 ?? null, pos++);
+    conceptStats.added++;
+
+    // An added concept with no entries is a floating assertion. `applies_to` attaches it
+    // to entries that were already in the catalogue but had no word for this.
+    for (const [domainId, names] of Object.entries(c.applies_to ?? {})) {
+      for (const name of names) {
+        const row = findEntry.get(domainId, name);
+        if (!row) { conceptProblems.push(`concept "${c.id}" applies_to: no entry "${name}" in ${domainId}`); continue; }
+        insert.entryTag.run(row.id, c.id);
+        conceptStats.addedLinks++;
+      }
+    }
+  }
+
+  // Corrections to prose carried over from the source HTML. `was` must match what is
+  // actually there, so a correction cannot drift out of date without failing the build.
+  const setField = f => db.prepare(`UPDATE tag SET ${f} = ? WHERE id = ?`);
+  const CONCEPT_FIELDS = { what: setField('what'), good: setField('good'), bad: setField('bad'), watch: setField('watch'), name: setField('name') };
+  const readField = db.prepare(`SELECT id, name, what, good, bad, watch FROM tag WHERE id = ?`);
+
+  for (const c of ann.corrections ?? []) {
+    const row = readField.get(c.concept);
+    if (!row) { conceptProblems.push(`correction targets unknown concept "${c.concept}"`); continue; }
+    if (!CONCEPT_FIELDS[c.field]) { conceptProblems.push(`correction on "${c.concept}" names unknown field "${c.field}"`); continue; }
+    if (row[c.field] !== c.was) {
+      conceptProblems.push(`correction on ${c.concept}.${c.field}: "was" no longer matches the source text`);
+      continue;
+    }
+    if (!c.why) { conceptProblems.push(`correction on ${c.concept}.${c.field} has no reason`); continue; }
+    CONCEPT_FIELDS[c.field].run(c.now, c.concept);
+    conceptStats.corrected++;
+  }
+
+  const setEli5 = db.prepare(`UPDATE tag SET eli5 = ? WHERE id = ?`);
+  for (const [tagId, text] of Object.entries(ann.eli5 ?? {})) {
+    const { changes } = setEli5.run(text, tagId);
+    if (changes === 0) conceptProblems.push(`eli5 for unknown concept "${tagId}"`);
+    else conceptStats.eli5++;
+  }
+
+  const missing = db.prepare(`SELECT id FROM tag WHERE eli5 IS NULL OR eli5 = ''`).all().map(r => r.id);
+  if (missing.length) conceptProblems.push(`concepts with no eli5: ${missing.join(', ')}`);
+
+  if (conceptProblems.length) {
+    db.exec('ROLLBACK');
+    console.error('concept annotation errors:');
+    for (const p of conceptProblems) console.error(`  - ${p}`);
+    process.exit(1);
+  }
+}
+
 // ---- annotations -----------------------------------------------------------
 // Applied on top of the faithful migration. Keyed by (domain, entry name).
 // An override that matches no entry is an error, not a silent no-op — that is how
@@ -182,7 +270,7 @@ if (existsSync(FACET_ANNOTATIONS)) {
 
 // ---- technologies, algorithms, implementations -----------------------------
 
-const layerStats = { technologies: 0, algorithms: 0, implementations: 0, links: 0 };
+const layerStats = { technologies: 0, algorithms: 0, implementations: 0, links: 0, eli5: 0 };
 const layerProblems = [];
 
 if (existsSync(TECH_ANNOTATIONS)) {
@@ -198,21 +286,29 @@ if (existsSync(TECH_ANNOTATIONS)) {
 if (existsSync(ALGO_ANNOTATIONS)) {
   const ann = JSON.parse(readFileSync(ALGO_ANNOTATIONS, 'utf8'));
   const ins = db.prepare(`
-    INSERT INTO algorithm (id, name, concept_tag, year, authors, summary, description, tier, source_type, citation, url, position)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+    INSERT INTO algorithm (id, name, concept_tag, year, authors, summary, description, eli5, tier, source_type, citation, url, position)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
   const SOURCE_TYPES = new Set(['paper', 'article', 'reference-implementation', 'folklore']);
+  const TIERS = new Set(['source', 'operator', 'generator']);
   const tagExists = db.prepare(`SELECT 1 FROM tag WHERE id = ?`);
+  const seen = new Set();
 
   (ann.algorithms ?? []).forEach((a, i) => {
     if (a.concept && !tagExists.get(a.concept)) {
       layerProblems.push(`algorithm "${a.id}" references unknown concept "${a.concept}"`);
       return;
     }
+    if (seen.has(a.id)) { layerProblems.push(`duplicate algorithm id "${a.id}"`); return; }
+    seen.add(a.id);
     if (!a.url) layerProblems.push(`algorithm "${a.id}" has no citation url`);
     if (!a.description) layerProblems.push(`algorithm "${a.id}" has no description`);
+    // Not yet a hard error: the eli5 pass over the algorithm layer is still running, and
+    // the count below is how much of it is left. Becomes an error at full coverage.
+    if (a.eli5) layerStats.eli5++;
+    if (!TIERS.has(a.tier)) layerProblems.push(`algorithm "${a.id}" has invalid tier "${a.tier}"`);
     if (!SOURCE_TYPES.has(a.source_type)) layerProblems.push(`algorithm "${a.id}" has invalid source_type "${a.source_type}"`);
     ins.run(a.id, a.name, a.concept ?? null, a.year ?? null, a.authors ?? null,
-      a.summary ?? null, a.description ?? null, a.tier ?? null, a.source_type ?? null,
+      a.summary ?? null, a.description ?? null, a.eli5 ?? null, a.tier ?? null, a.source_type ?? null,
       a.citation ?? null, a.url ?? null, i);
     layerStats.algorithms++;
   });
@@ -273,6 +369,105 @@ if (existsSync(IMPL_ALGO_ANNOTATIONS)) {
   }
 }
 
+// ---- code samples ----------------------------------------------------------
+// Only for algorithms whose whole mechanism fits in CODE_LINE_LIMIT lines. The limit is
+// checked here, so "under 100 lines" on the page is a measured fact rather than a claim.
+
+let codeSamples = 0;
+if (existsSync(CODE_ANNOTATIONS)) {
+  const ann = JSON.parse(readFileSync(CODE_ANNOTATIONS, 'utf8'));
+  const ins = db.prepare(`
+    INSERT INTO code_sample (algorithm_id, technology, lines, note, code, position)
+    VALUES (?, ?, ?, ?, ?, ?)`);
+  const algoExists = db.prepare(`SELECT 1 FROM algorithm WHERE id = ?`);
+  const techExists = db.prepare(`SELECT 1 FROM technology WHERE id = ?`);
+
+  let i = 0;
+  for (const [algoId, samples] of Object.entries(ann.samples ?? {})) {
+    if (!algoExists.get(algoId)) { layerProblems.push(`code sample for unknown algorithm "${algoId}"`); continue; }
+    for (const s of samples) {
+      if (!techExists.get(s.technology)) {
+        layerProblems.push(`code sample "${algoId}" names unknown technology "${s.technology}"`); continue;
+      }
+      const code = Array.isArray(s.code) ? s.code.join('\n') : String(s.code ?? '');
+      const lines = code.split('\n').length;
+      if (!code.trim()) { layerProblems.push(`code sample "${algoId}/${s.technology}" is empty`); continue; }
+      if (lines > CODE_LINE_LIMIT) {
+        layerProblems.push(`code sample "${algoId}/${s.technology}" is ${lines} lines, over the ${CODE_LINE_LIMIT}-line limit`);
+        continue;
+      }
+      ins.run(algoId, s.technology, lines, s.note ?? null, code, i++);
+      codeSamples++;
+    }
+  }
+}
+
+// ---- research sources ------------------------------------------------------
+// Every URL gathered while checking something, with what it settles, linked to the
+// things it bears on. A link into a layer whose target does not exist is an error.
+
+const sourceStats = { sources: 0, links: 0 };
+if (existsSync(SOURCE_ANNOTATIONS)) {
+  const ann = JSON.parse(readFileSync(SOURCE_ANNOTATIONS, 'utf8'));
+  const ins = db.prepare(`
+    INSERT INTO source (id, url, title, kind, publisher, year, description, retrieved, position)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+  const link = db.prepare(`
+    INSERT OR IGNORE INTO source_link (source_id, layer, target_id, relation, note)
+    VALUES (?, ?, ?, ?, ?)`);
+
+  const EXISTS = {
+    concept: db.prepare(`SELECT 1 FROM tag WHERE id = ?`),
+    algorithm: db.prepare(`SELECT 1 FROM algorithm WHERE id = ?`),
+    technology: db.prepare(`SELECT 1 FROM technology WHERE id = ?`),
+    implementation: db.prepare(`SELECT 1 FROM implementation WHERE ecosystem = ? AND package = ?`),
+  };
+  const RELATIONS = new Set(['defines', 'describes', 'verifies', 'corrects', 'disputes', 'implements', 'benchmarks']);
+  const seenUrl = new Map();
+
+  (ann.sources ?? []).forEach((s, i) => {
+    if (!s.url) { layerProblems.push(`source "${s.id}" has no url`); return; }
+    if (!s.description) { layerProblems.push(`source "${s.id}" has no description of what it settles`); return; }
+    if (seenUrl.has(s.url)) { layerProblems.push(`source "${s.id}" repeats the url of "${seenUrl.get(s.url)}"`); return; }
+    seenUrl.set(s.url, s.id);
+    ins.run(s.id, s.url, s.title, s.kind ?? null, s.publisher ?? null, s.year ?? null,
+      s.description, s.retrieved ?? null, i);
+    sourceStats.sources++;
+
+    for (const l of s.links ?? []) {
+      const check = EXISTS[l.layer];
+      if (!check) { layerProblems.push(`source "${s.id}" links into unknown layer "${l.layer}"`); continue; }
+      if (!RELATIONS.has(l.relation)) { layerProblems.push(`source "${s.id}" uses unknown relation "${l.relation}"`); continue; }
+      const found = l.layer === 'implementation'
+        ? check.get(...(() => { const [eco, ...r] = l.target.split(':'); return [eco, r.join(':')]; })())
+        : check.get(l.target);
+      if (!found) { layerProblems.push(`source "${s.id}" links to missing ${l.layer} "${l.target}"`); continue; }
+      link.run(s.id, l.layer, l.target, l.relation, l.note ?? null);
+      sourceStats.links++;
+    }
+  });
+}
+
+// ---- corrections ledger ----------------------------------------------------
+// What this catalogue got wrong and has since fixed, as rows rather than quiet edits.
+
+let corrections = 0;
+if (existsSync(CORRECTION_ANNOTATIONS)) {
+  const ann = JSON.parse(readFileSync(CORRECTION_ANNOTATIONS, 'utf8'));
+  const ins = db.prepare(`
+    INSERT INTO correction (layer, target_id, field, was, now, why, source_url, position)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`);
+  const LAYERS = new Set(['concept', 'algorithm', 'implementation', 'source-data', 'readme']);
+
+  (ann.corrections ?? []).forEach((c, i) => {
+    if (!LAYERS.has(c.layer)) { layerProblems.push(`correction ${i} has unknown layer "${c.layer}"`); return; }
+    if (!c.why) { layerProblems.push(`correction on "${c.target}" has no reason`); return; }
+    ins.run(c.layer, c.target, c.field ?? null, c.was ?? null, c.now ?? null, c.why,
+      c.source_url ?? null, i);
+    corrections++;
+  });
+}
+
 if (layerProblems.length) {
   db.exec('ROLLBACK');
   console.error('algorithm / implementation errors:');
@@ -297,9 +492,15 @@ console.log(`\n  tiers:  ${tierStats.source} source · ${tierStats.operator} ope
 console.log(`  facets: ${Object.entries(facetStats).map(([k, v]) => `${v} ${k}`).join(' · ')}`);
 console.log(`\n  technologies    ${layerStats.technologies}`);
 console.log(`  algorithms      ${layerStats.algorithms}  (verified citations only)`);
+console.log(`    with eli5     ${layerStats.eli5} / ${layerStats.algorithms}`);
 console.log(`  implementations ${layerStats.implementations}  (registry-checked)`);
 console.log(`  impl↔tech links ${layerStats.links}`);
 console.log(`  impl↔algo links ${implAlgoLinks}`);
+console.log(`  code samples    ${codeSamples}  (each under ${CODE_LINE_LIMIT} lines)`);
+console.log(`\n  concepts: ${conceptStats.eli5} with eli5 · ${conceptStats.added} added `
+  + `(${conceptStats.addedLinks} entry links) · ${conceptStats.corrected} prose corrections`);
+console.log(`  sources         ${sourceStats.sources}  (${sourceStats.links} links to concepts/algorithms/implementations)`);
+console.log(`  corrections     ${corrections}`);
 
 if (orphanTags.size) {
   console.warn(`\n  WARNING: tag ids used by entries but absent from the algorithm cards: ${[...orphanTags].join(', ')}`);

@@ -474,6 +474,60 @@ mark { background: color-mix(in oklab, var(--accent) 30%, transparent); color: i
   border-radius: 4px; padding: 2px 7px; color: var(--ink-2);
 }
 
+/* ---------- explain like I'm five ----------
+   Set apart from the technical prose rather than blended into it, because the two are
+   meant to be checked against each other. */
+
+.eli5 {
+  margin: 10px 0 0;
+  padding: 9px 12px;
+  background: var(--panel-2);
+  border-left: 2px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+}
+.eli5-head {
+  font-family: var(--mono); font-size: 9.5px; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--accent); font-weight: 650; margin-bottom: 4px;
+}
+.eli5-text {
+  margin: 0 !important; font-size: 13px !important; line-height: 1.62 !important;
+  color: var(--ink) !important;
+}
+
+/* ---------- code samples ---------- */
+
+.code-sample {
+  margin-top: 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  overflow: hidden;
+}
+.code-head {
+  display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;
+  padding: 7px 11px; cursor: pointer; list-style: none;
+  font-size: 11.5px; color: var(--ink-2);
+}
+.code-head::-webkit-details-marker { display: none; }
+.code-head:hover { color: var(--ink); }
+.code-chevron {
+  font-size: 9px; color: var(--ink-3); transition: transform 0.12s;
+  display: inline-block;
+}
+.code-sample[open] .code-chevron { transform: rotate(90deg); }
+.code-lang { font-family: var(--mono); font-size: 11px; color: var(--accent); font-weight: 650; }
+.code-lines { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); }
+.code-note { font-size: 11px; color: var(--ink-3); flex: 1 1 200px; min-width: 0; }
+.code-body {
+  margin: 0; padding: 11px 13px; border-top: 1px solid var(--line);
+  background: var(--panel); overflow-x: auto;
+  font-family: var(--mono); font-size: 11.5px; line-height: 1.55;
+  color: var(--ink); tab-size: 2;
+}
+.code-body code { white-space: pre; }
+
+.s-added { border-color: var(--accent); color: var(--accent); }
+
 /* ---------- algorithms ---------- */
 
 .algo-list { display: grid; gap: 10px; margin: 16px 0 6px; }

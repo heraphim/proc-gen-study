@@ -1,0 +1,5 @@
+{
+  "_about": "Everything this catalogue asserted and later found to be wrong, kept as a row instead of a quiet edit. `was` is what it said before; `why` is what changed the answer.",
+  "_why": "The README already lists errors inherited from the source data and leaves them visible on purpose. This is the same policy applied to the project's own output: a catalogue that silently corrects itself gives no way to judge how often it is wrong.",
+  "corrections": []
+}

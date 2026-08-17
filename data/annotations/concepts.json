@@ -1,0 +1,43 @@
+{
+  "_about": "The concept layer's own annotations: plain-language explanations, corrections to the prose carried over from the source HTML, and concepts this project named that the original vocabulary lacked.",
+  "_why_eli5": "A concept you cannot explain without its own jargon is a concept you have not finished understanding. Writing these caught real vagueness — `sim`, `kit` and `shader` were the hardest, which is consistent with three of them being the ones the facet pass had already flagged as not really concepts.",
+  "_rules": {
+    "eli5": "No jargon, no name-dropping, and it must be something a child could picture. Every concept needs one; the migration fails without it.",
+    "corrections": "A correction never silently rewrites the source HTML. It records `field`, `was`, `now` and `why`, so the change is arguable and the provenance survives.",
+    "additions": "A concept may only be added if it passes the same three tests as the originals — irreducible, widespread, importable — and the importable test must name a real package."
+  },
+
+  "eli5": {
+    "noise": "Crumple a sheet of paper, then smooth it out a bit. Bumps everywhere, but bumps that are close together are close in height. Noise is a machine that gives you a number for any spot you ask about, and nearby spots get similar numbers — which is why it looks like hills and clouds instead of television static.",
+    "fractal": "Draw a tree. Now draw a smaller copy of the same tree at the end of every branch, and keep doing that. A fractal is a shape built out of smaller copies of itself, so you can zoom in forever and there is always more detail waiting.",
+    "lsys": "Start with one letter and a rule like \"every A turns into AB\". Apply it over and over and the word grows on its own. Now read the letters as orders for a pen — draw, turn left, remember this spot, come back to it — and the growing word draws a plant.",
+    "gram": "Mad Libs for shapes. One rule says a building is a bottom, some middles and a roof. Another says a middle is a row of windows. Keep swapping each word for what its rule says until there is nothing left to swap, and a building falls out.",
+    "wfc": "Sudoku, but with pictures instead of numbers. Every square starts out allowed to be any tile. You pick one square, and that instantly tells its neighbours which tiles they are no longer allowed to be. Keep picking and telling until every square has exactly one tile and nothing clashes.",
+    "ca": "Give every square on a chessboard one tiny rule about its neighbours — \"if most of the squares touching me are wall, I become wall too\" — and let every square obey it at the same moment. Do that a few times and shapes appear that nobody drew.",
+    "rd": "Two paints on a wet page. The first makes more of itself wherever it already is. The second spreads out faster and wipes the first one away. Where the two fight you get spots and stripes, which is the same reason a leopard has spots.",
+    "vor": "Scatter seeds on the floor, then give every bit of floor to whichever seed is nearest. You get patches with straight edges that meet at corners — dried cracked mud, a giraffe's coat, a cobbled street.",
+    "samp": "Putting sprinkles on a cake. Drop them at random and some pile up while other bits stay bare. These methods place each new sprinkle a polite distance from the ones already down, so it looks scattered by hand but covers everything evenly.",
+    "graph": "Dots joined by lines. The dots are rooms, or cities, or things you have to do; the lines say which ones connect. Once you have dots and lines you can ask useful questions — can I get from here to there, and what is the shortest way.",
+    "part": "Take a rectangle and cut it in two. Cut each of those in two. Keep going until the pieces are the size you want. Now they are rooms, or panels, or boxes on a page — and because you only ever cut, nothing can overlap.",
+    "cons": "Instead of telling the computer how to build the thing, you tell it the rules it is not allowed to break — no guard works two shifts in a row, every door must be reachable — and it goes hunting for something that obeys all of them at once.",
+    "sim": "Build a tiny pretend world with rules: water runs downhill, grass grows, rabbits eat grass, foxes eat rabbits. Press play, wait, and keep whatever it made. You are not drawing the answer, you are letting it happen and then taking a photograph.",
+    "ero": "Pour water and blow wind over a lump of clay for a very long time. Bits get scraped off the high places and dropped in the low places. That is the difference between a mountain and a crumpled blanket.",
+    "agent": "Lots of tiny stupid creatures, each one following two or three rules and only able to see what is right next to it. Nobody is in charge. Somehow they still make flocks, ant trails, veins, and rivers that branch.",
+    "evo": "Make a hundred rough attempts. Throw away all but the best few. Make wonky copies of the survivors and try again. You never have to know how to build the good thing — you only have to be able to say which of two attempts is better.",
+    "markov": "Read a long list of real names and count what letter usually follows what. Then make a new name by rolling dice weighted by those counts. It sounds like the list because it copied the list's habits, not its words.",
+    "ml": "Show a computer a hundred thousand photographs of faces until it works out for itself what makes a face look like a face. Then ask it for a new one, and it invents a person who was never photographed.",
+    "morph": "Measure a thousand real faces and work out the few sliders that describe how faces actually differ — rounder, longer, older, more surprised. Now any face is just slider settings, and nudging a slider gives you a new face that still looks like a person.",
+    "sdf": "Do not store the shape. Store a rule that answers one question: how far am I from the surface, and am I inside or outside? Once you can answer that anywhere, you can glue two shapes together, round off the join, and punch holes, all with arithmetic.",
+    "csg": "Modelling with cookie cutters. Start with blocks, tubes and balls, then bolt them together, cut one out of another, or keep only the bit where they overlap. Almost anything made in a factory is a handful of those steps.",
+    "spline": "A smooth curve you steer with a few handles, like bending a wire. Then slide a shape along the wire — the cross-section of a road, a pipe, a rope — and it sweeps out the whole object as it goes.",
+    "tile": "One tile, printed again and again so that the edges line up and you cannot find the joins. A few special sets of tiles fit together forever without ever repeating the same arrangement twice.",
+    "ik": "You know where you want your hand to end up. The puzzle is what your elbow and shoulder have to do to get it there. Working backwards from the hand to the joints is how a game character's feet land properly on a staircase.",
+    "dsp": "Make a sound out of arithmetic instead of playing a recording. Pluck an imaginary string, wobble one note with another note, and you get a sound that comes out slightly different every time — so it never wears out from being heard twice.",
+    "kit": "A LEGO set. A person carefully makes a few pieces that snap together neatly, and then the computer clicks thousands of them into buildings. Every piece looks good because a human made it; the endless variety comes from the clicking.",
+    "shader": "Do not keep the picture. Keep the recipe, and let the graphics card work out the colour of each pixel from scratch, every single frame. Nothing takes up space, and it never goes blurry when you walk right up to it.",
+    "rand": "A dice-rolling machine that only pretends to be random: feed it the same starting number and it rolls exactly the same sequence every time, forever. That is how a game can hand you an entire world in exchange for one short code."
+  },
+
+  "corrections": [],
+  "additions": []
+}

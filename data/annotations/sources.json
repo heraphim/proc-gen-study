@@ -1,0 +1,14 @@
+{
+  "_about": "Every URL consulted while checking something, with what it settles and what it bears on. Not a reading list — a reading list says what is worth reading, this says what was actually used and for which claim.",
+  "_rule": "`description` records the question the page answered, not what the page is about. A source with no link into the concept, algorithm, implementation or technology layers has no reason to be here.",
+  "_relations": {
+    "defines": "The origin of the idea, or the place it is given its standard form.",
+    "describes": "Explains the mechanism without being its origin — a survey, a tutorial, a course text.",
+    "verifies": "Was used to check a specific fact: a year, an author, a version, a package's existence.",
+    "corrects": "Overturned something this catalogue previously asserted.",
+    "disputes": "Contests a claim that other sources make. Recorded rather than resolved.",
+    "implements": "Code that is the reference for the method.",
+    "benchmarks": "Measures it against alternatives."
+  },
+  "sources": []
+}

@@ -323,6 +323,8 @@ state.data = data;
 
 const tagName = Object.fromEntries(data.tags.map(t => [t.id, t.name]));
 const tagById = Object.fromEntries(data.tags.map(t => [t.id, t]));
+const technologies = data.technologies ?? [];
+const techById = Object.fromEntries(technologies.map(t => [t.id, t]));
 
 /** Cross-layer indexes. Every card shows what it connects to, so relations are visible
     without opening anything. */
@@ -935,6 +937,17 @@ const FACET_TITLE = {
   deployment: 'Deployment — not concepts',
 };
 
+/* The plain-language explanation. Deliberately the first thing in the body: if the eli5
+   and the technical prose disagree, one of them is wrong, and putting them adjacent is
+   what makes that visible. */
+function eli5Block(text) {
+  if (!text) return null;
+  const box = el('div', 'eli5');
+  box.append(el('div', 'eli5-head', "Explain like I'm five"));
+  box.append(el('p', 'eli5-text', text));
+  return box;
+}
+
 function conceptCard(t) {
   const dl = el('dl');
   for (const [label, key] of [['What', 'what'], ['Good at', 'good'], ['Weak at', 'bad'], ['Watch', 'watch']]) {
@@ -942,6 +955,8 @@ function conceptCard(t) {
     dl.append(el('dt', null, label), el('dd', key === 'watch' ? 'watch' : null, t[key]));
   }
   const body = el('div');
+  const eli5 = eli5Block(t.eli5);
+  if (eli5) body.append(eli5);
   body.append(dl);
 
   const contains = facetMeta.contains?.[t.id];
@@ -961,7 +976,13 @@ function conceptCard(t) {
     cls: `block-card f-${t.facet}`,
     title: t.name,
     id: t.id,
-    badges: [{ cls: `facet-chip f-${t.facet}`, text: t.facet }],
+    badges: [
+      { cls: `facet-chip f-${t.facet}`, text: t.facet },
+      t.origin === 'added'
+        ? { cls: 'src-badge s-added', text: 'added',
+            title: 'Named by this project. The original 28-label vocabulary had no word for it.' }
+        : null,
+    ],
     metrics: [`${t.count} entries`, `${spread[t.id] ?? 0}/${data.domains.length} domains`],
     relations: [
       { label: 'Catalogue', items: [{ text: `${t.count} entries`, onClick: goToCatalogueTag(t.id) }] },
@@ -981,7 +1002,7 @@ filterablePage({
   host: '#facet-groups',
   items: data.tags,
   noun: 'concepts',
-  searchIn: t => [t.id, t.name, t.what, t.good, t.bad, t.watch].filter(Boolean).join(' '),
+  searchIn: t => [t.id, t.name, t.what, t.good, t.bad, t.watch, t.eli5].filter(Boolean).join(' '),
   filters: [{
     key: 'facet', label: 'Kind',
     options: FACET_ORDER.map(f => ({ id: f, label: FACET_TITLE[f].split(' — ')[0] })),
@@ -1017,6 +1038,8 @@ $('#algo-rule').textContent = algoMeta.rule ?? '';
 function algoCard(a) {
   const body = el('div');
   if (a.summary) body.append(el('p', 'algo-summary', a.summary));
+  const eli5 = eli5Block(a.eli5);
+  if (eli5) body.append(eli5);
   if (a.description) body.append(el('p', 'algo-description', a.description));
   if (a.citation) {
     const cite = el('div', 'algo-cite');
@@ -1029,6 +1052,8 @@ function algoCard(a) {
     }
     body.append(cite);
   }
+
+  for (const s of a.code ?? []) body.append(codeBlock(s));
 
   const impls = implByAlgorithm[a.id] ?? [];
   const tag = tagById[a.concept_tag];
@@ -1057,6 +1082,25 @@ function algoCard(a) {
   });
 }
 
+/* A code sample is collapsed by default and opens on its own, independently of the card:
+   the point of the card is the mechanism, and the point of the code is that the mechanism
+   really is that small. Both should be reachable without scrolling past the other. */
+function codeBlock(sample) {
+  const box = el('details', 'code-sample');
+  const sum = el('summary', 'code-head');
+  sum.append(el('span', 'code-chevron', '▸'));
+  sum.append(el('span', 'code-lang', techById[sample.technology]?.name ?? sample.technology));
+  sum.append(el('span', 'code-lines', `${sample.lines} lines`));
+  if (sample.note) sum.append(el('span', 'code-note', sample.note));
+  box.append(sum);
+  const pre = el('pre', 'code-body');
+  pre.append(el('code', null, sample.code));
+  box.append(pre);
+  // The card header toggles on click; a click inside the code must not also collapse it.
+  box.addEventListener('click', ev => ev.stopPropagation());
+  return box;
+}
+
 const SOURCE_TYPES = ['paper', 'article', 'reference-implementation', 'folklore'];
 
 filterablePage({
@@ -1064,8 +1108,8 @@ filterablePage({
   host: '#algo-list',
   items: algorithms,
   noun: 'algorithms',
-  searchIn: a => [a.name, a.authors, a.summary, a.description, a.citation, a.concept_tag, a.year]
-    .filter(Boolean).join(' '),
+  searchIn: a => [a.name, a.authors, a.summary, a.description, a.eli5, a.citation, a.concept_tag,
+    a.year, ...(a.code ?? []).map(c => c.code)].filter(Boolean).join(' '),
   filters: [
     {
       key: 'facet', label: 'Concept kind',
@@ -1117,8 +1161,6 @@ for (const [concept, names] of Object.entries(algoMeta.candidates ?? {})) {
 
 const implMeta = data.implMeta ?? {};
 const implementations = data.implementations ?? [];
-const technologies = data.technologies ?? [];
-const techById = Object.fromEntries(technologies.map(t => [t.id, t]));
 const techFilter = new Set();
 
 $('#impl-stats').textContent =

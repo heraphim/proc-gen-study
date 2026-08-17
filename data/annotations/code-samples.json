@@ -1,0 +1,6 @@
+{
+  "_about": "Runnable code for algorithms whose entire mechanism fits in under 100 lines. Held as arrays of lines so a change to a sample reads as a diff rather than as one replaced string.",
+  "_rule": "The 100-line limit is enforced by scripts/migrate.js, not by good intentions. A sample must be the whole method — no library calls doing the interesting part — and must run as written, with the note recording how.",
+  "_why": "An algorithm the catalogue describes in a paragraph and cites a paper for is still not something you can check. A hundred lines you can paste into a REPL is. Where a method genuinely does not fit — CP-SAT, marching cubes' 256-case table, an ML model — there is no sample, and that absence is information about the algorithm.",
+  "samples": {}
+}
