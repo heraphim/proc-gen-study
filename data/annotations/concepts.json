@@ -38,6 +38,63 @@
     "rand": "A dice-rolling machine that only pretends to be random: feed it the same starting number and it rolls exactly the same sequence every time, forever. That is how a game can hand you an entire world in exchange for one short code."
   },
 
-  "corrections": [],
+  "corrections": [
+    {
+      "concept": "ero",
+      "field": "bad",
+      "was": "Interactive iteration — full erosion passes take minutes to hours.",
+      "now": "Long offline passes, on the CPU. High-resolution CPU erosion does take minutes to hours — but the pipe-model formulation has run at interactive rates on the GPU since 2007, so \"not interactive\" is a property of the implementation, not of erosion.",
+      "why": "The claim contradicted this catalogue's own algorithm layer, which already lists Mei's GPU hydraulic erosion. Mei, Decaudin & Hu report interactive rates in the original paper, and the 2008 follow-up measures at least 20 fps at 2048×1024 with four material layers. Left as written, the concept card tells you not to attempt the thing the algorithm card tells you how to do.",
+      "source_url": "http://www-evasion.imag.fr/Publications/2007/MDH07/FastErosion_PG07.pdf"
+    },
+    {
+      "concept": "lsys",
+      "field": "bad",
+      "was": "Anything requiring global awareness — branches happily grow through each other.",
+      "now": "Global awareness, in the context-free form — branches happily grow through each other. Open L-systems fix exactly this by exchanging queries with an environment program, which is how collision, shading and competition for light get modelled; the cost is that the grammar stops being self-contained.",
+      "why": "True only of context-free L-systems. Měch & Prusinkiewicz's open L-systems add bidirectional communication with an environmental program, and collision between apices and leaf clusters is one of the effects they model. The catalogue already lists open-l-systems as an algorithm, so the concept contradicted its own algorithm layer — and the WATCH line's advice to \"add collision avoidance\" was describing a published formalism as if it were a hand-rolled patch.",
+      "source_url": "https://algorithmicbotany.org/papers/enviro.sig96.pdf"
+    },
+    {
+      "concept": "noise",
+      "field": "what",
+      "was": "Continuous pseudo-random fields: Perlin, simplex, value, Worley, Gabor, curl. Combined via fBm, ridged, billow and domain warping.",
+      "now": "Continuous pseudo-random fields: Perlin, simplex, value, Worley, Gabor. Combined via fBm, ridged, billow and domain warping — and turned into a divergence-free flow field by curl noise, which needs one of the others underneath it.",
+      "why": "Curl noise is not a noise basis and cannot be used in place of one. Bridson, Houriham & Nordenstam build a velocity field as the curl of a potential that is itself Perlin noise, so it is an operator over a field rather than another kind of field alongside Perlin and Worley. Listing it with the bases hid the fact that it requires one.",
+      "source_url": "https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph2007-curlnoise.pdf"
+    },
+    {
+      "concept": "tile",
+      "field": "watch",
+      "was": "Aperiodic tiles (Penrose, the 'hat') give coverage without visible repeat.",
+      "now": "Aperiodic tiles (Penrose, the 'hat', the 'spectre') give coverage without visible repeat. The hat only tiles if you also use its mirror image; the spectre is the strictly chiral one that does not.",
+      "why": "Every hat tiling requires reflected copies — the \"anti-hat\". Smith, Myers, Kaplan & Goodman-Strauss published the spectre two months later precisely because a monotile that needs its own mirror image is arguably not one tile. The distinction is not pedantry for anyone cutting a physical or one-sided tile set: with the hat alone the set does not work.",
+      "source_url": "https://arxiv.org/abs/2305.17743"
+    },
+    {
+      "concept": "wfc",
+      "field": "what",
+      "was": "Constraint propagation over a tile grid, with adjacency rules often learned from a single example image.",
+      "now": "Constraint propagation over a tile grid — AC-4 plus a minimum-entropy rule for choosing which cell to collapse next — with adjacency rules often learned from a single example image.",
+      "why": "Worth naming, because these two specifics are what separate WFC from the model synthesis it generalises. The propagation is AC-4, not the AC-3 this catalogue lists under constraint solving, and the cell choice is by minimum entropy rather than in scan order. Both come straight from the reference implementation's own README.",
+      "source_url": "https://github.com/mxgmn/WaveFunctionCollapse"
+    },
+    {
+      "concept": "wfc",
+      "field": "watch",
+      "was": "Contradictions need backtracking or restart. Layer WFC under a higher-level plan.",
+      "now": "Contradictions need a restart, or backtracking you add yourself — the reference implementation has none and simply stops without output. Layer WFC under a higher-level plan.",
+      "why": "\"Backtracking or restart\" implies a choice the canonical code does not offer. mxgmn's implementation reports a contradiction when a cell's coefficients all reach zero and gives up; the README notes the problem is NP-hard, so no always-terminating fast solution exists. The difference matters, because it is the difference between a generator that can hang and one that fails fast and can be retried.",
+      "source_url": "https://github.com/mxgmn/WaveFunctionCollapse"
+    },
+    {
+      "concept": "shader",
+      "field": "bad",
+      "was": "Anything gameplay logic needs to query — the CPU never sees it.",
+      "now": "Anything gameplay logic needs to query cheaply. Reading back is possible, but synchronous readback stalls both processors and the asynchronous form arrives a few frames late, so the usual answer is to compute the gameplay-relevant value on the CPU as well.",
+      "why": "\"The CPU never sees it\" is too strong — readback exists and is a documented API. What is true is its price: the CPU normally runs a frame or two ahead of the GPU, and reading results synchronously collapses that pipeline. Unity's own documentation for the asynchronous path states the trade plainly — no stall, but a few frames of latency. The practical advice is unchanged; the reason for it is what tells you whether a frame of latency is acceptable in your case.",
+      "source_url": "https://docs.unity3d.com/ScriptReference/Rendering.AsyncGPUReadback.html"
+    }
+  ],
   "additions": []
 }

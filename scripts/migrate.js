@@ -159,22 +159,28 @@ if (existsSync(CONCEPT_ANNOTATIONS)) {
 
   // Corrections to prose carried over from the source HTML. `was` must match what is
   // actually there, so a correction cannot drift out of date without failing the build.
+  // Each one also lands in the correction ledger, so there is a single count of how often
+  // this catalogue has been wrong regardless of which layer the mistake was in.
   const setField = f => db.prepare(`UPDATE tag SET ${f} = ? WHERE id = ?`);
   const CONCEPT_FIELDS = { what: setField('what'), good: setField('good'), bad: setField('bad'), watch: setField('watch'), name: setField('name') };
   const readField = db.prepare(`SELECT id, name, what, good, bad, watch FROM tag WHERE id = ?`);
+  const logCorrection = db.prepare(`
+    INSERT INTO correction (layer, target_id, field, was, now, why, source_url, position)
+    VALUES ('concept', ?, ?, ?, ?, ?, ?, ?)`);
 
-  for (const c of ann.corrections ?? []) {
+  (ann.corrections ?? []).forEach((c, i) => {
     const row = readField.get(c.concept);
-    if (!row) { conceptProblems.push(`correction targets unknown concept "${c.concept}"`); continue; }
-    if (!CONCEPT_FIELDS[c.field]) { conceptProblems.push(`correction on "${c.concept}" names unknown field "${c.field}"`); continue; }
+    if (!row) { conceptProblems.push(`correction targets unknown concept "${c.concept}"`); return; }
+    if (!CONCEPT_FIELDS[c.field]) { conceptProblems.push(`correction on "${c.concept}" names unknown field "${c.field}"`); return; }
     if (row[c.field] !== c.was) {
       conceptProblems.push(`correction on ${c.concept}.${c.field}: "was" no longer matches the source text`);
-      continue;
+      return;
     }
-    if (!c.why) { conceptProblems.push(`correction on ${c.concept}.${c.field} has no reason`); continue; }
+    if (!c.why) { conceptProblems.push(`correction on ${c.concept}.${c.field} has no reason`); return; }
     CONCEPT_FIELDS[c.field].run(c.now, c.concept);
+    logCorrection.run(c.concept, c.field, c.was, c.now, c.why, c.source_url ?? null, i);
     conceptStats.corrected++;
-  }
+  });
 
   const setEli5 = db.prepare(`UPDATE tag SET eli5 = ? WHERE id = ?`);
   for (const [tagId, text] of Object.entries(ann.eli5 ?? {})) {
@@ -461,12 +467,19 @@ if (existsSync(CORRECTION_ANNOTATIONS)) {
 
   (ann.corrections ?? []).forEach((c, i) => {
     if (!LAYERS.has(c.layer)) { layerProblems.push(`correction ${i} has unknown layer "${c.layer}"`); return; }
+    if (c.layer === 'concept') {
+      layerProblems.push(`correction on "${c.target}" belongs in concepts.json, which applies it as well as recording it`);
+      return;
+    }
     if (!c.why) { layerProblems.push(`correction on "${c.target}" has no reason`); return; }
     ins.run(c.layer, c.target, c.field ?? null, c.was ?? null, c.now ?? null, c.why,
-      c.source_url ?? null, i);
+      c.source_url ?? null, 1000 + i);
     corrections++;
   });
 }
+
+// Concept corrections were logged during the concept pass, so count them here.
+corrections += conceptStats.corrected;
 
 if (layerProblems.length) {
   db.exec('ROLLBACK');

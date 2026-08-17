@@ -337,6 +337,72 @@ for (const a of data.algorithms ?? []) (algosByConcept[a.concept_tag] ??= []).pu
 const implsByConcept = {};
 for (const im of data.implementations ?? []) (implsByConcept[im.concept_tag] ??= []).push(im);
 
+/* Provenance. Two things every card can carry: what this catalogue got wrong about it, and
+   which URLs were used to check it. Both are kept next to the claim rather than on a page of
+   their own, because a correction filed elsewhere is a correction nobody reads. */
+const sourceById = Object.fromEntries((data.sources ?? []).map(s => [s.id, s]));
+const correctionsFor = (layer, id) =>
+  (data.corrections ?? []).filter(c => c.layer === layer && c.target_id === id);
+const sourcesFor = (layer, id) =>
+  (data.sourcesFor?.[`${layer}:${id}`] ?? [])
+    .map(l => ({ ...(sourceById[l.id] ?? {}), relation: l.relation, note: l.note }))
+    .filter(s => s.url);
+
+function externalLink(href, text, cls = 'tl-src') {
+  const a = el('a', cls, text);
+  a.href = href; a.target = '_blank'; a.rel = 'noreferrer';
+  a.addEventListener('click', ev => ev.stopPropagation());
+  return a;
+}
+
+function provenanceBlock(layer, id) {
+  const corrections = correctionsFor(layer, id);
+  const sources = sourcesFor(layer, id);
+  if (!corrections.length && !sources.length) return null;
+
+  const box = el('div', 'provenance');
+
+  if (corrections.length) {
+    box.append(el('div', 'prov-head warn',
+      corrections.length === 1 ? 'Corrected' : `Corrected (${corrections.length})`));
+    for (const c of corrections) {
+      const row = el('div', 'correction');
+      row.append(el('div', 'corr-field', c.field ?? ''));
+      if (c.was) {
+        const was = el('div', 'corr-was');
+        was.append(el('span', 'corr-tag', 'was'), el('span', null, c.was));
+        row.append(was);
+      }
+      if (c.now) {
+        const now = el('div', 'corr-now');
+        now.append(el('span', 'corr-tag', 'now'), el('span', null, c.now));
+        row.append(now);
+      }
+      const why = el('div', 'corr-why');
+      why.append(el('span', 'corr-tag', 'why'), el('span', null, c.why));
+      if (c.source_url) why.append(externalLink(c.source_url, 'source'));
+      row.append(why);
+      box.append(row);
+    }
+  }
+
+  if (sources.length) {
+    box.append(el('div', 'prov-head', sources.length === 1 ? 'Source' : `Sources (${sources.length})`));
+    for (const s of sources) {
+      const row = el('div', 'prov-source');
+      const top = el('div', 'prov-title');
+      top.append(el('span', `rel-chip r-${s.relation}`, s.relation));
+      top.append(externalLink(s.url, s.title, 'prov-link'));
+      if (s.year) top.append(el('span', 'prov-year', String(s.year)));
+      row.append(top);
+      if (s.description) row.append(el('div', 'prov-desc', s.description));
+      if (s.note) row.append(el('div', 'prov-note', s.note));
+      box.append(row);
+    }
+  }
+  return box;
+}
+
 const goToCatalogueTag = tag => () => {
   state.tiers.clear(); state.domains.clear(); state.search = '';
   $('#search').value = '';
@@ -969,8 +1035,12 @@ function conceptCard(t) {
     body.append(box);
   }
 
+  const prov = provenanceBlock('concept', t.id);
+  if (prov) body.append(prov);
+
   const algos = algosByConcept[t.id] ?? [];
   const impls = implsByConcept[t.id] ?? [];
+  const corrected = correctionsFor('concept', t.id).length;
 
   return entityCard({
     cls: `block-card f-${t.facet}`,
@@ -981,6 +1051,10 @@ function conceptCard(t) {
       t.origin === 'added'
         ? { cls: 'src-badge s-added', text: 'added',
             title: 'Named by this project. The original 28-label vocabulary had no word for it.' }
+        : null,
+      corrected
+        ? { cls: 'src-badge', text: corrected === 1 ? 'corrected' : `${corrected} corrections`,
+            title: 'The prose carried over from the source reference was wrong. Open the card for what it said and why it changed.' }
         : null,
     ],
     metrics: [`${t.count} entries`, `${spread[t.id] ?? 0}/${data.domains.length} domains`],
@@ -1055,8 +1129,12 @@ function algoCard(a) {
 
   for (const s of a.code ?? []) body.append(codeBlock(s));
 
+  const prov = provenanceBlock('algorithm', a.id);
+  if (prov) body.append(prov);
+
   const impls = implByAlgorithm[a.id] ?? [];
   const tag = tagById[a.concept_tag];
+  const corrected = correctionsFor('algorithm', a.id).length;
 
   return entityCard({
     cls: tag?.facet ? `block-card f-${tag.facet}` : 'block-card',
@@ -1068,6 +1146,14 @@ function algoCard(a) {
         ? { cls: `src-badge s-${a.source_type}`,
             text: a.source_type.replace('reference-implementation', 'ref impl'),
             title: 'Not academically published — admitted deliberately, and labelled.' }
+        : null,
+      (a.code ?? []).length
+        ? { cls: 'src-badge s-code', text: `${a.code.length === 1 ? a.code[0].lines + ' lines' : a.code.length + ' samples'}`,
+            title: 'The whole mechanism, as running code, inside the card.' }
+        : null,
+      corrected
+        ? { cls: 'src-badge', text: corrected === 1 ? 'corrected' : `${corrected} corrections`,
+            title: 'Something this catalogue asserted about it was wrong. Open the card for what and why.' }
         : null,
     ],
     metrics: [String(a.year ?? '—'), a.authors ?? ''].filter(Boolean),

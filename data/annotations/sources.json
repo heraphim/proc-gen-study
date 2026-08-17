@@ -10,5 +10,90 @@
     "implements": "Code that is the reference for the method.",
     "benchmarks": "Measures it against alternatives."
   },
-  "sources": []
+  "sources": [
+    {
+      "id": "mei-2007-gpu-erosion",
+      "url": "http://www-evasion.imag.fr/Publications/2007/MDH07/FastErosion_PG07.pdf",
+      "title": "Fast Hydraulic Erosion Simulation and Visualization on GPU",
+      "kind": "paper",
+      "publisher": "Pacific Graphics 2007",
+      "year": 2007,
+      "description": "Settled whether erosion is inherently an offline process. It is not: the pipe-model formulation of shallow-water flow, erosion, transport and deposition runs entirely on the GPU at interactive rates, which is why the concept card's \"minutes to hours\" claim had to be narrowed to CPU implementations.",
+      "retrieved": "2026-08-17",
+      "links": [
+        { "layer": "concept", "target": "ero", "relation": "corrects", "note": "Overturned the claim that erosion cannot be iterated interactively." },
+        { "layer": "algorithm", "target": "mei-gpu-erosion", "relation": "defines" }
+      ]
+    },
+    {
+      "id": "mech-1996-open-lsystems",
+      "url": "https://algorithmicbotany.org/papers/enviro.sig96.pdf",
+      "title": "Visual Models of Plants Interacting with Their Environment",
+      "kind": "paper",
+      "publisher": "SIGGRAPH 96",
+      "year": 1996,
+      "description": "Establishes that L-systems can be environmentally aware. Open L-systems exchange information bidirectionally with a program modelling the environment, which is how collision between branches, competition for light and pruning are handled — so the blanket claim that L-systems cannot do global awareness only holds for the context-free form.",
+      "retrieved": "2026-08-17",
+      "links": [
+        { "layer": "concept", "target": "lsys", "relation": "corrects", "note": "Narrowed the \"no global awareness\" limitation to context-free L-systems." },
+        { "layer": "algorithm", "target": "open-l-systems", "relation": "defines" }
+      ]
+    },
+    {
+      "id": "bridson-2007-curl-noise",
+      "url": "https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph2007-curlnoise.pdf",
+      "title": "Curl-Noise for Procedural Fluid Flow",
+      "kind": "paper",
+      "publisher": "SIGGRAPH 2007",
+      "year": 2007,
+      "description": "Shows curl noise is a construction over a noise field, not a noise basis: the velocity field is the curl of a potential built from Perlin noise, which is what makes it exactly divergence-free without solving a linear system. Used to move curl out of the list of noise bases in the concept card.",
+      "retrieved": "2026-08-17",
+      "links": [
+        { "layer": "concept", "target": "noise", "relation": "corrects", "note": "Curl noise was listed alongside Perlin and Worley as if it were an alternative to them." },
+        { "layer": "algorithm", "target": "curl-noise", "relation": "defines" }
+      ]
+    },
+    {
+      "id": "smith-2023-spectre",
+      "url": "https://arxiv.org/abs/2305.17743",
+      "title": "A chiral aperiodic monotile",
+      "kind": "paper",
+      "publisher": "arXiv:2305.17743",
+      "year": 2023,
+      "description": "The reason the hat and the spectre are not interchangeable. Hat tilings need reflected copies; the spectre family admits only chiral non-periodic tilings, so it tiles without its mirror image. Decides whether a one-sided or physically cut tile set can be built from a single shape.",
+      "retrieved": "2026-08-17",
+      "links": [
+        { "layer": "concept", "target": "tile", "relation": "corrects", "note": "The concept card implied the hat alone suffices for aperiodic coverage." }
+      ]
+    },
+    {
+      "id": "mxgmn-wfc-readme",
+      "url": "https://github.com/mxgmn/WaveFunctionCollapse",
+      "title": "WaveFunctionCollapse — reference implementation and README",
+      "kind": "reference-implementation",
+      "publisher": "Maxim Gumin",
+      "year": 2016,
+      "description": "The specification for what people mean by WFC, since there is no paper. Settles three things: adjacency is learned from N×N patterns in one bitmap, propagation is AC-4 with a minimum-entropy choice heuristic, and a contradiction ends the run — there is no backtracking. Also states the generalisation of Merrell's model synthesis from tiles to overlapping patterns.",
+      "retrieved": "2026-08-17",
+      "links": [
+        { "layer": "concept", "target": "wfc", "relation": "corrects", "note": "Named AC-4 and minimum entropy; removed the implication that the canonical implementation backtracks." },
+        { "layer": "algorithm", "target": "wave-function-collapse", "relation": "implements" },
+        { "layer": "algorithm", "target": "model-synthesis", "relation": "describes", "note": "States what WFC changed relative to Merrell." }
+      ]
+    },
+    {
+      "id": "unity-async-gpu-readback",
+      "url": "https://docs.unity3d.com/ScriptReference/Rendering.AsyncGPUReadback.html",
+      "title": "Unity — AsyncGPUReadback",
+      "kind": "docs",
+      "publisher": "Unity Technologies",
+      "year": 2024,
+      "description": "Documents the actual cost of getting shader-generated data back to the CPU: the asynchronous path copies without stalling either processor but adds a few frames of latency. Used to replace \"the CPU never sees it\" with the real trade-off.",
+      "retrieved": "2026-08-17",
+      "links": [
+        { "layer": "concept", "target": "shader", "relation": "corrects", "note": "Readback exists; what is true is that it costs a stall or a few frames." },
+        { "layer": "technology", "target": "gpu", "relation": "describes" }
+      ]
+    }
+  ]
 }
