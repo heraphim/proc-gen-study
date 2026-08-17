@@ -822,6 +822,7 @@ const ROUTES = {
   '/case-studies': 'cases',
   '/pitfalls': 'pitfalls',
   '/tools': 'refs',
+  '/sources': 'sources',
   '/sql': 'sql',
 };
 const PATHS = Object.fromEntries(Object.entries(ROUTES).map(([p, v]) => [v, p]));
@@ -1543,6 +1544,150 @@ filterablePage({
     body: r.description ? el('p', 'algo-summary', r.description) : null,
   }),
 });
+
+/* ---------------- sources & corrections ---------------- */
+
+const sources = data.sources ?? [];
+const corrections = data.corrections ?? [];
+const sourceMeta = data.sourceMeta ?? {};
+
+/** Reverse the sourcesFor index: source id -> the things it is attached to. */
+const linksBySource = {};
+for (const [key, entries] of Object.entries(data.sourcesFor ?? {})) {
+  const [layer, ...rest] = key.split(':');
+  const target = rest.join(':');
+  for (const e of entries) (linksBySource[e.id] ??= []).push({ layer, target, relation: e.relation, note: e.note });
+}
+
+const LAYER_LABEL = {
+  concept: id => tagById[id]?.name ?? id,
+  algorithm: id => algoById[id]?.name ?? id,
+  technology: id => techById[id]?.name ?? id,
+  implementation: id => id,
+};
+const jumpTo = { concept: 'blocks', algorithm: 'algorithms', implementation: 'implementations', technology: 'implementations' };
+
+$('#sources-stats').textContent =
+  `${sources.length} sources · ${Object.values(linksBySource).flat().length} links · `
+  + `${Object.values(linksBySource).flat().filter(l => l.relation === 'corrects').length} of them overturned something`;
+$('#sources-rule').textContent = sourceMeta.rule ?? '';
+
+const relHost = $('#sources-relations');
+for (const [name, desc] of Object.entries(sourceMeta.relations ?? {})) {
+  const t = el('div', 'test-card');
+  t.append(el('h4', null, name), el('p', null, desc));
+  relHost.append(t);
+}
+
+filterablePage({
+  toolbar: '#toolbar-sources',
+  host: '#sources-list',
+  items: sources,
+  noun: 'sources',
+  searchIn: s => [s.id, s.title, s.description, s.publisher, s.kind, s.year,
+    ...(linksBySource[s.id] ?? []).flatMap(l => [l.target, l.relation, l.note])].filter(Boolean).join(' '),
+  filters: [
+    {
+      key: 'kind', label: 'Kind',
+      options: [...new Set(sources.map(s => s.kind).filter(Boolean))].sort().map(k => ({ id: k, label: k })),
+      match: (s, id) => s.kind === id,
+    },
+    {
+      key: 'rel', label: 'Did what',
+      options: Object.keys(sourceMeta.relations ?? {}).map(r => ({ id: r, label: r })),
+      match: (s, id) => (linksBySource[s.id] ?? []).some(l => l.relation === id),
+    },
+    {
+      key: 'layer', label: 'Bears on',
+      options: ['concept', 'algorithm', 'implementation', 'technology'].map(l => ({ id: l, label: l })),
+      match: (s, id) => (linksBySource[s.id] ?? []).some(l => l.layer === id),
+    },
+  ],
+  groupBy: s => {
+    const rels = (linksBySource[s.id] ?? []).map(l => l.relation);
+    return rels.includes('corrects') || rels.includes('disputes') ? 'corrects' : 'supports';
+  },
+  groupHeader: (key, rows) => {
+    const box = el('span', 'grp-title');
+    box.append(el('span', 'grp-name', key === 'corrects'
+      ? 'Overturned something this catalogue asserted'
+      : 'Established or verified a claim'));
+    box.append(el('span', 'grp-note', key === 'corrects'
+      ? 'The expensive ones. Each of these changed a row.'
+      : 'Checked and held.'));
+    return box;
+  },
+  groupOrder: a => (a === 'corrects' ? -1 : 1),
+  renderItem: s => {
+    const body = el('div');
+    body.append(el('p', 'algo-summary', s.description));
+    const facts = el('dl');
+    for (const [label, v] of [['Publisher', s.publisher], ['Year', s.year],
+      ['Kind', s.kind], ['Retrieved', s.retrieved], ['Id', s.id]]) {
+      if (!v) continue;
+      facts.append(el('dt', null, label), el('dd', null, String(v)));
+    }
+    body.append(facts);
+    const cite = el('div', 'algo-cite');
+    cite.append(externalLink(s.url, s.url.replace(/^https?:\/\//, '').slice(0, 78)));
+    body.append(cite);
+
+    const links = linksBySource[s.id] ?? [];
+    return entityCard({
+      cls: 'block-card',
+      title: s.title,
+      badges: [s.kind ? { cls: 'src-badge s-role', text: s.kind } : null],
+      metrics: [s.publisher, s.year ? String(s.year) : ''].filter(Boolean),
+      relations: ['concept', 'algorithm', 'implementation', 'technology'].map(layer => {
+        const of = links.filter(l => l.layer === layer);
+        if (!of.length) return null;
+        return {
+          label: layer,
+          items: of.map(l => ({
+            text: `${l.relation} · ${LAYER_LABEL[layer](l.target)}`,
+            cls: l.relation === 'corrects' || l.relation === 'disputes' ? 'orphan' : '',
+            title: l.note ?? '',
+            onClick: goToPage(jumpTo[layer]),
+          })),
+        };
+      }).filter(Boolean),
+      body,
+    });
+  },
+});
+
+const CORR_LAYER_TITLE = {
+  concept: 'Concept layer',
+  algorithm: 'Algorithm layer',
+  implementation: 'Implementation layer',
+  'source-data': 'Source data carried over from the original reference',
+  readme: 'The README\'s own claims',
+};
+
+$('#corrections-stats').textContent =
+  `${corrections.length} so far, across ${new Set(corrections.map(c => c.layer)).size} layers.`;
+
+const corrHost = $('#corrections-list');
+for (const layer of Object.keys(CORR_LAYER_TITLE)) {
+  const rows = corrections.filter(c => c.layer === layer);
+  if (!rows.length) continue;
+  const group = el('div', 'cand-group');
+  group.append(el('div', 'cand-head', `${CORR_LAYER_TITLE[layer]}  (${rows.length})`));
+  for (const c of rows) {
+    const row = el('div', 'correction');
+    const head = el('div', 'corr-field');
+    head.append(el('span', null, `${c.target_id}${c.field ? ' · ' + c.field : ''}`));
+    row.append(head);
+    if (c.was) { const d = el('div', 'corr-was'); d.append(el('span', 'corr-tag', 'was'), el('span', null, c.was)); row.append(d); }
+    if (c.now) { const d = el('div', 'corr-now'); d.append(el('span', 'corr-tag', 'now'), el('span', null, c.now)); row.append(d); }
+    const why = el('div', 'corr-why');
+    why.append(el('span', 'corr-tag', 'why'), el('span', null, c.why));
+    if (c.source_url) why.append(externalLink(c.source_url, 'source'));
+    row.append(why);
+    group.append(row);
+  }
+  corrHost.append(group);
+}
 
 /* ---------------- SQL console ----------------
    The console POSTs SQL back to the server, so the static build ships neither the tab

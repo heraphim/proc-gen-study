@@ -21,6 +21,7 @@
     <button data-view="cases">Case studies</button>
     <button data-view="pitfalls">Pitfalls</button>
     <button data-view="refs">Tools &amp; reading</button>
+    <button data-view="sources">Sources</button>
     <button data-view="sql">SQL</button>
   </nav>
   <span class="counts" id="headline"></span>
@@ -393,6 +394,38 @@
     <div class="content wide">
       <div class="page-toolbar" id="toolbar-refs"></div>
       <div id="refs-list"></div>
+    </div>
+  </section>
+
+  <!-- Sources & corrections -->
+  <section class="view" id="view-sources">
+    <div class="content wide prose">
+      <div class="hero">
+        <h2>Sources</h2>
+        <p class="hero-def">
+          Every URL consulted while checking something, with the question it answered and what
+          it bears on. Not a reading list — a reading list says what is worth reading, this says
+          what was actually used, for which claim.
+        </p>
+        <p class="hero-sub" id="sources-stats"></p>
+      </div>
+
+      <div class="callout" id="sources-rule"></div>
+
+      <h2 class="def-h">Relations</h2>
+      <p>A source is attached to a concept, an algorithm, an implementation or a technology,
+      with the kind of work it did. <code>corrects</code> is the one that matters most: it marks
+      a source that overturned something this catalogue had already asserted.</p>
+      <div id="sources-relations" class="tests"></div>
+
+      <div class="page-toolbar" id="toolbar-sources"></div>
+      <div id="sources-list"></div>
+
+      <h2 class="def-h">Corrections</h2>
+      <p>What this catalogue said, what it says now, and why. Kept as rows rather than quiet
+      edits, because a catalogue that silently corrects itself gives you no way to judge how
+      often it is wrong. <span id="corrections-stats"></span></p>
+      <div id="corrections-list" class="candidates"></div>
     </div>
   </section>
 

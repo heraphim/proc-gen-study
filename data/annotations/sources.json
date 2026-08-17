@@ -480,6 +480,304 @@
           "relation": "corrects"
         }
       ]
+    },
+    {
+      "id": "efros-2001-quilting",
+      "url": "https://people.eecs.berkeley.edu/~efros/research/quilting/quilting.pdf",
+      "title": "Image Quilting for Texture Synthesis and Transfer",
+      "kind": "paper",
+      "publisher": "SIGGRAPH 2001",
+      "year": 2001,
+      "description": "Separates the two ideas usually conflated when people say \"quilting\": copying patches instead of pixels, which bought two orders of magnitude of speed, and cutting each seam along a minimum-cost path instead of blending it, which bought quality blending cannot. Used to put the texsyn progression in the right order.",
+      "retrieved": "2026-08-17",
+      "links": [
+        {
+          "layer": "algorithm",
+          "target": "image-quilting",
+          "relation": "defines"
+        },
+        {
+          "layer": "concept",
+          "target": "texsyn",
+          "relation": "describes"
+        }
+      ]
+    },
+    {
+      "id": "barnes-2009-patchmatch",
+      "url": "https://gfx.cs.princeton.edu/pubs/Barnes_2009_PAR/patchmatch.pdf",
+      "title": "PatchMatch: A Randomized Correspondence Algorithm for Structural Image Editing",
+      "kind": "paper",
+      "publisher": "SIGGRAPH 2009",
+      "year": 2009,
+      "description": "Settles why every earlier texture-synthesis method suddenly became interactive around 2009: not a better synthesiser, but a cheap approximate nearest-neighbour field. Random initialisation, propagation from already-scanned neighbours, and random search at decreasing radii.",
+      "retrieved": "2026-08-17",
+      "links": [
+        {
+          "layer": "algorithm",
+          "target": "patchmatch",
+          "relation": "defines"
+        }
+      ]
+    },
+    {
+      "id": "garland-1997-qem",
+      "url": "https://www.cs.cmu.edu/~garland/Papers/quadrics.pdf",
+      "title": "Surface Simplification Using Quadric Error Metrics",
+      "kind": "paper",
+      "publisher": "SIGGRAPH 97",
+      "year": 1997,
+      "description": "The algorithm that decides what all generated geometry looks like at a distance, since it is what every automatic LOD chain runs. Establishes that the error can be accumulated per vertex as a 4x4 quadratic form rather than recomputed against the original mesh, which is what keeps it cheap.",
+      "retrieved": "2026-08-17",
+      "links": [
+        {
+          "layer": "algorithm",
+          "target": "qem-decimation",
+          "relation": "defines"
+        },
+        {
+          "layer": "concept",
+          "target": "mesh",
+          "relation": "describes"
+        }
+      ]
+    },
+    {
+      "id": "jakob-2015-instant-meshes",
+      "url": "https://igl.ethz.ch/projects/instant-meshes/instant-meshes-SA-2015-jakob-et-al.pdf",
+      "title": "Instant Field-Aligned Meshes",
+      "kind": "paper",
+      "publisher": "SIGGRAPH Asia 2015",
+      "year": 2015,
+      "description": "Answers the catalogue entry \"Remeshing & retopology\", which had no method attached. Two local smoothing problems — an orientation field, then a position field — replace a global parameterisation, which is why it runs interactively on million-triangle meshes where earlier methods did not.",
+      "retrieved": "2026-08-17",
+      "links": [
+        {
+          "layer": "algorithm",
+          "target": "instant-meshes",
+          "relation": "defines"
+        }
+      ]
+    },
+    {
+      "id": "kazhdan-2006-poisson-recon",
+      "url": "https://hhoppe.com/poissonrecon.pdf",
+      "title": "Poisson Surface Reconstruction",
+      "kind": "paper",
+      "publisher": "Symposium on Geometry Processing 2006",
+      "year": 2006,
+      "description": "Why photogrammetry and LiDAR pipelines all produce watertight, slightly soft meshes: the reconstruction is a global least-squares fit of a gradient field, so noise averages out and holes get filled by the smoothest continuation — including holes that should have stayed open.",
+      "retrieved": "2026-08-17",
+      "links": [
+        {
+          "layer": "algorithm",
+          "target": "poisson-surface-reconstruction",
+          "relation": "defines"
+        }
+      ]
+    },
+    {
+      "id": "perez-2003-poisson-editing",
+      "url": "https://www.cs.jhu.edu/~misha/Fall07/Papers/Perez03.pdf",
+      "title": "Poisson Image Editing",
+      "kind": "paper",
+      "publisher": "SIGGRAPH 2003",
+      "year": 2003,
+      "description": "Establishes the gradient-domain half of seam removal, complementary to the pixel-selection half that graph-cut textures solve. Transferring gradients rather than values lets an inserted region relight itself to its surroundings, which is why the seam vanishes without feathering.",
+      "retrieved": "2026-08-17",
+      "links": [
+        {
+          "layer": "algorithm",
+          "target": "poisson-image-editing",
+          "relation": "defines"
+        },
+        {
+          "layer": "concept",
+          "target": "filter",
+          "relation": "describes"
+        }
+      ]
+    },
+    {
+      "id": "tomasi-1998-bilateral",
+      "url": "https://users.cs.duke.edu/~tomasi/papers/tomasi/tomasiIccv98.pdf",
+      "title": "Bilateral Filtering for Gray and Color Images",
+      "kind": "paper",
+      "publisher": "ICCV 1998",
+      "year": 1998,
+      "description": "The one extra term that turns a blur into an edge-preserving operator, and therefore the basis of the detail-layer split used throughout texture authoring: filter a heightfield, subtract, and the large forms separate from the fine grain without the halos a Gaussian split produces.",
+      "retrieved": "2026-08-17",
+      "links": [
+        {
+          "layer": "algorithm",
+          "target": "bilateral-filter",
+          "relation": "defines"
+        }
+      ]
+    },
+    {
+      "id": "hart-1996-sphere-tracing",
+      "url": "https://link.springer.com/article/10.1007/s003710050084",
+      "title": "Sphere Tracing: A Geometric Method for the Antialiased Ray Tracing of Implicit Surfaces",
+      "kind": "paper",
+      "publisher": "The Visual Computer 12(10)",
+      "year": 1996,
+      "description": "The step the sdf concept was missing: five polygonisers were recorded and nothing about rendering a distance field directly. Sphere tracing is what makes an SDF interesting — no tessellation, no acceleration structure, and booleans and infinite repetition become one-line changes.",
+      "retrieved": "2026-08-17",
+      "links": [
+        {
+          "layer": "algorithm",
+          "target": "sphere-tracing",
+          "relation": "defines"
+        },
+        {
+          "layer": "concept",
+          "target": "sdf",
+          "relation": "describes"
+        },
+        {
+          "layer": "concept",
+          "target": "shader",
+          "relation": "describes"
+        }
+      ]
+    },
+    {
+      "id": "knuth-1981-line-breaking",
+      "url": "https://onlinelibrary.wiley.com/doi/10.1002/spe.4380111102",
+      "title": "Breaking Paragraphs into Lines",
+      "kind": "paper",
+      "publisher": "Software: Practice and Experience 11(11)",
+      "year": 1981,
+      "description": "The entry this catalogue’s README claimed was in the algorithm layer while it was not. Also settles where it belongs: the mechanism is a shortest path through a directed acyclic graph of feasible breakpoints, which puts it under graph algorithms rather than typesetting.",
+      "retrieved": "2026-08-17",
+      "links": [
+        {
+          "layer": "algorithm",
+          "target": "knuth-plass",
+          "relation": "defines"
+        },
+        {
+          "layer": "concept",
+          "target": "graph",
+          "relation": "describes"
+        }
+      ]
+    },
+    {
+      "id": "mohr-1986-ac4",
+      "url": "https://www.sciencedirect.com/science/article/abs/pii/0004370286900834",
+      "title": "Arc and Path Consistency Revisited",
+      "kind": "paper",
+      "publisher": "Artificial Intelligence 28(2)",
+      "year": 1986,
+      "description": "The propagation algorithm WFC actually uses. Per-value support counters instead of re-examining whole arcs, which reaches the optimal worst case and is exactly the \"compatible neighbour count\" bookkeeping WFC implementations are full of. Without this row the catalogue named AC-3, which WFC does not use.",
+      "retrieved": "2026-08-17",
+      "links": [
+        {
+          "layer": "algorithm",
+          "target": "ac-4",
+          "relation": "defines"
+        },
+        {
+          "layer": "concept",
+          "target": "wfc",
+          "relation": "describes"
+        }
+      ]
+    },
+    {
+      "id": "perlin-2002-improving-noise",
+      "url": "https://dl.acm.org/doi/10.1145/566654.566636",
+      "title": "Improving Noise",
+      "kind": "paper",
+      "publisher": "ACM TOG 21(3), SIGGRAPH 2002",
+      "year": 2002,
+      "description": "Establishes that \"Perlin noise\" names two different algorithms. The 1985 cubic fade has a non-zero second derivative at the ends, so derived normal maps show discontinuities on lattice planes; the 2002 quintic fixes that, and the 12 fixed edge-midpoint gradients fix the directional bias. Almost every library implements the 2002 version while citing the 1985 paper.",
+      "retrieved": "2026-08-17",
+      "links": [
+        {
+          "layer": "algorithm",
+          "target": "improved-perlin",
+          "relation": "defines"
+        },
+        {
+          "layer": "algorithm",
+          "target": "perlin-noise",
+          "relation": "describes"
+        }
+      ]
+    },
+    {
+      "id": "kim-2008-wavelet-turbulence",
+      "url": "https://www.cs.cornell.edu/~tedkim/WTURB/wavelet_turbulence.pdf",
+      "title": "Wavelet Turbulence for Fluid Simulation",
+      "kind": "paper",
+      "publisher": "ACM TOG 27(3), SIGGRAPH 2008",
+      "year": 2008,
+      "description": "Why film smoke pipelines are \"simulate low, upres high\". The energy at unresolved scales can be extrapolated from Kolmogorov’s k^-5/3 law rather than computed, and synthesised as divergence-free curl noise — which makes this entry depend directly on another already in the table.",
+      "retrieved": "2026-08-17",
+      "links": [
+        {
+          "layer": "algorithm",
+          "target": "wavelet-turbulence",
+          "relation": "defines"
+        },
+        {
+          "layer": "algorithm",
+          "target": "curl-noise",
+          "relation": "describes"
+        }
+      ]
+    },
+    {
+      "id": "mordvintsev-2020-nca",
+      "url": "https://distill.pub/2020/growing-ca/",
+      "title": "Growing Neural Cellular Automata",
+      "kind": "article",
+      "publisher": "Distill",
+      "year": 2020,
+      "description": "The bridge between the ca and ml concepts, and a genuinely different point on the trade-off: a few thousand parameters rather than a few hundred million, and self-repair after damage learned rather than designed. Also the clearest demonstration that a CA rule can be fitted instead of invented.",
+      "retrieved": "2026-08-17",
+      "links": [
+        {
+          "layer": "algorithm",
+          "target": "neural-cellular-automata",
+          "relation": "defines"
+        },
+        {
+          "layer": "concept",
+          "target": "ca",
+          "relation": "describes"
+        }
+      ]
+    },
+    {
+      "id": "khalifa-2020-pcgrl",
+      "url": "https://arxiv.org/abs/2001.09212",
+      "title": "PCGRL: Procedural Content Generation via Reinforcement Learning",
+      "kind": "paper",
+      "publisher": "AIIDE 2020",
+      "year": 2020,
+      "description": "Answers the ml concept card’s own complaint that PCGML fails where you have forty training examples: this needs none, because the reward function supplies the signal. It also moves the expensive part to training time, so generation afterwards is a forward pass rather than a search.",
+      "retrieved": "2026-08-17",
+      "links": [
+        {
+          "layer": "algorithm",
+          "target": "pcgrl",
+          "relation": "defines"
+        },
+        {
+          "layer": "concept",
+          "target": "ml",
+          "relation": "describes"
+        },
+        {
+          "layer": "concept",
+          "target": "evo",
+          "relation": "describes"
+        }
+      ]
     }
   ]
 }
