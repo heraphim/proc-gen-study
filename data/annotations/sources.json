@@ -21,8 +21,17 @@
       "description": "Settled whether erosion is inherently an offline process. It is not: the pipe-model formulation of shallow-water flow, erosion, transport and deposition runs entirely on the GPU at interactive rates, which is why the concept card's \"minutes to hours\" claim had to be narrowed to CPU implementations.",
       "retrieved": "2026-08-17",
       "links": [
-        { "layer": "concept", "target": "ero", "relation": "corrects", "note": "Overturned the claim that erosion cannot be iterated interactively." },
-        { "layer": "algorithm", "target": "mei-gpu-erosion", "relation": "defines" }
+        {
+          "layer": "concept",
+          "target": "ero",
+          "relation": "corrects",
+          "note": "Overturned the claim that erosion cannot be iterated interactively."
+        },
+        {
+          "layer": "algorithm",
+          "target": "mei-gpu-erosion",
+          "relation": "defines"
+        }
       ]
     },
     {
@@ -35,8 +44,17 @@
       "description": "Establishes that L-systems can be environmentally aware. Open L-systems exchange information bidirectionally with a program modelling the environment, which is how collision between branches, competition for light and pruning are handled — so the blanket claim that L-systems cannot do global awareness only holds for the context-free form.",
       "retrieved": "2026-08-17",
       "links": [
-        { "layer": "concept", "target": "lsys", "relation": "corrects", "note": "Narrowed the \"no global awareness\" limitation to context-free L-systems." },
-        { "layer": "algorithm", "target": "open-l-systems", "relation": "defines" }
+        {
+          "layer": "concept",
+          "target": "lsys",
+          "relation": "corrects",
+          "note": "Narrowed the \"no global awareness\" limitation to context-free L-systems."
+        },
+        {
+          "layer": "algorithm",
+          "target": "open-l-systems",
+          "relation": "defines"
+        }
       ]
     },
     {
@@ -49,8 +67,17 @@
       "description": "Shows curl noise is a construction over a noise field, not a noise basis: the velocity field is the curl of a potential built from Perlin noise, which is what makes it exactly divergence-free without solving a linear system. Used to move curl out of the list of noise bases in the concept card.",
       "retrieved": "2026-08-17",
       "links": [
-        { "layer": "concept", "target": "noise", "relation": "corrects", "note": "Curl noise was listed alongside Perlin and Worley as if it were an alternative to them." },
-        { "layer": "algorithm", "target": "curl-noise", "relation": "defines" }
+        {
+          "layer": "concept",
+          "target": "noise",
+          "relation": "corrects",
+          "note": "Curl noise was listed alongside Perlin and Worley as if it were an alternative to them."
+        },
+        {
+          "layer": "algorithm",
+          "target": "curl-noise",
+          "relation": "defines"
+        }
       ]
     },
     {
@@ -63,7 +90,12 @@
       "description": "The reason the hat and the spectre are not interchangeable. Hat tilings need reflected copies; the spectre family admits only chiral non-periodic tilings, so it tiles without its mirror image. Decides whether a one-sided or physically cut tile set can be built from a single shape.",
       "retrieved": "2026-08-17",
       "links": [
-        { "layer": "concept", "target": "tile", "relation": "corrects", "note": "The concept card implied the hat alone suffices for aperiodic coverage." }
+        {
+          "layer": "concept",
+          "target": "tile",
+          "relation": "corrects",
+          "note": "The concept card implied the hat alone suffices for aperiodic coverage."
+        }
       ]
     },
     {
@@ -76,9 +108,23 @@
       "description": "The specification for what people mean by WFC, since there is no paper. Settles three things: adjacency is learned from N×N patterns in one bitmap, propagation is AC-4 with a minimum-entropy choice heuristic, and a contradiction ends the run — there is no backtracking. Also states the generalisation of Merrell's model synthesis from tiles to overlapping patterns.",
       "retrieved": "2026-08-17",
       "links": [
-        { "layer": "concept", "target": "wfc", "relation": "corrects", "note": "Named AC-4 and minimum entropy; removed the implication that the canonical implementation backtracks." },
-        { "layer": "algorithm", "target": "wave-function-collapse", "relation": "implements" },
-        { "layer": "algorithm", "target": "model-synthesis", "relation": "describes", "note": "States what WFC changed relative to Merrell." }
+        {
+          "layer": "concept",
+          "target": "wfc",
+          "relation": "corrects",
+          "note": "Named AC-4 and minimum entropy; removed the implication that the canonical implementation backtracks."
+        },
+        {
+          "layer": "algorithm",
+          "target": "wave-function-collapse",
+          "relation": "implements"
+        },
+        {
+          "layer": "algorithm",
+          "target": "model-synthesis",
+          "relation": "describes",
+          "note": "States what WFC changed relative to Merrell."
+        }
       ]
     },
     {
@@ -91,8 +137,18 @@
       "description": "Settles the origin of the material point method, which this catalogue had dated to the 2013 graphics paper. It also names the lineage: MPM is an extension of the particle-in-cell code FLIP from fluids to solid mechanics, the addition being that each material point carries the full stress tensor. FLIP is separately an entry here, so the mis-dating had hidden a link inside the catalogue's own table.",
       "retrieved": "2026-08-17",
       "links": [
-        { "layer": "algorithm", "target": "mpm", "relation": "corrects", "note": "Nineteen years earlier than the date recorded, and the parent method was already in the table." },
-        { "layer": "algorithm", "target": "flip", "relation": "describes", "note": "Named as the method MPM extends." }
+        {
+          "layer": "algorithm",
+          "target": "mpm",
+          "relation": "corrects",
+          "note": "Nineteen years earlier than the date recorded, and the parent method was already in the table."
+        },
+        {
+          "layer": "algorithm",
+          "target": "flip",
+          "relation": "describes",
+          "note": "Named as the method MPM extends."
+        }
       ]
     },
     {
@@ -105,7 +161,12 @@
       "description": "Used to separate two structures that share one name. Region quadtrees are Klinger 1971, the term in this sense is from Hunter's 1978 Princeton thesis, and octree encoding is Meagher 1980; Finkel & Bentley 1974 — which this catalogue was citing — is the point quadtree, which splits at data points rather than at midpoints. Graphics uses the region variety.",
       "retrieved": "2026-08-17",
       "links": [
-        { "layer": "algorithm", "target": "quadtree", "relation": "corrects", "note": "The entry described a region quadtree while citing the point quadtree paper." }
+        {
+          "layer": "algorithm",
+          "target": "quadtree",
+          "relation": "corrects",
+          "note": "The entry described a region quadtree while citing the point quadtree paper."
+        }
       ]
     },
     {
@@ -118,7 +179,11 @@
       "description": "The source the catalogue already cited for Eller's algorithm, read properly: it dates the algorithm to 1982, not 1980, and describes it as combining Sidewinder's row-at-a-time structure with Kruskal's set-merging to avoid Sidewinder's bias.",
       "retrieved": "2026-08-17",
       "links": [
-        { "layer": "algorithm", "target": "ellers-algorithm", "relation": "corrects" }
+        {
+          "layer": "algorithm",
+          "target": "ellers-algorithm",
+          "relation": "corrects"
+        }
       ]
     },
     {
@@ -131,8 +196,17 @@
       "description": "Fixes the date on ridged multifractal, and is the right link for a citation whose point is that it is a book chapter rather than a paper. The first edition is 1994; the catalogue said 1993 and linked to Wikipedia's article on fractional Brownian motion, which is the thing ridged multifractal modifies and says nothing about the modification.",
       "retrieved": "2026-08-17",
       "links": [
-        { "layer": "algorithm", "target": "ridged-multifractal", "relation": "corrects" },
-        { "layer": "algorithm", "target": "value-noise", "relation": "describes", "note": "Also the documented source for value noise, which has no origin paper." }
+        {
+          "layer": "algorithm",
+          "target": "ridged-multifractal",
+          "relation": "corrects"
+        },
+        {
+          "layer": "algorithm",
+          "target": "value-noise",
+          "relation": "describes",
+          "note": "Also the documented source for value noise, which has no origin paper."
+        }
       ]
     },
     {
@@ -145,7 +219,12 @@
       "description": "Justifies flow routing as a concept in its own right rather than a step inside erosion. Depression filling has an optimal algorithm — O(n) for integer elevations — that is separate from any transport model, and the authors note the whole thing is under 100 lines of C++. That combination of importable, standard and short is what the concept vocabulary was missing.",
       "retrieved": "2026-08-17",
       "links": [
-        { "layer": "concept", "target": "hydro", "relation": "defines", "note": "The precondition step: without it, routing on real noisy data terminates in local pits." }
+        {
+          "layer": "concept",
+          "target": "hydro",
+          "relation": "defines",
+          "note": "The precondition step: without it, routing on real noisy data terminates in local pits."
+        }
       ]
     },
     {
@@ -158,7 +237,11 @@
       "description": "The named importable that lets flow routing pass the concept test: depression filling, D8 and multiple-flow-direction routing, flow accumulation and watershed labelling, in one installable package rather than as a paper to reimplement.",
       "retrieved": "2026-08-17",
       "links": [
-        { "layer": "concept", "target": "hydro", "relation": "implements" }
+        {
+          "layer": "concept",
+          "target": "hydro",
+          "relation": "implements"
+        }
       ]
     },
     {
@@ -171,7 +254,11 @@
       "description": "Why colour needed a concept of its own: the choice of space decides whether a generated gradient has a grey dead zone in the middle, and Ottosson shows the failure side by side. Also the origin of the space that CSS and every design-token generator now use for interpolation.",
       "retrieved": "2026-08-17",
       "links": [
-        { "layer": "concept", "target": "colour", "relation": "defines" }
+        {
+          "layer": "concept",
+          "target": "colour",
+          "relation": "defines"
+        }
       ]
     },
     {
@@ -184,8 +271,16 @@
       "description": "Makes the colour concept importable in the strongest possible sense — the perceptual spaces, difference metrics and interpolation rules are shipped in every browser, so a palette generator does not need a library at all. Used to check that Oklab, Lab, LCH and the interpolation behaviour are specified rather than conventions.",
       "retrieved": "2026-08-17",
       "links": [
-        { "layer": "concept", "target": "colour", "relation": "implements" },
-        { "layer": "technology", "target": "browser", "relation": "describes" }
+        {
+          "layer": "concept",
+          "target": "colour",
+          "relation": "implements"
+        },
+        {
+          "layer": "technology",
+          "target": "browser",
+          "relation": "describes"
+        }
       ]
     },
     {
@@ -198,7 +293,11 @@
       "description": "The origin of growing a texture pixel by pixel by matching neighbourhoods against a single example, and the reason example-based synthesis is a concept rather than a trick: no model is fitted at all, the sample *is* the model. Establishes the family that WFC later generalises.",
       "retrieved": "2026-08-17",
       "links": [
-        { "layer": "concept", "target": "texsyn", "relation": "defines" }
+        {
+          "layer": "concept",
+          "target": "texsyn",
+          "relation": "defines"
+        }
       ]
     },
     {
@@ -211,7 +310,11 @@
       "description": "The importable that makes subdivision a block: Catmull–Clark and Loop with semi-sharp creases, hierarchical edits and GPU evaluation, in the library that Maya, Blender and RenderMan all use — so it is the de facto specification of what subdivision means in practice, not just one implementation of it.",
       "retrieved": "2026-08-17",
       "links": [
-        { "layer": "concept", "target": "subdiv", "relation": "implements" }
+        {
+          "layer": "concept",
+          "target": "subdiv",
+          "relation": "implements"
+        }
       ]
     },
     {
@@ -224,7 +327,11 @@
       "description": "The reason topology optimisation is defensible as a block despite having no mature library: the specification is 99 lines, split 36 main / 12 optimality-criteria optimiser / 16 mesh-independency filter / 35 finite elements. Andreassen et al. later cut it to 88 by vectorising. A method whose complete reference implementation fits on two pages does not need a package to be pinned down.",
       "retrieved": "2026-08-17",
       "links": [
-        { "layer": "concept", "target": "topopt", "relation": "defines" }
+        {
+          "layer": "concept",
+          "target": "topopt",
+          "relation": "defines"
+        }
       ]
     },
     {
@@ -237,7 +344,11 @@
       "description": "Checked to confirm the shorter figure quoted for SIMP: 88 lines, reached from Sigmund's 99 by preallocating arrays and vectorising loops rather than by cutting functionality. Fixes the line count this catalogue quotes.",
       "retrieved": "2026-08-17",
       "links": [
-        { "layer": "concept", "target": "topopt", "relation": "verifies" }
+        {
+          "layer": "concept",
+          "target": "topopt",
+          "relation": "verifies"
+        }
       ]
     },
     {
@@ -250,7 +361,12 @@
       "description": "Checked while testing whether data-driven motion synthesis could pass the importable test. PyPI `pymo` is \"MongoClient instrumentation and factory\", not the motion-capture package the name suggests — the same failure mode that put `sdf` (Scientific Data Format) and `wfc` (WebForms Core) in this catalogue's caveat list. PyPI `meep` is likewise a task runner, not the MIT photonics solver. Both are why the motion concept was rejected rather than asserted.",
       "retrieved": "2026-08-17",
       "links": [
-        { "layer": "concept", "target": "ik", "relation": "verifies", "note": "The nearest existing concept to the rejected `motion` addition." }
+        {
+          "layer": "concept",
+          "target": "ik",
+          "relation": "verifies",
+          "note": "The nearest existing concept to the rejected `motion` addition."
+        }
       ]
     },
     {
@@ -263,8 +379,106 @@
       "description": "Documents the actual cost of getting shader-generated data back to the CPU: the asynchronous path copies without stalling either processor but adds a few frames of latency. Used to replace \"the CPU never sees it\" with the real trade-off.",
       "retrieved": "2026-08-17",
       "links": [
-        { "layer": "concept", "target": "shader", "relation": "corrects", "note": "Readback exists; what is true is that it costs a stall or a few frames." },
-        { "layer": "technology", "target": "gpu", "relation": "describes" }
+        {
+          "layer": "concept",
+          "target": "shader",
+          "relation": "corrects",
+          "note": "Readback exists; what is true is that it costs a stall or a few frames."
+        },
+        {
+          "layer": "technology",
+          "target": "gpu",
+          "relation": "describes"
+        }
+      ]
+    },
+    {
+      "id": "github-api-fastnoiselite",
+      "url": "https://api.github.com/repos/Auburn/FastNoiseLite",
+      "title": "GitHub API metadata for FastNoiseLite",
+      "kind": "registry",
+      "publisher": "GitHub",
+      "year": 2026,
+      "description": "The check that closed this catalogue's stated method gap. The README said registry verification could not reach GitHub-hosted C++ and named FastNoiseLite, Recast, mxgmn's WFC and CGAL as examples; api.github.com/repos returns licence, last push and archive status, which is enough to verify a row to the same standard as npm or PyPI. All four are now recorded.",
+      "retrieved": "2026-08-17",
+      "links": [
+        {
+          "layer": "implementation",
+          "target": "github:Auburn/FastNoiseLite",
+          "relation": "verifies"
+        },
+        {
+          "layer": "technology",
+          "target": "cpp",
+          "relation": "describes",
+          "note": "The technology that had nothing attached to it before this check existed."
+        },
+        {
+          "layer": "algorithm",
+          "target": "simplex-noise",
+          "relation": "implements"
+        }
+      ]
+    },
+    {
+      "id": "crates-io-api",
+      "url": "https://crates.io/api/v1/crates/noise",
+      "title": "crates.io API metadata for the `noise` crate",
+      "kind": "registry",
+      "publisher": "crates.io",
+      "year": 2026,
+      "description": "How the Rust rows were resolved. crates.io reports max_stable_version separately from max_version, which matters: taking the latest version alone would record a pre-release as the current one.",
+      "retrieved": "2026-08-17",
+      "links": [
+        {
+          "layer": "implementation",
+          "target": "cargo:noise",
+          "relation": "verifies"
+        },
+        {
+          "layer": "technology",
+          "target": "rust",
+          "relation": "describes"
+        }
+      ]
+    },
+    {
+      "id": "nuget-flat-container",
+      "url": "https://api.nuget.org/v3-flatcontainer/quikgraph/index.json",
+      "title": "NuGet flat container index for QuikGraph",
+      "kind": "registry",
+      "publisher": "NuGet",
+      "year": 2026,
+      "description": "How the C# rows were resolved. The flat container lists every published version but does not mark which are pre-releases, so they have to be filtered by the hyphen in the semantic version — otherwise a release candidate is recorded as current.",
+      "retrieved": "2026-08-17",
+      "links": [
+        {
+          "layer": "implementation",
+          "target": "nuget:QuikGraph",
+          "relation": "verifies"
+        },
+        {
+          "layer": "technology",
+          "target": "csharp",
+          "relation": "describes"
+        }
+      ]
+    },
+    {
+      "id": "npm-registry-noisejs",
+      "url": "https://registry.npmjs.org/noisejs",
+      "title": "npm registry metadata for noisejs",
+      "kind": "registry",
+      "publisher": "npm",
+      "year": 2026,
+      "description": "The row that disproved this catalogue's own explanation of its release dates. The file guessed the clustered 2022 dates were a bulk registry operation and advised against reading them as abandonment; the registry says noisejs 2.1.0 was published in 2013 and nothing has shipped since. The dates had been filled with the lookup date, and the wrong dates were hiding real abandonment.",
+      "retrieved": "2026-08-17",
+      "links": [
+        {
+          "layer": "implementation",
+          "target": "npm:noisejs",
+          "relation": "corrects"
+        }
       ]
     }
   ]

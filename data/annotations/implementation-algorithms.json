@@ -244,6 +244,262 @@
     ],
     "npm:maxrects-packer": [
       "maxrects"
+    ],
+    "github:Auburn/FastNoiseLite": [
+      "perlin-noise",
+      "simplex-noise",
+      "value-noise",
+      "worley-noise",
+      "fbm",
+      "domain-warping"
+    ],
+    "github:recastnavigation/recastnavigation": [
+      "recast-navmesh"
+    ],
+    "github:mxgmn/WaveFunctionCollapse": [
+      "wave-function-collapse",
+      "model-synthesis",
+      "ac-4"
+    ],
+    "github:PixarAnimationStudios/OpenSubdiv": [
+      "catmull-clark",
+      "loop-subdivision"
+    ],
+    "github:libigl/libigl": [
+      "qem-decimation",
+      "loop-subdivision",
+      "lscm",
+      "felzenszwalb-distance-transform"
+    ],
+    "github:CGAL/cgal": [
+      "bowyer-watson",
+      "chew-ruppert-refinement",
+      "straight-skeleton",
+      "robust-predicates",
+      "bsp-booleans"
+    ],
+    "github:r-barnes/richdem": [
+      "priority-flood",
+      "d8-flow-direction",
+      "dinf-flow"
+    ],
+    "github:zeux/meshoptimizer": [
+      "qem-decimation"
+    ],
+    "github:nothings/stb": [
+      "perlin-noise",
+      "fbm",
+      "ridged-multifractal",
+      "mip-pyramid"
+    ],
+    "github:Chlumsky/msdfgen": [
+      "sdf-primitives",
+      "felzenszwalb-distance-transform"
+    ],
+    "github:sp4cerat/Fast-Quadric-Mesh-Simplification": [
+      "qem-decimation"
+    ],
+    "github:stegu/webgl-noise": [
+      "simplex-noise",
+      "perlin-noise",
+      "worley-noise"
+    ],
+    "github:patriciogonzalezvivo/lygia": [
+      "simplex-noise",
+      "worley-noise",
+      "fbm",
+      "domain-warping",
+      "sdf-primitives",
+      "sphere-tracing",
+      "oklab",
+      "gaussian-blur",
+      "sobel-operator"
+    ],
+    "cargo:noise": [
+      "perlin-noise",
+      "simplex-noise",
+      "value-noise",
+      "worley-noise",
+      "fbm",
+      "ridged-multifractal",
+      "domain-warping"
+    ],
+    "cargo:libnoise": [
+      "perlin-noise",
+      "simplex-noise",
+      "value-noise",
+      "worley-noise",
+      "fbm"
+    ],
+    "cargo:fastnoise-lite": [
+      "simplex-noise",
+      "perlin-noise",
+      "value-noise",
+      "worley-noise",
+      "fbm",
+      "domain-warping"
+    ],
+    "cargo:rand": [
+      "fisher-yates",
+      "alias-method",
+      "pcg-random"
+    ],
+    "cargo:rand_xoshiro": [
+      "xoshiro",
+      "splitmix",
+      "xorshift"
+    ],
+    "cargo:fast_poisson": [
+      "bridson-poisson-disk"
+    ],
+    "cargo:delaunator": [
+      "bowyer-watson"
+    ],
+    "cargo:spade": [
+      "bowyer-watson",
+      "chew-ruppert-refinement",
+      "robust-predicates",
+      "lloyd-relaxation"
+    ],
+    "cargo:lyon": [
+      "de-casteljau",
+      "douglas-peucker"
+    ],
+    "cargo:meshopt": [
+      "qem-decimation"
+    ],
+    "cargo:tri-mesh": [
+      "winged-edge"
+    ],
+    "nuget:Google.OrTools": [
+      "cp-sat",
+      "simplex-method",
+      "column-generation",
+      "dpll"
+    ],
+    "nuget:MathNet.Numerics": [
+      "mersenne-twister",
+      "xorshift",
+      "catmull-rom",
+      "de-boor",
+      "halton-sequence",
+      "sobol-sequence"
+    ],
+    "nuget:QuikGraph": [
+      "kruskal",
+      "prim",
+      "a-star",
+      "dijkstra"
+    ],
+    "nuget:Accord.Math": [
+      "genetic-algorithm",
+      "simulated-annealing",
+      "eigenfaces"
+    ],
+    "npm:chroma-js": [
+      "cielab",
+      "wcag-contrast",
+      "oklab"
+    ],
+    "npm:culori": [
+      "oklab",
+      "cielab",
+      "ciede2000",
+      "wcag-contrast"
+    ],
+    "npm:colorjs.io": [
+      "oklab",
+      "cielab",
+      "ciede2000",
+      "wcag-contrast"
+    ],
+    "npm:three-subdivide": [
+      "catmull-clark"
+    ],
+    "npm:simplify-js": [
+      "douglas-peucker"
+    ],
+    "npm:d3-contour": [
+      "marching-squares"
+    ],
+    "npm:wcag-contrast": [
+      "wcag-contrast"
+    ],
+    "npm:rbush": [
+      "kd-tree"
+    ],
+    "pypi:richdem": [
+      "priority-flood",
+      "d8-flow-direction",
+      "dinf-flow"
+    ],
+    "pypi:pysheds": [
+      "d8-flow-direction",
+      "priority-flood",
+      "strahler-order"
+    ],
+    "pypi:whitebox": [
+      "priority-flood",
+      "d8-flow-direction",
+      "dinf-flow",
+      "strahler-order"
+    ],
+    "pypi:pymeshlab": [
+      "qem-decimation",
+      "catmull-clark",
+      "loop-subdivision",
+      "sqrt3-subdivision",
+      "poisson-surface-reconstruction",
+      "marching-cubes"
+    ],
+    "pypi:libigl": [
+      "qem-decimation",
+      "loop-subdivision",
+      "lscm",
+      "winged-edge",
+      "felzenszwalb-distance-transform"
+    ],
+    "pypi:colour-science": [
+      "cielab",
+      "ciede2000",
+      "oklab"
+    ],
+    "pypi:coloraide": [
+      "oklab",
+      "cielab",
+      "ciede2000",
+      "wcag-contrast"
+    ],
+    "pypi:opencv-python": [
+      "gaussian-blur",
+      "sobel-operator",
+      "bilateral-filter",
+      "mathematical-morphology",
+      "poisson-image-editing",
+      "felzenszwalb-distance-transform",
+      "floyd-steinberg"
+    ],
+    "pypi:scikit-image": [
+      "gaussian-blur",
+      "sobel-operator",
+      "mathematical-morphology",
+      "marching-cubes",
+      "marching-squares",
+      "felzenszwalb-distance-transform"
+    ],
+    "pypi:texturize": [
+      "portilla-simoncelli",
+      "texture-optimization"
+    ],
+    "pypi:topopt": [
+      "simp"
+    ],
+    "pypi:nlopt": [
+      "adjoint-inverse-design",
+      "simp"
+    ],
+    "pypi:openmdao": [
+      "adjoint-inverse-design"
     ]
   },
   "_orphan_reason": {

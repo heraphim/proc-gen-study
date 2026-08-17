@@ -64,6 +64,33 @@
       "now": "operator",
       "why": "A source takes nothing but a seed and parameters. Curl noise takes the curl of a potential field built from noise, so something goes in — it cannot produce a flow field without a noise basis underneath it. Filed as a source, it claimed to be usable in place of Perlin or simplex noise rather than on top of one. Same correction as the concept-level one on `noise`, one layer down.",
       "source_url": "https://www.cs.ubc.ca/~rbridson/docs/bridson-siggraph2007-curlnoise.pdf"
+    },
+    {
+      "layer": "implementation",
+      "target": "all npm rows",
+      "field": "last_release",
+      "was": "the date the registry lookup ran — 2022-05 or 2022-06 on 23 of 71 rows",
+      "now": "the actual publish date of the recorded version, from the registry, ranging 2013 to 2026",
+      "why": "The file itself had noticed the anomaly and explained it wrongly. Its caveat said the 2022 dates \"cluster too tightly across unrelated projects to be real\" and guessed at a bulk registry metadata operation, then advised the reader not to treat them as abandonment. Re-resolving showed the field had simply been filled with the check date. The advice was backwards: noisejs last shipped in 2013, csg and voronoi in 2015, markovchain in 2016, and the wrong dates were hiding exactly the abandonment the caveat told you to disregard.",
+      "source_url": "https://registry.npmjs.org/noisejs"
+    },
+    {
+      "layer": "implementation",
+      "target": "15 pypi rows",
+      "field": "license",
+      "was": "the string \"null\" on 12 rows; the first 25 characters of the licence text on 3 more, e.g. \"GNU General Public Licens\"",
+      "now": "SPDX identifiers, taken from license_expression where PyPI provides one",
+      "why": "Two separate bugs in one field. Twelve rows carried the four-character string \"null\" rather than a null value, so a query for unlicensed packages returned nothing. Three others held truncated licence prose, because some PyPI projects paste their entire licence text into the metadata field and it had been cut to a fixed width. The whole column is now normalised to SPDX, so it can be filtered on.",
+      "source_url": "https://pypi.org/pypi/scipy/json"
+    },
+    {
+      "layer": "readme",
+      "target": "What is not done",
+      "field": "coverage claim",
+      "was": "\"registry verification cannot reach GitHub-hosted C++ (FastNoiseLite, mxgmn's WFC, Recast, CGAL). That needs a different check.\"",
+      "now": "resolved — the GitHub, crates.io and NuGet APIs are now used alongside npm and PyPI, and all four of those named libraries are recorded",
+      "why": "The gap was a method limitation, not a real absence, and the README said so. Four registries were added: api.github.com/repos for the C++ and shader libraries that ship only as repositories, crates.io for Rust, and NuGet for C#. All four named examples are now rows, and the technologies table no longer has C++, Rust, C# and GLSL sitting empty.",
+      "source_url": "https://api.github.com/repos/Auburn/FastNoiseLite"
     }
   ]
 }

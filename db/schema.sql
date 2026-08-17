@@ -174,7 +174,10 @@ CREATE TABLE algorithm (
 CREATE TABLE implementation (
   id           INTEGER PRIMARY KEY,
   package      TEXT NOT NULL,
-  ecosystem    TEXT,        -- npm | pypi | github | builtin
+  -- npm | pypi | cargo | nuget | github. `github` is for libraries that ship only as a
+  -- repository, which is where most of the C++ and shader work lives; the row is resolved
+  -- against api.github.com rather than a package registry.
+  ecosystem    TEXT,
   concept_tag  TEXT REFERENCES tag(id),
   role         TEXT,        -- generation-library | output-surface | solver | model | authoring-app
   version      TEXT,

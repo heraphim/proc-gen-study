@@ -1,7 +1,7 @@
 {
-  "_about": "Implementations, each checked against its package registry before being written down.",
-  "_method": "Every row resolved with a 200 from registry.npmjs.org or pypi.org/pypi. Six candidates 404ed and were dropped; five more resolved to unrelated projects sharing a name (PyPI `sdf` is Scientific Data Format, `wfc` is WebForms Core) and were dropped too.",
-  "_caveat": "last_release is the registry timestamp verbatim. Many npm packages report 2022-05/06, which clusters too tightly across unrelated projects to be real activity — probably a bulk metadata operation. Do not read those dates as abandonment. One package (webaudio-oscilloscope) was removed entirely: it is a visualiser, not a generation library, and was only present because registry verification confirms a package exists without confirming it is the right kind of thing. Four others were re-roled for the same reason.",
+  "_about": "Implementations, each resolved against its registry before being written down. Five registries are used, because restricting the check to npm and PyPI restricted the catalogue to JavaScript and Python.",
+  "_method": "Every row resolved with a 200 from its registry: registry.npmjs.org, pypi.org/pypi/<name>/json, crates.io/api/v1/crates, api.nuget.org/v3-flatcontainer, or api.github.com/repos for the C++ and shader libraries that live only on GitHub. Six original candidates 404ed and were dropped; five more resolved to unrelated projects sharing a name — PyPI `sdf` is Scientific Data Format, `wfc` is WebForms Core — and were dropped too. The same trap caught two more during the expansion pass: PyPI `pymo` is MongoClient instrumentation, not motion capture, and PyPI `meep` is a task runner, not the MIT photonics solver. All 71 original rows were then re-resolved in full: none had disappeared and no version had moved.",
+  "_caveat": "Version, licence and release date are the registry's answer, not a judgement. Two caveats worth carrying:\n\nFirst, four GitHub-hosted rows have no SPDX licence identifier — OpenSubdiv, CGAL, mxgmn's WaveFunctionCollapse and lygia all carry terms that GitHub cannot classify automatically. Read the repository before shipping any of them.\n\nSecond, one row is listed despite being unmaintained: Accord.Math has had no release since 2017, and is here because a large amount of existing C# generation code depends on it. That is recorded rather than hidden.",
   "_roles": {
     "generation-library": "Produces content.",
     "output-surface": "Turns generated data into something perceivable.",
@@ -13,6 +13,104 @@
     "post-processing": "Transforms already-generated output."
   },
   "implementations": [
+    {
+      "package": "chroma-js",
+      "ecosystem": "npm",
+      "concept": "colour",
+      "role": "generation-library",
+      "version": "3.2.0",
+      "last_release": "2025-11-28",
+      "license": "BSD-3-Clause",
+      "repo": "https://github.com/gka/chroma.js",
+      "technologies": [
+        "js",
+        "browser",
+        "node"
+      ],
+      "description": "Colour conversion, scales, interpolation and contrast. The most widely used palette-generation library in JavaScript, and the one that made \"interpolate in Lab, not RGB\" common practice.",
+      "verified": true
+    },
+    {
+      "package": "colorjs.io",
+      "ecosystem": "npm",
+      "concept": "colour",
+      "role": "generation-library",
+      "version": "0.7.1",
+      "last_release": "2026-07-24",
+      "license": "MIT",
+      "repo": "https://github.com/color-js/color.js",
+      "technologies": [
+        "js",
+        "browser",
+        "node"
+      ],
+      "description": "Written by two editors of the CSS Color specification, which makes it the reference for what the spec means in practice: every space, CIEDE2000 and other difference formulas, gamut mapping, and both WCAG 2 and APCA contrast.",
+      "verified": true
+    },
+    {
+      "package": "culori",
+      "ecosystem": "npm",
+      "concept": "colour",
+      "role": "generation-library",
+      "version": "4.0.2",
+      "last_release": "2025-06-27",
+      "license": "MIT",
+      "repo": "https://github.com/Evercoder/culori",
+      "technologies": [
+        "js",
+        "browser",
+        "node"
+      ],
+      "description": "A tree-shakeable colour library covering every CSS Color 4 space including Oklab and Oklch, with difference metrics, gamut mapping and interpolation. The most complete implementation of the specification outside a browser engine.",
+      "verified": true
+    },
+    {
+      "package": "wcag-contrast",
+      "ecosystem": "npm",
+      "concept": "colour",
+      "role": "generation-library",
+      "version": "3.0.0",
+      "last_release": "2019-11-05",
+      "license": "BSD-2-Clause",
+      "repo": "https://github.com/tmcw/wcag-contrast",
+      "technologies": [
+        "js",
+        "node",
+        "browser"
+      ],
+      "description": "The WCAG relative-luminance contrast ratio and its score thresholds, and nothing else. Listed because the calculation is small enough that a wrong implementation is common, and this one is the widely-checked reference.",
+      "verified": true
+    },
+    {
+      "package": "coloraide",
+      "ecosystem": "pypi",
+      "concept": "colour",
+      "role": "generation-library",
+      "version": "8.11.1",
+      "last_release": "2026-08-04",
+      "license": "MIT",
+      "repo": "https://github.com/facelessuser/coloraide",
+      "technologies": [
+        "python"
+      ],
+      "description": "A CSS Color 4-aligned Python library: Oklab and Oklch, gamut mapping, interpolation with the specification's hue-handling rules, and both contrast algorithms. The Python counterpart to colorjs.io.",
+      "verified": true
+    },
+    {
+      "package": "colour-science",
+      "ecosystem": "pypi",
+      "concept": "colour",
+      "role": "generation-library",
+      "version": "0.4.7",
+      "last_release": "2026-01-04",
+      "license": "BSD-3-Clause",
+      "repo": "https://github.com/colour-science/colour",
+      "technologies": [
+        "python"
+      ],
+      "description": "Colour science in the full sense: every standard space and transform, all the CIE difference formulas, appearance models including CAM16, spectral computation and chromatic adaptation. Where you go when a library-level approximation is not enough.",
+      "verified": true
+    },
     {
       "package": "javascript-lp-solver",
       "ecosystem": "npm",
@@ -34,7 +132,7 @@
       "concept": "cons",
       "role": "solver",
       "version": "2.0.1",
-      "last_release": "2022-06-19",
+      "last_release": "2016-05-16",
       "description": "General satisfiability solver for logic problems",
       "repo": "git://github.com/meteor/logic-solver",
       "license": "MIT",
@@ -59,6 +157,23 @@
       "verified": true
     },
     {
+      "package": "Google.OrTools",
+      "ecosystem": "nuget",
+      "concept": "cons",
+      "role": "solver",
+      "version": "9.15.6755",
+      "last_release": "2026-07-21",
+      "license": "Apache-2.0",
+      "repo": "https://github.com/google/or-tools",
+      "technologies": [
+        "csharp",
+        "cpp",
+        "python"
+      ],
+      "description": "CP-SAT, linear and mixed-integer programming, routing and flow, packaged for .NET. Listed alongside the Python build because Unity is where a great deal of shipped constraint-based generation actually runs.",
+      "verified": true
+    },
+    {
       "package": "cvxpy",
       "ecosystem": "pypi",
       "concept": "cons",
@@ -67,7 +182,7 @@
       "last_release": "2026-06-22",
       "description": "A domain-specific language for modeling convex optimization problems in Python.",
       "repo": null,
-      "license": null,
+      "license": "Apache-2.0",
       "technologies": [
         "python"
       ],
@@ -97,7 +212,7 @@
       "last_release": "2026-01-14",
       "description": "Google OR-Tools python libraries and modules",
       "repo": "https://developers.google.com/optimization/",
-      "license": "Apache 2.0",
+      "license": "Apache-2.0",
       "technologies": [
         "python"
       ],
@@ -112,7 +227,7 @@
       "last_release": "2026-05-25",
       "description": "PuLP is an LP modeler written in python. PuLP can generate MPS or LP files and call GLPK, COIN ",
       "repo": null,
-      "license": null,
+      "license": "MIT",
       "technologies": [
         "python"
       ],
@@ -142,7 +257,7 @@
       "last_release": "2026-08-16",
       "description": "an efficient SMT solver library",
       "repo": "https://github.com/Z3Prover/z3",
-      "license": "MIT License",
+      "license": "MIT",
       "technologies": [
         "python"
       ],
@@ -154,7 +269,7 @@
       "concept": "csg",
       "role": "generation-library",
       "version": "2.13.0",
-      "last_release": "2026-08-02",
+      "last_release": "2026-02-22",
       "description": "Constructive Solid Geometry (CSG) Library for JSCAD",
       "repo": "https://github.com/jscad/OpenJSCAD.org",
       "license": "MIT",
@@ -169,7 +284,7 @@
       "concept": "csg",
       "role": "generation-library",
       "version": "1.0.1",
-      "last_release": "2022-06-14",
+      "last_release": "2015-03-12",
       "description": "Constructive solid geometry on meshes using BSP trees in JavaScript",
       "repo": "git://github.com/thibauts/csg.js",
       "license": "MIT",
@@ -217,7 +332,7 @@
       "last_release": "2026-06-21",
       "description": "CadQuery is a parametric  scripting language for creating and traversing CAD models",
       "repo": "https://github.com/CadQuery/cadquery",
-      "license": "Apache Public License 2.0",
+      "license": "Apache-2.0",
       "technologies": [
         "python"
       ],
@@ -232,7 +347,7 @@
       "last_release": "2026-08-01",
       "description": "Import, export, process, analyze and view triangular meshes.",
       "repo": null,
-      "license": "The MIT License (MIT)\n   ",
+      "license": "MIT",
       "technologies": [
         "python"
       ],
@@ -244,7 +359,7 @@
       "concept": "dsp",
       "role": "output-surface",
       "version": "0.12.0",
-      "last_release": "2022-06-26",
+      "last_release": "2020-01-27",
       "description": "Lightweight soundfont (music instrument) loader and player for WebAudio API",
       "repo": "https://github.com/danigb/soundfont-player",
       "license": "MIT",
@@ -259,7 +374,7 @@
       "concept": "dsp",
       "role": "output-surface",
       "version": "15.1.22",
-      "last_release": "2026-08-07",
+      "last_release": "2025-04-27",
       "description": "A Web Audio framework for making interactive music in the browser.",
       "repo": "https://github.com/Tonejs/Tone.js",
       "license": "MIT",
@@ -292,7 +407,7 @@
       "last_release": "2026-07-08",
       "description": "A Python library for adding effects to audio.",
       "repo": null,
-      "license": "GNU GENERAL PUBLIC LICENS",
+      "license": "GPL-3.0",
       "technologies": [
         "python"
       ],
@@ -307,7 +422,7 @@
       "last_release": "2023-03-26",
       "description": "Python module to build digital signal processing program.",
       "repo": "http://ajaxsoundstudio.com/software/pyo/",
-      "license": "LGPLv3+",
+      "license": "LGPL-3.0-or-later",
       "technologies": [
         "python"
       ],
@@ -319,13 +434,28 @@
       "concept": "evo",
       "role": "solver",
       "version": "0.1.14",
-      "last_release": "2022-06-18",
+      "last_release": "2014-08-27",
       "description": "Advanced genetic and evolutionary algorithm library",
       "repo": "git://github.com/subprotocol/genetic-js",
-      "license": "BSD",
+      "license": "BSD-3-Clause",
       "technologies": [
         "js"
       ],
+      "verified": true
+    },
+    {
+      "package": "Accord.Math",
+      "ecosystem": "nuget",
+      "concept": "evo",
+      "role": "solver",
+      "version": "3.8.0",
+      "last_release": "2017-10-22",
+      "license": "LGPL-2.1",
+      "repo": "https://github.com/accord-net/framework",
+      "technologies": [
+        "csharp"
+      ],
+      "description": "Optimisation and numerics from the Accord.NET framework, including genetic algorithms, simulated annealing and PCA. Recorded with a caveat: the framework has been unmaintained since 2017 and is listed because a large amount of existing C# generation code depends on it.",
       "verified": true
     },
     {
@@ -337,7 +467,7 @@
       "last_release": "2026-02-25",
       "description": "CMA-ES, Covariance Matrix Adaptation Evolution Strategy for non-linear numerical optimization i",
       "repo": null,
-      "license": null,
+      "license": "BSD-3-Clause",
       "technologies": [
         "python"
       ],
@@ -352,7 +482,7 @@
       "last_release": "2026-04-17",
       "description": "Distributed Evolutionary Algorithms in Python",
       "repo": "https://www.github.com/deap",
-      "license": "LGPL",
+      "license": "LGPL-3.0",
       "technologies": [
         "python"
       ],
@@ -367,7 +497,7 @@
       "last_release": "2026-06-28",
       "description": "Multi-Objective Optimization in Python",
       "repo": null,
-      "license": null,
+      "license": "Apache-2.0",
       "technologies": [
         "python"
       ],
@@ -382,10 +512,74 @@
       "last_release": "2023-10-31",
       "description": "Quality-Diversity algorithms in Python",
       "repo": "https://gitlab.com/leo.cazenille/qdpy",
-      "license": "LGPLv3",
+      "license": "LGPL-3.0",
       "technologies": [
         "python"
       ],
+      "verified": true
+    },
+    {
+      "package": "d3-contour",
+      "ecosystem": "npm",
+      "concept": "field",
+      "role": "generation-library",
+      "version": "4.0.2",
+      "last_release": "2023-01-11",
+      "license": "ISC",
+      "repo": "https://github.com/d3/d3-contour",
+      "technologies": [
+        "js",
+        "browser",
+        "node"
+      ],
+      "description": "Marching squares over a scalar grid, producing GeoJSON multipolygons, with density estimation to build the grid from points. This is the isoline half of the field concept, and the saddle-case resolution is handled explicitly.",
+      "verified": true
+    },
+    {
+      "package": "opencv-python",
+      "ecosystem": "pypi",
+      "concept": "filter",
+      "role": "generation-library",
+      "version": "5.0.0.93",
+      "last_release": "2026-07-06",
+      "license": "Apache-2.0",
+      "repo": "https://github.com/opencv/opencv-python",
+      "technologies": [
+        "python",
+        "cpp"
+      ],
+      "description": "The largest single collection of image-space operators: convolution, Sobel and Laplacian, bilateral filtering, morphology, distance transforms, seamless cloning by Poisson blending, and inpainting. Most of the filter concept, in one import.",
+      "verified": true
+    },
+    {
+      "package": "scikit-image",
+      "ecosystem": "pypi",
+      "concept": "filter",
+      "role": "generation-library",
+      "version": "0.26.0",
+      "last_release": "2026-06-16",
+      "license": "BSD-3-Clause",
+      "repo": "https://github.com/scikit-image/scikit-image",
+      "technologies": [
+        "python"
+      ],
+      "description": "Image processing over NumPy arrays, with the pieces the filter and texsyn concepts need: filters and morphology, marching cubes and marching squares, histogram matching, inpainting, and segmentation.",
+      "verified": true
+    },
+    {
+      "package": "recastnavigation/recastnavigation",
+      "ecosystem": "github",
+      "concept": "graph",
+      "role": "generation-library",
+      "version": "1.6.0",
+      "last_release": "2026-02-27",
+      "license": "Zlib",
+      "repo": "https://github.com/recastnavigation/recastnavigation",
+      "technologies": [
+        "cpp",
+        "native"
+      ],
+      "description": "The navmesh generator behind a large share of shipped games: voxelise arbitrary level geometry, filter by slope and headroom, erode by agent radius, and emit walkable polygons. Detour is the query and crowd half.",
       "verified": true
     },
     {
@@ -394,7 +588,7 @@
       "concept": "graph",
       "role": "generation-library",
       "version": "2.1.8",
-      "last_release": "2022-06-18",
+      "last_release": "2019-12-03",
       "description": "A directed and undirected multi-graph library",
       "repo": "https://github.com/dagrejs/graphlib",
       "license": "MIT",
@@ -449,6 +643,21 @@
       "verified": true
     },
     {
+      "package": "QuikGraph",
+      "ecosystem": "nuget",
+      "concept": "graph",
+      "role": "generation-library",
+      "version": "2.5.0",
+      "last_release": "2021-11-25",
+      "license": "MS-PL",
+      "repo": "https://github.com/KeRNeLith/QuikGraph",
+      "technologies": [
+        "csharp"
+      ],
+      "description": "Generic graph data structures and algorithms for .NET — spanning trees, shortest paths, maximum flow, topological sort. The successor to QuickGraph, and the practical answer for graph-driven level and quest generation in Unity.",
+      "verified": true
+    },
+    {
       "package": "igraph",
       "ecosystem": "pypi",
       "concept": "graph",
@@ -457,7 +666,7 @@
       "last_release": "2025-10-23",
       "description": "High performance graph data structures and algorithms",
       "repo": "https://igraph.org/python",
-      "license": "GNU General Public Licens",
+      "license": "GPL-2.0-or-later",
       "technologies": [
         "python"
       ],
@@ -472,10 +681,73 @@
       "last_release": "2025-12-08",
       "description": "Python package for creating and manipulating graphs and networks",
       "repo": null,
-      "license": null,
+      "license": "BSD-3-Clause",
       "technologies": [
         "python"
       ],
+      "verified": true
+    },
+    {
+      "package": "r-barnes/richdem",
+      "ecosystem": "github",
+      "concept": "hydro",
+      "role": "generation-library",
+      "version": "2.3.0",
+      "last_release": "2024-06-24",
+      "license": "GPL-3.0",
+      "repo": "https://github.com/r-barnes/richdem",
+      "technologies": [
+        "cpp",
+        "python"
+      ],
+      "description": "The author of the priority-flood paper's own implementation: depression filling, D8 and D-infinity routing, flow accumulation, watershed labelling, all parallelised for large rasters.",
+      "verified": true
+    },
+    {
+      "package": "pysheds",
+      "ecosystem": "pypi",
+      "concept": "hydro",
+      "role": "generation-library",
+      "version": "0.5",
+      "last_release": "2026-03-07",
+      "license": "GPL-3.0",
+      "repo": "https://github.com/mdbartos/pysheds",
+      "technologies": [
+        "python"
+      ],
+      "description": "Watershed delineation over a NumPy-backed grid: fill, resolve flats, flow direction, accumulation, catchment extraction and stream ordering. The most direct route from a heightfield to a river network in Python.",
+      "verified": true
+    },
+    {
+      "package": "richdem",
+      "ecosystem": "pypi",
+      "concept": "hydro",
+      "role": "generation-library",
+      "version": "0.3.4",
+      "last_release": "2020-05-14",
+      "license": "GPL-3.0",
+      "repo": "https://github.com/r-barnes/richdem",
+      "technologies": [
+        "python",
+        "cpp"
+      ],
+      "description": "The Python interface to RichDEM. Depression filling, flow routing in several schemes, and flow accumulation over rasters large enough that the algorithmic complexity is the point.",
+      "verified": true
+    },
+    {
+      "package": "whitebox",
+      "ecosystem": "pypi",
+      "concept": "hydro",
+      "role": "generation-library",
+      "version": "2.3.6",
+      "last_release": "2026-04-15",
+      "license": "MIT",
+      "repo": "https://github.com/opengeos/whitebox-python",
+      "technologies": [
+        "python",
+        "rust"
+      ],
+      "description": "Python bindings to WhiteboxTools, several hundred geospatial operations including the full hydrology suite — breaching as well as filling depressions, which is often the better choice because it carves an outlet instead of drowning the pit.",
       "verified": true
     },
     {
@@ -484,7 +756,7 @@
       "concept": "ik",
       "role": "generation-library",
       "version": "0.1.0",
-      "last_release": "2022-05-21",
+      "last_release": "2018-04-23",
       "description": "inverse kinematics for three.js",
       "repo": "https://github.com/jsantell/THREE.IK",
       "license": "MIT",
@@ -514,7 +786,7 @@
       "concept": "lsys",
       "role": "generation-library",
       "version": "1.5.4",
-      "last_release": "2022-06-19",
+      "last_release": "2020-06-12",
       "description": "Lindenmayer is  a L-System/LSystem library using modern (ES6) JavaScript with focus on a concis",
       "repo": "https://github.com/nylki/lindenmayer",
       "license": "MIT",
@@ -529,7 +801,7 @@
       "concept": "markov",
       "role": "generation-library",
       "version": "1.0.2",
-      "last_release": "2022-06-19",
+      "last_release": "2016-04-04",
       "description": "A general purpose markov chain generator",
       "repo": "git://github.com/bdchauvette/markov-chains",
       "license": "MIT",
@@ -544,7 +816,7 @@
       "concept": "markov",
       "role": "generation-library",
       "version": "1.0.2",
-      "last_release": "2022-06-19",
+      "last_release": "2016-01-28",
       "description": "generates a markov chain of words based on input files",
       "repo": "https://github.com/swang/markovchain",
       "license": "ISC",
@@ -569,6 +841,133 @@
       "verified": true
     },
     {
+      "package": "meshopt",
+      "ecosystem": "cargo",
+      "concept": "mesh",
+      "role": "generation-library",
+      "version": "0.6.2",
+      "last_release": "2026-05-25",
+      "license": "MIT",
+      "repo": "https://github.com/gwihlidal/meshopt-rs",
+      "technologies": [
+        "rust"
+      ],
+      "description": "Rust bindings to meshoptimizer, so simplification and cache optimisation are available to a Rust generation pipeline without leaving the language.",
+      "verified": true
+    },
+    {
+      "package": "tri-mesh",
+      "ecosystem": "cargo",
+      "concept": "mesh",
+      "role": "generation-library",
+      "version": "0.6.1",
+      "last_release": "2023-01-23",
+      "license": "MIT",
+      "repo": "https://github.com/asny/tri-mesh",
+      "technologies": [
+        "rust"
+      ],
+      "description": "A half-edge triangle mesh with the traversal and edit operations that depend on it: split, collapse, flip, and connectivity queries. The data structure the mesh concept is about, in Rust.",
+      "verified": true
+    },
+    {
+      "package": "CGAL/cgal",
+      "ecosystem": "github",
+      "concept": "mesh",
+      "role": "generation-library",
+      "version": "6.0.1",
+      "last_release": "2026-08-17",
+      "license": null,
+      "repo": "https://github.com/CGAL/cgal",
+      "technologies": [
+        "cpp",
+        "native"
+      ],
+      "description": "The computational geometry library that takes exactness seriously: Delaunay in 2D and 3D, mesh generation with quality guarantees, straight skeletons, booleans, and the exact predicate kernels the rest of the field borrows. Dual-licensed GPL and commercial.",
+      "verified": true
+    },
+    {
+      "package": "libigl/libigl",
+      "ecosystem": "github",
+      "concept": "mesh",
+      "role": "generation-library",
+      "version": "2.6.0",
+      "last_release": "2026-08-04",
+      "license": "GPL-3.0",
+      "repo": "https://github.com/libigl/libigl",
+      "technologies": [
+        "cpp",
+        "python"
+      ],
+      "description": "Header-only geometry processing: decimation, subdivision, parameterisation, distances, curvature, booleans. The C++ library the research literature is written against, with a Python wrapper on PyPI.",
+      "verified": true
+    },
+    {
+      "package": "sp4cerat/Fast-Quadric-Mesh-Simplification",
+      "ecosystem": "github",
+      "concept": "mesh",
+      "role": "reference-implementation",
+      "version": "master",
+      "last_release": "2024-07-28",
+      "license": "MIT",
+      "repo": "https://github.com/sp4cerat/Fast-Quadric-Mesh-Simplification",
+      "technologies": [
+        "cpp"
+      ],
+      "description": "Quadric error decimation in a single readable header — the clearest short implementation of Garland and Heckbert, and the one most ports and bindings are derived from.",
+      "verified": true
+    },
+    {
+      "package": "zeux/meshoptimizer",
+      "ecosystem": "github",
+      "concept": "mesh",
+      "role": "generation-library",
+      "version": "0.24",
+      "last_release": "2026-08-08",
+      "license": "MIT",
+      "repo": "https://github.com/zeux/meshoptimizer",
+      "technologies": [
+        "cpp",
+        "rust",
+        "js",
+        "wasm"
+      ],
+      "description": "Simplification, vertex-cache and overdraw optimisation, meshlet building and vertex-stream compression. This is the step between \"the generator produced a mesh\" and \"the mesh is fast\", and it is what glTF pipelines use.",
+      "verified": true
+    },
+    {
+      "package": "libigl",
+      "ecosystem": "pypi",
+      "concept": "mesh",
+      "role": "generation-library",
+      "version": "2.6.2",
+      "last_release": "2026-05-20",
+      "license": "GPL-3.0",
+      "repo": "https://github.com/libigl/libigl-python-bindings",
+      "technologies": [
+        "python",
+        "cpp"
+      ],
+      "description": "The Python bindings to libigl. Chosen by much of the geometry-processing literature for reproducing results, which makes it the fastest way to check a paper's claim about a mesh operation.",
+      "verified": true
+    },
+    {
+      "package": "pymeshlab",
+      "ecosystem": "pypi",
+      "concept": "mesh",
+      "role": "generation-library",
+      "version": "2025.7",
+      "last_release": "2025-08-06",
+      "license": "GPL-3.0",
+      "repo": "https://github.com/cnr-isti-vclab/PyMeshLab",
+      "technologies": [
+        "python",
+        "cpp"
+      ],
+      "description": "Scriptable access to MeshLab's several hundred filters: quadric decimation, subdivision schemes, Poisson reconstruction, remeshing, curvature and repair. The broadest single mesh toolbox reachable from Python.",
+      "verified": true
+    },
+    {
       "package": "diffusers",
       "ecosystem": "pypi",
       "concept": "ml",
@@ -577,7 +976,7 @@
       "last_release": "2026-07-03",
       "description": "State-of-the-art diffusion in PyTorch and JAX.",
       "repo": "https://github.com/huggingface/diffusers",
-      "license": "Apache 2.0 License",
+      "license": "Apache-2.0",
       "technologies": [
         "python"
       ],
@@ -592,7 +991,7 @@
       "last_release": "2026-06-02",
       "description": "A set of python modules for machine learning and data mining",
       "repo": null,
-      "license": null,
+      "license": "BSD-3-Clause",
       "technologies": [
         "python"
       ],
@@ -607,10 +1006,111 @@
       "last_release": "2026-07-08",
       "description": "Tensors and Dynamic neural networks in Python with strong GPU acceleration",
       "repo": null,
-      "license": null,
+      "license": "Apache-2.0",
       "technologies": [
         "python"
       ],
+      "verified": true
+    },
+    {
+      "package": "fastnoise-lite",
+      "ecosystem": "cargo",
+      "concept": "noise",
+      "role": "generation-library",
+      "version": "1.1.1",
+      "last_release": "2024-06-06",
+      "license": "MIT",
+      "repo": "https://github.com/Auburn/FastNoiseLite",
+      "technologies": [
+        "rust",
+        "wasm"
+      ],
+      "description": "The Rust port of FastNoiseLite. Worth listing separately from the C++ original because it is the half that makes cross-language determinism usable from a Rust server or a WASM client.",
+      "verified": true
+    },
+    {
+      "package": "libnoise",
+      "ecosystem": "cargo",
+      "concept": "noise",
+      "role": "generation-library",
+      "version": "1.2.0",
+      "last_release": "2024-05-15",
+      "license": "MIT",
+      "repo": "https://github.com/cookiephone/libnoise-rs",
+      "technologies": [
+        "rust",
+        "wasm"
+      ],
+      "description": "A newer Rust noise crate built around a generator-adapter pipeline, so a whole terrain stack is one expression with the composition checked at compile time.",
+      "verified": true
+    },
+    {
+      "package": "noise",
+      "ecosystem": "cargo",
+      "concept": "noise",
+      "role": "generation-library",
+      "version": "0.9.0",
+      "last_release": "2024-01-14",
+      "license": "LGPL-3.0",
+      "repo": "https://github.com/Razaekel/noise-rs",
+      "technologies": [
+        "rust",
+        "wasm"
+      ],
+      "description": "The established Rust noise crate: Perlin, simplex, value, Worley, plus a combinator graph of fBm, billow, ridged multifractal, turbulence and domain warping built as composable types rather than as parameters.",
+      "verified": true
+    },
+    {
+      "package": "Auburn/FastNoiseLite",
+      "ecosystem": "github",
+      "concept": "noise",
+      "role": "generation-library",
+      "version": "1.1.1",
+      "last_release": "2026-06-21",
+      "license": "MIT",
+      "repo": "https://github.com/Auburn/FastNoiseLite",
+      "technologies": [
+        "cpp",
+        "csharp",
+        "rust",
+        "glsl",
+        "js",
+        "python"
+      ],
+      "description": "A single header per language implementing OpenSimplex2, Perlin, value and cellular noise plus fBm and domain warping. The reason it matters here is portability: the same noise, byte-identical, in C++, C#, Rust, GLSL, JavaScript and Python, which is what lets a server and a shader agree on a world.",
+      "verified": true
+    },
+    {
+      "package": "nothings/stb",
+      "ecosystem": "github",
+      "concept": "noise",
+      "role": "generation-library",
+      "version": "master",
+      "last_release": "2026-08-02",
+      "license": null,
+      "repo": "https://github.com/nothings/stb",
+      "technologies": [
+        "cpp",
+        "native"
+      ],
+      "description": "Single-file public-domain C libraries. Relevant here for stb_perlin.h — Perlin, ridged, turbulence and fBm in about 150 lines with no dependencies — and stb_image_resize for filtered field resampling.",
+      "verified": true
+    },
+    {
+      "package": "stegu/webgl-noise",
+      "ecosystem": "github",
+      "concept": "noise",
+      "role": "reference-implementation",
+      "version": "master",
+      "last_release": "2025-04-27",
+      "license": "MIT",
+      "repo": "https://github.com/stegu/webgl-noise",
+      "technologies": [
+        "glsl",
+        "gpu",
+        "browser"
+      ],
+      "description": "Ashima and Gustavson's GLSL noise functions: 2D/3D/4D simplex, classic Perlin and cellular, written with no texture lookups or uniform arrays so they run on any WebGL target. Almost every shader on Shadertoy that uses noise uses a copy of these.",
       "verified": true
     },
     {
@@ -619,7 +1119,7 @@
       "concept": "noise",
       "role": "generation-library",
       "version": "4.0.0",
-      "last_release": "2022-06-17",
+      "last_release": "2021-04-28",
       "description": "A TypeScript implementation of faster simplex noise",
       "repo": "https://github.com/joshforisha/fast-simplex-noise-js",
       "license": "Unlicense",
@@ -649,7 +1149,7 @@
       "concept": "noise",
       "role": "generation-library",
       "version": "2.1.0",
-      "last_release": "2022-06-22",
+      "last_release": "2013-11-07",
       "description": "Perlin noise implementation",
       "repo": "https://github.com/xixixao/noisejs",
       "license": null,
@@ -664,7 +1164,7 @@
       "concept": "noise",
       "role": "generation-library",
       "version": "2.5.0",
-      "last_release": "2022-06-22",
+      "last_release": "2021-04-15",
       "description": "OpenSimplex noise for TypeScript/JavaScript",
       "repo": "https://github.com/joshforisha/open-simplex-noise-js",
       "license": "Unlicense",
@@ -697,7 +1197,7 @@
       "last_release": "2015-03-29",
       "description": "Perlin noise for Python",
       "repo": "https://github.com/caseman/noise",
-      "license": "UNKNOWN",
+      "license": null,
       "technologies": [
         "python"
       ],
@@ -749,12 +1249,61 @@
       "verified": true
     },
     {
+      "package": "rbush",
+      "ecosystem": "npm",
+      "concept": "part",
+      "role": "generation-library",
+      "version": "4.0.1",
+      "last_release": "2024-08-21",
+      "license": "MIT",
+      "repo": "https://github.com/mourner/rbush",
+      "technologies": [
+        "js",
+        "browser",
+        "node"
+      ],
+      "description": "An R-tree spatial index using bulk-loading by sort-tile-recursive packing. The practical answer for \"what is near this\" over generated content when the data is rectangles rather than points, where a k-d tree would want points.",
+      "verified": true
+    },
+    {
+      "package": "rand",
+      "ecosystem": "cargo",
+      "concept": "rand",
+      "role": "generation-library",
+      "version": "0.10.2",
+      "last_release": "2026-07-08",
+      "license": "MIT",
+      "repo": "https://github.com/rust-random/rand",
+      "technologies": [
+        "rust",
+        "wasm"
+      ],
+      "description": "Rust's standard randomness crate. Relevant here for what it makes explicit rather than what it computes: seedable generators are a separate type from the OS entropy source, and the distinction between reproducible and secure randomness is enforced at compile time.",
+      "verified": true
+    },
+    {
+      "package": "rand_xoshiro",
+      "ecosystem": "cargo",
+      "concept": "rand",
+      "role": "generation-library",
+      "version": "0.8.1",
+      "last_release": "2026-07-08",
+      "license": "MIT",
+      "repo": "https://github.com/rust-random/rngs",
+      "technologies": [
+        "rust",
+        "wasm"
+      ],
+      "description": "The xoshiro and xoroshiro family plus SplitMix64, in the form the authors specify. The jump functions matter for generation: they give you provably non-overlapping streams for parallel or per-chunk work.",
+      "verified": true
+    },
+    {
       "package": "alea",
       "ecosystem": "npm",
       "concept": "rand",
       "role": "generation-library",
       "version": "1.0.1",
-      "last_release": "2022-06-13",
+      "last_release": "2021-09-07",
       "description": "Implementation of the Alea PRNG by Johannes Baagøe",
       "repo": "https://github.com/coverslide/node-alea",
       "license": "MIT",
@@ -784,7 +1333,7 @@
       "concept": "rand",
       "role": "generation-library",
       "version": "2.1.0",
-      "last_release": "2024-10-22",
+      "last_release": "2019-05-30",
       "description": "A mathematically correct random number generator library for JavaScript.",
       "repo": "git://github.com/ckknight/random-js",
       "license": "MIT",
@@ -799,13 +1348,28 @@
       "concept": "rand",
       "role": "generation-library",
       "version": "3.0.5",
-      "last_release": "2022-06-26",
+      "last_release": "2019-09-17",
       "description": "Seeded random number generator for Javascript.",
       "repo": "git://github.com/davidbau/seedrandom",
       "license": "MIT",
       "technologies": [
         "js"
       ],
+      "verified": true
+    },
+    {
+      "package": "MathNet.Numerics",
+      "ecosystem": "nuget",
+      "concept": "rand",
+      "role": "generation-library",
+      "version": "5.0.0",
+      "last_release": "2022-04-03",
+      "license": "MIT",
+      "repo": "https://github.com/mathnet/mathnet-numerics",
+      "technologies": [
+        "csharp"
+      ],
+      "description": "The .NET numerics library: Mersenne Twister and xorshift generators, distributions, interpolation including cubic splines, linear algebra and the FFT. In generation terms it is the substrate that C# otherwise lacks.",
       "verified": true
     },
     {
@@ -817,7 +1381,7 @@
       "last_release": "2026-08-09",
       "description": "Fundamental package for array computing in Python",
       "repo": null,
-      "license": null,
+      "license": "BSD-3-Clause",
       "technologies": [
         "python"
       ],
@@ -832,10 +1396,26 @@
       "last_release": "2025-10-22",
       "description": "Random generator supporting multiple PRNGs",
       "repo": null,
-      "license": null,
+      "license": "NCSA",
       "technologies": [
         "python"
       ],
+      "verified": true
+    },
+    {
+      "package": "fast_poisson",
+      "ecosystem": "cargo",
+      "concept": "samp",
+      "role": "generation-library",
+      "version": "1.0.2",
+      "last_release": "2023-06-14",
+      "license": "MIT",
+      "repo": "https://github.com/AlphaModder/fast-poisson",
+      "technologies": [
+        "rust",
+        "wasm"
+      ],
+      "description": "Bridson's algorithm in arbitrary dimensions, as a lazy iterator — so you can take as many points as you need rather than generating a whole set.",
       "verified": true
     },
     {
@@ -859,7 +1439,7 @@
       "concept": "samp",
       "role": "generation-library",
       "version": "2.7.3",
-      "last_release": "2025-08-30",
+      "last_release": "2022-02-02",
       "description": "A max rectangle 2d bin packer for packing glyphs or images into multiple sprite-sheet/atlas",
       "repo": "https://soimy@github.com/soimy/maxrects-packer",
       "license": "MIT",
@@ -874,7 +1454,7 @@
       "concept": "samp",
       "role": "generation-library",
       "version": "2.3.1",
-      "last_release": "2022-06-24",
+      "last_release": "2022-06-05",
       "description": "Poisson disk sampling in arbitrary dimensions",
       "repo": "https://github.com/kchapelier/poisson-disk-sampling",
       "license": "MIT",
@@ -914,6 +1494,55 @@
       "verified": true
     },
     {
+      "package": "Chlumsky/msdfgen",
+      "ecosystem": "github",
+      "concept": "sdf",
+      "role": "generation-library",
+      "version": "1.12",
+      "last_release": "2026-05-17",
+      "license": "MIT",
+      "repo": "https://github.com/Chlumsky/msdfgen",
+      "technologies": [
+        "cpp",
+        "gpu"
+      ],
+      "description": "Generates multi-channel signed distance fields from vector outlines, which is how text and icons stay sharp at any magnification from one small texture. The multi-channel trick preserves corners that a single-channel SDF rounds off.",
+      "verified": true
+    },
+    {
+      "package": "patriciogonzalezvivo/lygia",
+      "ecosystem": "github",
+      "concept": "shader",
+      "role": "generation-library",
+      "version": "main",
+      "last_release": "2026-08-17",
+      "license": null,
+      "repo": "https://github.com/patriciogonzalezvivo/lygia",
+      "technologies": [
+        "glsl",
+        "gpu"
+      ],
+      "description": "A shader standard library, cross-compiled to GLSL, HLSL, WGSL, Metal and CUDA: noise bases, SDF primitives and operators, colour-space conversions, filters and lighting. The closest thing shader work has to an importable package.",
+      "verified": true
+    },
+    {
+      "package": "lyon",
+      "ecosystem": "cargo",
+      "concept": "spline",
+      "role": "generation-library",
+      "version": "1.0.19",
+      "last_release": "2026-02-21",
+      "license": "MIT",
+      "repo": "https://github.com/nical/lyon",
+      "technologies": [
+        "rust",
+        "gpu",
+        "wasm"
+      ],
+      "description": "Path geometry for GPU rendering: Bézier evaluation and flattening, offsetting, stroking and fill tessellation. The adaptive flattening is de Casteljau subdivision put to work.",
+      "verified": true
+    },
+    {
       "package": "bezier-js",
       "ecosystem": "npm",
       "concept": "spline",
@@ -934,7 +1563,7 @@
       "concept": "spline",
       "role": "generation-library",
       "version": "3.0.3",
-      "last_release": "2022-06-14",
+      "last_release": "2020-01-07",
       "description": "spline interpolation",
       "repo": "https://github.com/morganherlocker/cubic-spline",
       "license": "MIT",
@@ -949,13 +1578,30 @@
       "concept": "spline",
       "role": "generation-library",
       "version": "3.2.0",
-      "last_release": "2023-04-12",
+      "last_release": "2022-12-20",
       "description": "Graphical primitives for visualization, such as lines and areas.",
       "repo": "https://github.com/d3/d3-shape",
       "license": "ISC",
       "technologies": [
         "js"
       ],
+      "verified": true
+    },
+    {
+      "package": "simplify-js",
+      "ecosystem": "npm",
+      "concept": "spline",
+      "role": "generation-library",
+      "version": "1.2.4",
+      "last_release": "2020-02-03",
+      "license": "BSD-2-Clause",
+      "repo": "https://github.com/mourner/simplify-js",
+      "technologies": [
+        "js",
+        "browser",
+        "node"
+      ],
+      "description": "Ramer–Douglas–Peucker with an optional radial-distance pre-pass, in about forty lines. The library behind polyline simplification in most JavaScript mapping stacks.",
       "verified": true
     },
     {
@@ -967,10 +1613,135 @@
       "last_release": "2025-05-23",
       "description": "Object-oriented B-Spline and NURBS evaluation library",
       "repo": null,
-      "license": null,
+      "license": "MIT",
       "technologies": [
         "python"
       ],
+      "verified": true
+    },
+    {
+      "package": "PixarAnimationStudios/OpenSubdiv",
+      "ecosystem": "github",
+      "concept": "subdiv",
+      "role": "generation-library",
+      "version": "3.6.0",
+      "last_release": "2026-07-17",
+      "license": null,
+      "repo": "https://github.com/PixarAnimationStudios/OpenSubdiv",
+      "technologies": [
+        "cpp",
+        "gpu",
+        "native"
+      ],
+      "description": "Catmull–Clark and Loop with semi-sharp creases, hierarchical edits and GPU evaluation. Inside Maya, Blender and RenderMan, which makes it less one implementation than the de facto definition of what a subdivision surface is in production.",
+      "verified": true
+    },
+    {
+      "package": "three-subdivide",
+      "ecosystem": "npm",
+      "concept": "subdiv",
+      "role": "generation-library",
+      "version": "1.1.5",
+      "last_release": "2023-08-03",
+      "license": "MIT",
+      "repo": "https://github.com/stevinz/three-subdivide",
+      "technologies": [
+        "js",
+        "browser"
+      ],
+      "description": "Catmull–Clark and a simple split modifier for three.js BufferGeometry, replacing the SubdivisionModifier that was removed from three.js itself.",
+      "verified": true
+    },
+    {
+      "package": "texturize",
+      "ecosystem": "pypi",
+      "concept": "texsyn",
+      "role": "model",
+      "version": "0.14.1",
+      "last_release": "2021-05-26",
+      "license": "AGPL-3.0",
+      "repo": "https://github.com/photogeniq/texturize",
+      "technologies": [
+        "python"
+      ],
+      "description": "Neural texture synthesis and remixing: extend a photographed material, make it seamless, or transfer its statistics to another image. The descendant of Portilla–Simoncelli with a learned feature space in place of the steerable pyramid. Note the AGPL licence.",
+      "verified": true
+    },
+    {
+      "package": "nlopt",
+      "ecosystem": "pypi",
+      "concept": "topopt",
+      "role": "solver",
+      "version": "2.11.0",
+      "last_release": "2026-06-02",
+      "license": "LGPL-2.1",
+      "repo": "https://github.com/stevengj/nlopt",
+      "technologies": [
+        "python",
+        "cpp"
+      ],
+      "description": "The optimiser half of an adjoint inverse-design loop: MMA, SLSQP, CCSA and the rest, all taking a user-supplied gradient. Pair it with an automatic-differentiation or adjoint-capable simulator and you have the machinery the nanophotonics literature uses.",
+      "verified": true
+    },
+    {
+      "package": "openmdao",
+      "ecosystem": "pypi",
+      "concept": "topopt",
+      "role": "solver",
+      "version": "3.45.0",
+      "last_release": "2026-08-05",
+      "license": "Apache-2.0",
+      "repo": "https://github.com/OpenMDAO/OpenMDAO",
+      "technologies": [
+        "python"
+      ],
+      "description": "NASA's multidisciplinary optimisation framework. Its reason to be here is analytic derivatives across coupled solvers: it assembles the adjoint for a whole system rather than for one simulation, which is what makes inverse design tractable when the physics has several parts.",
+      "verified": true
+    },
+    {
+      "package": "topopt",
+      "ecosystem": "pypi",
+      "concept": "topopt",
+      "role": "solver",
+      "version": "0.0.1a1",
+      "last_release": "2019-12-22",
+      "license": "MIT",
+      "repo": "https://github.com/zfergus/topopt",
+      "technologies": [
+        "python"
+      ],
+      "description": "A direct Python translation of the 88-line SIMP reference code — density variables, optimality-criteria update, sensitivity filter, finite elements. Recorded honestly: an early alpha by one author, listed because it is the only installable implementation of the textbook method and because the method is short enough that the code is the specification.",
+      "verified": true
+    },
+    {
+      "package": "delaunator",
+      "ecosystem": "cargo",
+      "concept": "vor",
+      "role": "generation-library",
+      "version": "1.1.0",
+      "last_release": "2026-01-05",
+      "license": "ISC",
+      "repo": "https://github.com/mourner/delaunator-rs",
+      "technologies": [
+        "rust",
+        "wasm"
+      ],
+      "description": "The Rust port of Delaunator: incremental Delaunay triangulation with a space-filling-curve insertion order, from which the Voronoi dual falls out. Fast enough that the triangulation stops being the bottleneck.",
+      "verified": true
+    },
+    {
+      "package": "spade",
+      "ecosystem": "cargo",
+      "concept": "vor",
+      "role": "generation-library",
+      "version": "2.15.1",
+      "last_release": "2026-06-24",
+      "license": "MIT",
+      "repo": "https://github.com/Stoeoef/spade",
+      "technologies": [
+        "rust"
+      ],
+      "description": "Delaunay and constrained Delaunay triangulations with exact predicates and refinement to a quality bound. The constrained half is what you need when the triangulation has to respect a coastline or a road you already generated.",
       "verified": true
     },
     {
@@ -1009,7 +1780,7 @@
       "concept": "vor",
       "role": "generation-library",
       "version": "1.0.0",
-      "last_release": "2022-06-28",
+      "last_release": "2015-03-24",
       "description": "A Javascript implementation of Steven J. Fortune's algorithm to efficiently compute Voronoi dia",
       "repo": "https://github.com/gorhill/Javascript-Voronoi",
       "license": "MIT",
@@ -1027,7 +1798,7 @@
       "last_release": "2025-10-08",
       "description": "Powerful, efficient trajectory analysis in scientific Python.",
       "repo": "https://github.com/glotzerlab/freud",
-      "license": null,
+      "license": "BSD-3-Clause",
       "technologies": [
         "python"
       ],
@@ -1042,7 +1813,7 @@
       "last_release": "2014-09-02",
       "description": "2D and 3D Voronoi tessellations: a python entry point for the voro++ library.",
       "repo": "https://github.com/joe-jordan/pyvoro",
-      "license": "UNKNOWN",
+      "license": null,
       "technologies": [
         "python"
       ],
@@ -1057,10 +1828,26 @@
       "last_release": "2026-06-19",
       "description": "Fundamental algorithms for scientific computing in Python",
       "repo": null,
-      "license": "Copyright (c) 2001-2002 E",
+      "license": "BSD-3-Clause",
       "technologies": [
         "python"
       ],
+      "verified": true
+    },
+    {
+      "package": "mxgmn/WaveFunctionCollapse",
+      "ecosystem": "github",
+      "concept": "wfc",
+      "role": "reference-implementation",
+      "version": "master",
+      "last_release": "2026-03-22",
+      "license": null,
+      "repo": "https://github.com/mxgmn/WaveFunctionCollapse",
+      "technologies": [
+        "csharp",
+        "native"
+      ],
+      "description": "The reference implementation, and effectively the specification, since WFC has no paper. Both the overlapping model that learns NxN patterns from one bitmap and the simple-tiled model. Note the licence: the repository carries no standard SPDX identifier, so check the terms before shipping it.",
       "verified": true
     },
     {
@@ -1069,7 +1856,7 @@
       "concept": "wfc",
       "role": "generation-library",
       "version": "2.1.0",
-      "last_release": "2022-06-28",
+      "last_release": "2021-03-27",
       "description": "Javascript port of https://github.com/mxgmn/WaveFunctionCollapse",
       "repo": "https://github.com/kchapelier/wavefunctioncollapse",
       "license": "MIT",
@@ -1078,5 +1865,6 @@
       ],
       "verified": true
     }
-  ]
+  ],
+  "_resolved": "The previous version of this file observed that many npm packages reported a last_release in 2022-05 or 2022-06, clustering too tightly across unrelated projects to be real, and guessed at a bulk registry metadata operation. That guess was wrong. Re-resolving showed the dates were simply the day the original lookup ran: the field had been filled with the check date rather than the release date, on 23 of 71 rows. The real dates range from 2013 to 2026, and some of those packages genuinely have not shipped in a decade — which the wrong dates were concealing."
 }
