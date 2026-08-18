@@ -16,6 +16,9 @@ const state = {
   domains: new Set(),
   tags: new Set(),
   tiers: new Set(),
+  /* One Set per axis, keyed by axis id. Filled once the bootstrap is in, because the axes
+     are data rather than a fixed list — adding one to axes.json must not need a change here. */
+  axes: new Map(),
 };
 
 /* ---------------- shared page shell ----------------
@@ -471,6 +474,18 @@ function entityCard({ cls = '', title, id, badges = [], metrics = [], relations 
 const data = await fetch(`${BASE}api/bootstrap.json`).then(r => r.json());
 state.data = data;
 
+/* The axis layer. Concepts say what an entry is made of; axes say how it behaves, and the
+   difference is that nothing implements an axis. Everything below is driven off the data
+   rather than a list written here, so a fourth axis needs no change in this file. */
+const axisMeta = data.axes ?? { axes: [] };
+const axisColumn = new Map(axisMeta.axes.map(a => [a.id, a.column]));
+const axisById = Object.fromEntries(axisMeta.axes.map(a => [a.id, a]));
+const axisValueName = (axisId, value) =>
+  axisById[axisId]?.values.find(v => v.id === value)?.name ?? value;
+const notableValues = new Map(axisMeta.axes.map(a =>
+  [a.id, new Set(a.values.filter(v => v.notable).map(v => v.id))]));
+for (const a of axisMeta.axes) state.axes.set(a.id, new Set());
+
 const tagName = Object.fromEntries(data.tags.map(t => [t.id, t.name]));
 const tagById = Object.fromEntries(data.tags.map(t => [t.id, t]));
 const technologies = data.technologies ?? [];
@@ -530,6 +545,16 @@ const goToCatalogueTag = tag => () => {
   showView('catalogue'); renderAll(); window.scrollTo(0, 0);
 };
 const goToPage = page => () => { showView(page); window.scrollTo(0, 0); };
+
+/* An axis value is only worth naming if you can see what carries it, so every value on every
+   axis card is a link into the catalogue filtered to exactly that value. */
+const goToCatalogueAxis = (axisId, value) => () => {
+  state.tiers.clear(); state.domains.clear(); state.tags.clear(); state.search = '';
+  $('#search').value = '';
+  for (const set of state.axes.values()) set.clear();
+  state.axes.get(axisId)?.add(value);
+  showView('catalogue'); renderAll(); window.scrollTo(0, 0);
+};
 
 
 /* ---------------- headline ---------------- */
@@ -600,6 +625,11 @@ function matches(entry) {
   if (state.tiers.size && !state.tiers.has(entry.tier)) return false;
   if (state.domains.size && !state.domains.has(entry.domain_id)) return false;
   for (const t of state.tags) if (!entry.tags.includes(t)) return false;
+  for (const [axisId, chosen] of state.axes) {
+    if (!chosen.size) continue;
+    const col = axisColumn.get(axisId);
+    if (!chosen.has(entry[col])) return false;
+  }
   if (state.search) {
     const hay = `${entry.name} ${entry.description ?? ''} ${entry.group_name} ${entry.domain_name}`.toLowerCase();
     if (!state.search.split(/\s+/).every(term => hay.includes(term))) return false;
@@ -677,6 +707,22 @@ function renderEntries() {
       b.addEventListener('click', () => toggle(state.tags, t, renderAll));
       tags.append(b);
     }
+    /* Axis values are not tags and must not read as tags: a tag says what the entry is made
+       of, an axis says how it behaves. Same row, separated, different shape.
+
+       Only the values marked notable print. Every entry has a value on every axis, so
+       printing them all put three chips on all 841 rows and tripled the row height to say
+       "ordinary" over and over. What prints is a departure from the ordinary case. */
+    const notable = axisMeta.axes.filter(ax => notableValues.get(ax.id)?.has(entry[ax.column]));
+    if (notable.length) tags.append(el('span', 'chip-split'));
+    for (const ax of notable) {
+      const v = entry[ax.column];
+      const on = state.axes.get(ax.id)?.has(v);
+      const b = el('button', `axis-chip${on ? ' on' : ''}`, `${ax.id}: ${v}`);
+      b.title = `${ax.question} — ${axisValueName(ax.id, v)}`;
+      b.addEventListener('click', () => toggle(state.axes.get(ax.id), v, renderAll));
+      tags.append(b);
+    }
     row.append(tags);
 
     if (entry.description) {
@@ -698,6 +744,8 @@ function renderActiveFilters() {
       set: state.domains, key: d,
     })),
     ...[...state.tags].map(t => ({ label: `#${t}`, set: state.tags, key: t })),
+    ...[...state.axes].flatMap(([axisId, chosen]) =>
+      [...chosen].map(v => ({ label: axisValueName(axisId, v), set: chosen, key: v }))),
   ];
   for (const c of chips) {
     const chip = el('button', 'chip', `${c.label} ✕`);
@@ -707,6 +755,8 @@ function renderActiveFilters() {
   $('[data-clear="domain"]').classList.toggle('on', state.domains.size > 0);
   $('[data-clear="tag"]').classList.toggle('on', state.tags.size > 0);
   $('[data-clear="tier"]').classList.toggle('on', state.tiers.size > 0);
+  for (const [axisId, chosen] of state.axes)
+    $(`[data-clear="axis:${axisId}"]`)?.classList.toggle('on', chosen.size > 0);
 }
 
 /** Counts shown in the sidebar reflect what would remain if you added that filter. */
@@ -732,6 +782,16 @@ function renderFacetCounts(visible) {
     btn.querySelector('.n').textContent = n;
     btn.classList.toggle('zero', n === 0 && !state.tags.has(btn.dataset.id));
   }
+  for (const list of document.querySelectorAll('.axis-pills')) {
+    const col = axisColumn.get(list.dataset.axis);
+    const counts = {};
+    for (const e of visible) counts[e[col]] = (counts[e[col]] ?? 0) + 1;
+    for (const btn of list.querySelectorAll('button')) {
+      const n = counts[btn.dataset.id] ?? 0;
+      btn.querySelector('.n').textContent = n;
+      btn.classList.toggle('zero', n === 0 && !state.axes.get(list.dataset.axis).has(btn.dataset.id));
+    }
+  }
 }
 
 function toggle(set, value, after) {
@@ -746,6 +806,9 @@ function renderAll() {
     btn.classList.toggle('on', state.domains.has(btn.dataset.id));
   for (const btn of document.querySelectorAll('#tag-list button'))
     btn.classList.toggle('on', state.tags.has(btn.dataset.id));
+  for (const list of document.querySelectorAll('.axis-pills'))
+    for (const btn of list.querySelectorAll('button'))
+      btn.classList.toggle('on', state.axes.get(list.dataset.axis).has(btn.dataset.id));
   renderFilterSummary();
   renderEntries();
   writeUrl(true);
@@ -786,6 +849,34 @@ for (const t of data.tags) {
   $('#tag-list').append(li);
 }
 
+/* One block per axis, built from the data. Values are alternatives rather than
+   requirements — picking two of them widens the result the way the layer pills do — so the
+   hint says so, because the tag block directly above behaves the opposite way. */
+const axisFacetHost = $('#axis-facets');
+for (const ax of axisMeta.axes) {
+  const box = el('div', 'facet');
+  const h = el('h2', null, ax.name);
+  const clear = el('button', 'clear', 'clear');
+  clear.dataset.clear = `axis:${ax.id}`;
+  h.append(clear);
+  box.append(h);
+  box.append(el('p', 'hint', ax.question));
+  const list = el('ul', 'pills axis-pills');
+  list.dataset.axis = ax.id;
+  for (const v of ax.values) {
+    const li = el('li');
+    const b = el('button');
+    b.dataset.id = v.id;
+    b.append(el('span', 'label', v.name), el('span', 'n', String(v.count)));
+    b.title = `${v.what} — ${v.buys}`;
+    b.addEventListener('click', () => toggle(state.axes.get(ax.id), v.id, renderAll));
+    li.append(b);
+    list.append(li);
+  }
+  box.append(list);
+  axisFacetHost.append(box);
+}
+
 /* The facets run to roughly 2400px — 28 tags, 23 domains, three layers. On a phone that
    buries the first result three screens under the search box, so they go inside a
    disclosure that starts closed. Above 860px the sidebar is a column of its own and the
@@ -821,6 +912,9 @@ $('#search').addEventListener('input', e => {
 });
 
 const CLEAR_TARGETS = { domain: state.domains, tag: state.tags, tier: state.tiers };
+// Axis blocks are built from data, so their clear buttons register themselves rather than
+// being listed above alongside the three the markup hard-codes.
+for (const [axisId, chosen] of state.axes) CLEAR_TARGETS[`axis:${axisId}`] = chosen;
 for (const btn of document.querySelectorAll('.clear')) {
   btn.addEventListener('click', () => {
     CLEAR_TARGETS[btn.dataset.clear]?.clear();
@@ -1003,6 +1097,7 @@ function writeUrl(replace = false) {
     for (const t of state.tiers) q.append('tier', t);
     for (const d of state.domains) q.append('domain', d);
     for (const t of state.tags) q.append('tag', t);
+    for (const [axisId, chosen] of state.axes) for (const v of chosen) q.append(axisId, v);
   }
   const url = q.size ? `${path}?${q}` : path;
   if (url === location.pathname + location.search) return;
@@ -1017,6 +1112,7 @@ function readUrl() {
   state.tiers = new Set(q.getAll('tier'));
   state.domains = new Set(q.getAll('domain'));
   state.tags = new Set(q.getAll('tag'));
+  for (const a of axisMeta.axes) state.axes.set(a.id, new Set(q.getAll(a.id)));
   showView(view, { push: false });
   renderAll();
 }
@@ -1144,15 +1240,12 @@ for (const b of document.querySelectorAll('[data-goto]')) {
   b.addEventListener('click', () => { showView(b.dataset.goto); window.scrollTo(0, 0); });
 }
 
+/* What is still empty. `input_class`, `addressing` and `runs_at` used to be here and are now
+   filled and explained on the basic blocks page, so they are listed there instead — with the
+   rest of the empty columns beside them, where the comparison is useful. This list is what is
+   left over: the two that are not axis-shaped at all. */
 const PENDING = [
-  ['output_type', 'image · vector · mesh · audio · text · data · schedule · plan · field', 'What actually comes out.'],
-  ['input_class', 'seed · seed+library · external-data', 'Whether it can run from a seed alone. `external-data` entries cannot live in a seed-driven engine at all — a roster needs a staff list, an implant needs a scan. This is the split that `tier` does not capture.'],
-  ['compute_cost', 'trivial · moderate · heavy · offline-only', 'Rough order of magnitude.'],
-  ['deterministic', 'yes · no · conditional', 'Same seed, same result — across platforms and versions.'],
-  ['realtime', 'yes · no · with-caveats', 'Whether it can run inside a frame budget.'],
-  ['difficulty', 'wrap-a-library · weekend · month · research · unsolved', 'Honest effort estimate. Judgement, not fact.'],
-  ['confidence', 'attested · plausible · unverified', 'How much the entry can be trusted. The catalogue was partly written from recall, so some entries name things nobody actually does.'],
-  ['tag.facet', 'mechanism · representation · deployment', 'The current 28 tags mix all three axes. `shader` is not an algorithm family — it is a place of execution.'],
+  ['tag.facet', 'block · representation · category · deployment', 'Filled, and the deployment two turned out not to be concepts. Kept here because the facet vocabulary itself is still a judgement rather than a measurement, apart from the implemented test.'],
   ['entry_uses', 'entry → entry', 'Which sources and operators each generator is built from. This is what turns the worked example above into data rather than prose.'],
 ];
 
@@ -1316,6 +1409,91 @@ filterablePage({
   groupOrder: (a, b) => FACET_ORDER.indexOf(a) - FACET_ORDER.indexOf(b),
   renderItem: conceptCard,
 });
+
+/* ---------------- axes ----------------
+   Rendered below the concepts on the same page and in the same card shape, because the point
+   that has to land is the contrast: these sit next to the concepts and are not concepts. Not
+   a filterable page of its own — there are three of them, and a search box over three rows
+   would be furniture. */
+
+$('#axis-about').textContent = axisMeta.about ?? '';
+$('#axis-why').textContent = axisMeta.test ?? '';
+
+const axisHost = $('#axis-list');
+for (const ax of axisMeta.axes) {
+  const body = el('div');
+  const eli5 = eli5Block(ax.eli5);
+  if (eli5) body.append(eli5);
+
+  const dl = el('dl');
+  dl.append(el('dt', null, 'The question'), el('dd', null, ax.question));
+  body.append(dl);
+
+  /* Each value gets what it is, what it buys and what it costs. The cost line is the one
+     worth having: an axis whose values all sound good is not sorting anything. */
+  const vals = el('div', 'axis-values');
+  for (const v of ax.values) {
+    const row = el('div', 'axis-value');
+    const head = el('div', 'axis-value-head');
+    const pick = el('button', 'axis-value-name', v.name);
+    pick.title = `Show the ${v.count} entries with ${ax.id} = ${v.id}`;
+    pick.addEventListener('click', goToCatalogueAxis(ax.id, v.id));
+    head.append(pick);
+    head.append(el('code', 'id', v.id));
+    head.append(el('span', 'axis-value-n', v.count === 0 ? 'none' : `${v.count} entries`));
+    row.append(head);
+    const vdl = el('dl');
+    vdl.append(el('dt', null, 'What'), el('dd', null, v.what));
+    vdl.append(el('dt', null, 'Buys'), el('dd', null, v.buys));
+    vdl.append(el('dt', null, 'Costs'), el('dd', 'watch', v.costs));
+    row.append(vdl);
+    vals.append(row);
+  }
+  body.append(vals);
+
+  /* An axis argues for itself the way an added concept does, and for the same reason: it was
+     not in the original vocabulary, so the case for it has to be readable next to it. */
+  const box = el('div', 'addition');
+  box.append(el('div', 'prov-head', 'Why this is an axis and not a concept'));
+  box.append(el('p', 'add-why', ax.why));
+  const rdl = el('dl');
+  rdl.append(el('dt', null, 'How it is classified'), el('dd', null,
+    `${ax.rule.about ?? ''} Default ${ax.rule.default}; where an entry's concepts disagree, `
+    + `${ax.rule.precedence.join(' beats ')}.`));
+  rdl.append(el('dt', null, 'Hand-corrected'), el('dd', ax.overrides ? null : 'orphan',
+    ax.overrides
+      ? `${ax.overrides} ${ax.overrides === 1 ? 'entry' : 'entries'} where the rule was wrong.`
+      : 'Nothing. Either the rule is exactly right or nobody has checked it yet.'));
+  box.append(rdl);
+  body.append(box);
+
+  const total = ax.values.reduce((n, v) => n + v.count, 0);
+  axisHost.append(entityCard({
+    cls: 'block-card f-axis',
+    title: ax.name,
+    id: ax.column,
+    badges: [{ cls: 'facet-chip f-axis', text: 'axis' }],
+    metrics: [`${ax.values.length} values`, `${total} entries`],
+    relations: [{
+      label: 'Catalogue',
+      items: ax.values.map(v => ({
+        text: `${v.name} ${v.count}`, title: v.what, onClick: goToCatalogueAxis(ax.id, v.id),
+      })),
+    }],
+    body,
+  }));
+}
+
+/* Columns that exist and hold nothing. Kept beside the filled axes rather than on the
+   definitions page, so one place knows what the axis layer covers and what it does not. */
+const axisEmptyHost = $('#axis-empty');
+for (const [field, why] of Object.entries(axisMeta.stillEmpty ?? {})) {
+  if (field.startsWith('_')) continue;
+  const row = el('div', 'field-def');
+  row.append(el('code', 'fname', field));
+  row.append(el('div', 'fwhy', why));
+  axisEmptyHost.append(row);
+}
 
 const rejectedHost = $('#concept-rejected');
 for (const r of conceptMeta.rejected ?? []) {

@@ -1277,3 +1277,39 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   .schema summary { padding: 6px 0; }
   .entry-ref, .block-name { padding: 3px 0; }
 }
+
+/* ---- axis layer ----
+   Axes sit next to concepts and must not read as concepts. The facet chip gets its own
+   colour, the card its own left border, and on an entry row the axis values are pushed past
+   a divider and given a different shape from the tags, because a tag says what a thing is
+   made of and an axis says how it behaves. */
+.facet-chip.f-axis { color: var(--warn); border-color: var(--warn); }
+.block-card.f-axis { border-left-color: var(--warn); }
+
+.axis-sub { font-size: 15px; font-weight: 500; margin: 26px 0 4px; }
+
+.axis-values { margin-top: 12px; display: grid; gap: 10px; }
+.axis-value { border: 1px solid var(--line); border-radius: 6px; padding: 9px 12px 4px; }
+.axis-value-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.axis-value-name {
+  background: none; border: 0; padding: 0; cursor: pointer;
+  font: inherit; font-weight: 600; color: var(--accent);
+}
+.axis-value-name:hover { text-decoration: underline; }
+.axis-value-n { margin-left: auto; font-size: 12px; color: var(--ink-3); }
+.axis-value dl { margin: 6px 0 0; }
+
+/* The divider between what an entry is made of and how it behaves. */
+.chip-split {
+  display: inline-block; width: 1px; height: 13px;
+  background: var(--line-2); margin: 0 3px; vertical-align: -2px;
+}
+.axis-chip {
+  font-family: var(--mono); font-size: 11px;
+  padding: 1px 7px; margin: 1px 2px 1px 0;
+  background: none; color: var(--ink-2);
+  border: 1px dashed var(--line-2); border-radius: 4px;
+  cursor: pointer;
+}
+.axis-chip:hover { border-color: var(--warn); color: var(--warn); }
+.axis-chip.on { border-style: solid; border-color: var(--warn); color: var(--warn); }

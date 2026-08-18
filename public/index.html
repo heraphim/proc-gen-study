@@ -183,6 +183,8 @@
         <ul id="tag-list" class="pills"></ul>
       </div>
 
+      <div id="axis-facets"></div>
+
       <div class="facet">
         <h2>Classification</h2>
         <p class="hint" id="classified-note"></p>
@@ -301,20 +303,36 @@
           applied differently.
         </p>
         <p class="hero-def">
-          Not everything on this page is a block. Three tests decide — irreducible, widespread,
-          importable — and concepts that fail one are still listed, grouped under what they
-          actually are: a representation is a format for holding structure rather than a way of
+          Not everything on this page is a block. Four tests decide — irreducible, widespread,
+          importable, implemented — and concepts that fail one are still listed, grouped under what
+          they actually are: a representation is a format for holding structure rather than a way of
           making it, a category is a bag containing blocks that were never named separately, and
           deployment describes where code runs rather than what it does.
+        </p>
+        <p class="hero-def">
+          The fourth test is the one that separates a concept from an <em>axis</em>. A concept is
+          something you can be sent away to build. An axis cannot be built, only observed: every
+          entry has a value on it, and nothing implements it. The axes are listed below the
+          concepts, and the two concepts that fail this test — the two with no algorithms at all —
+          are where two of them came from.
         </p>
         <p class="hero-sub" id="blocks-stats"></p>
       </div>
 
-      <h2 class="def-h">Three tests</h2>
+      <h2 class="def-h">Four tests</h2>
       <div id="block-tests" class="tests"></div>
 
       <div class="page-toolbar" id="toolbar-blocks"></div>
       <div id="facet-groups"></div>
+
+      <h2 class="def-h">Axes — properties, not concepts</h2>
+      <p id="axis-about"></p>
+      <p class="hint" id="axis-why"></p>
+      <div id="axis-list"></div>
+      <h3 class="axis-sub">Columns that are not axes yet</h3>
+      <p class="hint">They exist on every entry and hold nothing. Listed so the shape of what is
+      missing is visible next to what is not.</p>
+      <div id="axis-empty" class="field-defs"></div>
 
       <h2 class="def-h">Considered and rejected</h2>
       <p>Concepts that looked like gaps and were not added, with the reason. The importable test
