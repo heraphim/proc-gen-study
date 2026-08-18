@@ -102,6 +102,17 @@ jobs:
             ${{ github.event.inputs.debug == 'true' && '--debug' || '' }} \
             --markdown research-report.md
 
+      # Without this a dry run has nowhere to put its findings: no pull request is opened, so the
+      # report is written on the runner and thrown away with it. The answers are the point of the
+      # run, and they were only visible by scrolling the log.
+      - name: Keep the report
+        if: always() && steps.backlog.outputs.skip == 'false' && github.event.inputs.list_models != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-report
+          path: research-report.md
+          if-no-files-found: warn
+
       # The gate. A run that produced something the migration rejects proposes nothing: the
       # fairness invariant, the round contiguity and the link rules all fail here first.
       - name: Validate
