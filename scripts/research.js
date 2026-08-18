@@ -767,6 +767,7 @@ if (val('--subject')) {
 
 const disabled = new Set();
 const applied = [];
+const reportedOnly = [];
 const done = [];
 const unanswered = [];
 const allLinks = [];
@@ -964,6 +965,24 @@ if (writes && done.length) {
     const now = `${p.year} — ${p.authors.join(', ')}`;
     if (was === now) continue;
 
+    // Only a disputed year is edited automatically. The first run to have this power produced
+    // two edits and both were wrong, in the same way: splitmix went from Steele, Lea and Flood
+    // -- who wrote it -- to Vigna, who wrote the popular C variant; and chew-ruppert-refinement
+    // lost Ruppert, from a record named after him. Three families agreed on each.
+    //
+    // Both had the year already right. Recalling who published something in a given year is a
+    // different task from recalling when it was published, and models are markedly worse at it:
+    // they converge on whoever is most associated with the idea rather than whoever is on the
+    // paper. A catalogue that says "Ruppert, building on Chew (1989)" also carries a
+    // relationship that a list of surnames cannot express, so replacing it loses information
+    // even when nobody is wrong.
+    //
+    // So an authors-only difference is reported and left alone, however many families back it.
+    if (Number(record.year) === Number(p.year)) {
+      reportedOnly.push({ target: d.review.target, was, now, families: p.families });
+      continue;
+    }
+
     record.year = p.year;
     record.authors = p.authors.join(', ');
     corrections.corrections.push({
@@ -987,7 +1006,10 @@ if (writes && done.length) {
   console.log(`\nrecorded ${done.length} reviews and ${allLinks.length} links`);
   console.log(applied.length
     ? `applied ${applied.length} edits, each with a correction row keeping the previous value`
-    : 'no edit reached three agreeing families, so nothing was changed');
+    : 'no edit reached three agreeing families on a disputed year, so nothing was changed');
+  for (const r of reportedOnly) {
+    console.log(`  reported only  ${r.target}: authors differ but the year matches — ${r.was}  vs  ${r.now}`);
+  }
   for (const a of applied) console.log(`  ${a.target}: ${a.was}  ->  ${a.now}   (${a.families.join(', ')})`);
 } else if (done.length) {
   console.log(`\nnothing written (${measuring ? '--measure' : '--dry-run'})`);

@@ -88,7 +88,8 @@ jobs:
           git checkout -B research/nightly origin/main
           if git ls-remote --exit-code --heads origin research/nightly >/dev/null 2>&1; then
             git checkout origin/research/nightly -- \
-              data/annotations/reviews.json data/annotations/further-reading.json 2>/dev/null || true
+              data/annotations/reviews.json data/annotations/further-reading.json \
+              data/annotations/algorithms.json data/annotations/corrections.json 2>/dev/null || true
             git diff --cached --quiet || echo "carried forward unmerged findings from research/nightly"
           fi
 
@@ -160,7 +161,10 @@ jobs:
         run: |
           git config user.name  'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add data/annotations/reviews.json data/annotations/further-reading.json
+          # Everything a run may touch. Listing only the review files silently dropped the
+          # catalogue edits and their correction rows -- the run made them, the migration passed
+          # them, and the commit left them behind.
+          git add data/annotations/reviews.json data/annotations/further-reading.json                   data/annotations/algorithms.json data/annotations/corrections.json
           git commit -m "Research round: $(date -u +%Y-%m-%d)"
           git push --force-with-lease origin research/nightly
 
