@@ -195,6 +195,12 @@ const resolvers = {
 
 // ---- run --------------------------------------------------------------------
 
+// Which algorithms each package implements, and how many implementations each algorithm has.
+// A missing package matters exactly as much as what it was the only implementation of.
+const implAlgos = JSON.parse(readFileSync(join(root, 'data', 'annotations', 'implementation-algorithms.json'), 'utf8')).map ?? {};
+const algoImplCount = {};
+for (const list of Object.values(implAlgos)) for (const a of list) algoImplCount[a] = (algoImplCount[a] ?? 0) + 1;
+
 const file = JSON.parse(readFileSync(IMPL, 'utf8').replace(/\r\n/g, '\n'));
 const rows = file.implementations ?? [];
 const only = val('--only');
@@ -328,42 +334,83 @@ if (has('--write')) {
 
 if (val('--markdown')) {
   const L = [];
-  L.push(`Registry state as of ${today}. Checked ${targets.length} implementations against npm, PyPI, crates.io, NuGet and the GitHub API.`);
+
+  // Only problems are reported. Versions, release dates and star counts change every week by
+  // design -- that is what this exists to keep current -- and listing them turns the one thing
+  // that needs a person into a needle in a table nobody reads. They are in the diff.
+  const gone = of('attention').filter(f => /gone|404|no resolver/.test(f.what ?? ''));
+  const broken = of('attention').filter(f => !gone.includes(f)
+    && (f.flags ?? []).some(x => /archived|deprecated|yanked|licence/.test(x)));
+  const quiet = of('attention').filter(f => !gone.includes(f) && !broken.includes(f));
+
+  L.push(`Registry state as of ${today}, across ${targets.length} implementations.`);
   L.push('');
-  L.push(`**${of('attention').length} need a look · ${routine.length} routine · ${of('unchanged').length} unchanged · ${of('error').length} errors** · stars resolved for ${starred.length} of ${targets.length}`);
-  if (dormant.length) L.push('');
-  if (dormant.length) L.push(`${dormant.length} packages were already dormant before this run and are not re-listed.`);
-
-  if (of('attention').length) {
-    L.push('', '## Needs a look', '');
-    for (const f of of('attention')) {
-      L.push(`**\`${f.key}\`** — ${f.row.description ? f.row.description.slice(0, 120) : 'no description'}`);
-      for (const x of [f.what, ...(f.flags ?? [])].filter(Boolean)) L.push(`- ${x}`);
-      for (const c of f.changes ?? []) L.push(`- \`${c.field}\`: ${c.was ?? '—'} → ${c.now}`);
-
-      const where = wherePackage(f.row);
-      const links = [
-        where ? `[registry page](${where})` : null,
-        f.row.repo ? `[repo](${f.row.repo})` : null,
-        `[search](${searchFor(f.row)})`,
-      ].filter(Boolean);
-      L.push(`- ${links.join(' · ')}`);
-      if (f.row.concept) L.push(`- concept \`${f.row.concept}\`, used by ${f.row.technologies?.join(', ') ?? 'unknown technologies'}`);
-      L.push('');
-    }
+  if (!gone.length && !broken.length && !quiet.length && !of('error').length) {
+    L.push('Nothing needs a decision. Versions, release dates and star counts were refreshed; the diff has them.');
+  } else {
+    L.push(`**${gone.length} missing · ${broken.length} archived or deprecated · ${quiet.length} newly dormant**`);
+    L.push('');
+    L.push(`${routine.length} routine updates -- versions, release dates, star counts -- are applied in the diff and not listed here.`);
   }
+  if (dormant.length) L.push(`${dormant.length} packages were already dormant before this run and are not re-reported.`);
+
+  // What the catalogue loses if a package is really gone. Whether it moved, was renamed, or
+  // actually went away is a judgement someone has to make, and it needs the links to make it.
+  const detail = f => {
+    const row = f.row;
+    const key = `${row.ecosystem}:${row.package}`;
+    const covers = implAlgos[key] ?? [];
+    L.push(`### \`${key}\``);
+    L.push('');
+    if (row.description) L.push(`> ${row.description}`);
+    L.push('');
+    for (const x of [f.what, ...(f.flags ?? [])].filter(Boolean)) L.push(`- ${x}`);
+
+    const where = wherePackage(row);
+    L.push(`- **Look:** ${[
+      where ? `[${row.ecosystem} page](${where})` : null,
+      row.repo ? `[repo](${row.repo})` : null,
+      `[search](${searchFor(row)})`,
+    ].filter(Boolean).join(' · ')}`);
+
+    if (row.repo && ghSlug(row.repo)) {
+      const slug = ghSlug(row.repo);
+      L.push(`- **If it moved:** [forks](https://github.com/${slug}/forks) · [owner](https://github.com/${slug.split('/')[0]}) · [code search](https://github.com/search?q=${encodeURIComponent(row.package)}&type=repositories)`);
+    }
+
+    // The consequence, which is the part that decides whether this matters.
+    if (covers.length) {
+      const orphaned = covers.filter(a => (algoImplCount[a] ?? 0) <= 1);
+      L.push(`- **Implements:** ${covers.join(', ')}`);
+      if (orphaned.length) {
+        L.push(`- **If dropped:** ${orphaned.map(a => `\`${a}\``).join(', ')} would have no implementation left`);
+      }
+    } else {
+      L.push('- **Implements:** nothing recorded — see `_orphan_reason` in implementation-algorithms.json');
+    }
+    L.push(`- Concept \`${row.concept ?? '—'}\` · ${(row.technologies ?? []).join(', ') || 'no technologies recorded'} · ${row.license ?? 'licence not recorded'}`);
+    L.push('');
+  };
+
+  if (gone.length) { L.push('', '## Missing', ''); gone.forEach(detail); }
+  if (broken.length) { L.push('## Archived or deprecated', ''); broken.forEach(detail); }
+
+  if (quiet.length) {
+    L.push('## Newly dormant', '');
+    L.push('First run in which these crossed two years without a release. Not a problem in itself -- a finished library stays finished -- but it is the point at which that becomes true.');
+    L.push('');
+    for (const f of quiet) L.push(`- \`${f.key}\` — ${(f.flags ?? []).join('; ')}`);
+    L.push('');
+  }
+
   if (of('error').length) {
     L.push('## Could not be checked', '');
     for (const f of of('error')) L.push(`- \`${f.key}\` — ${f.what}`);
     L.push('');
   }
-  if (routine.length) {
-    L.push('<details>', `<summary>${routine.length} routine updates</summary>`, '', '| package | change |', '| --- | --- |');
-    for (const f of routine) L.push(`| \`${f.key}\` | ${f.changes.map(c => `${c.field} ${c.was ?? '—'} → ${c.now}`).join('<br>')} |`);
-    L.push('', '</details>', '');
-  }
-  L.push('', 'Produced by `scripts/poll-registries.js`. No language model is involved: every value here came from the registry that owns it.');
-  writeFileSync(val('--markdown'), L.join('\n') + '\n');
+
+  L.push('', `Produced by \`scripts/poll-registries.js\`. No language model is involved: every value came from the registry that owns it. Stars resolved for ${starred.length} of ${targets.length}.`);
+  writeFileSync(val('--markdown'), `${L.join('\n')}\n`);
 }
 
 if (val('--json')) {
