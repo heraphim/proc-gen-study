@@ -274,7 +274,7 @@
     {
       "id": "fisher-yates",
       "name": "Fisher–Yates shuffle",
-      "concept": "rand",
+      "concept": "pick",
       "source_type": "paper",
       "year": 1964,
       "authors": "Ronald Fisher and Frank Yates; in-place form by Richard Durstenfeld",
@@ -582,7 +582,7 @@
     {
       "id": "alias-method",
       "name": "Alias method",
-      "concept": "rand",
+      "concept": "pick",
       "source_type": "paper",
       "year": 1977,
       "authors": "Alastair Walker; simplified table construction by Michael Vose",
@@ -1520,7 +1520,7 @@
     {
       "id": "shuffle-bag",
       "name": "Shuffle bags and pity timers",
-      "concept": "rand",
+      "concept": "pick",
       "source_type": "folklore",
       "year": 2000,
       "authors": "Game development practice; no single origin",
@@ -2412,6 +2412,20 @@
       "description": "Plain xorshift is linear over GF(2), which shows up as failures in tests sensitive to linear structure — notably the low bits and binary-rank tests. The xoshiro and xoroshiro families keep a fast linear state transition built from xor, shift and rotate, but pass the output through a non-linear scrambler before returning it: multiplication for the ** variants, addition for the + variants. This keeps the throughput of xorshift while fixing its statistical weaknesses, in 128 or 256 bits of state rather than Mersenne Twister's 2.5 KB. They also provide jump functions that advance the state by a huge fixed distance, giving non-overlapping streams for parallel work. Note the + variants still have weak low bits by design and are intended for producing floats, not integers.",
       "citation": "Blackman & Vigna, Scrambled linear pseudorandom number generators, ACM TOMS 47(4), 2021; see prng.di.unimi.it",
       "url": "https://prng.di.unimi.it/"
+    },
+    {
+      "id": "sine-hash",
+      "name": "Sine hash (shader white noise)",
+      "concept": "rand",
+      "source_type": "folklore",
+      "year": null,
+      "authors": "No single origin; GPU shader folklore. First measured systematically by Mark Jarzynski and Marc Olano (2020)",
+      "tier": "source",
+      "summary": "White noise inside a shader with no state and no texture lookup: hash the coordinate itself by taking the fractional part of a large multiple of its sine.",
+      "eli5": "A shader runs every pixel independently and in any order, so it cannot keep a running sequence the way an ordinary random number generator does — there is nowhere to put the state. Instead it turns the pixel's own coordinate into a number that looks random: take the sine of the coordinate, multiply by something large, and keep only the digits after the decimal point. Ask twice about the same coordinate and you get the same answer, which is what makes the result reproducible without storing anything.",
+      "description": "The construction is fract(sin(dot(p, k)) * c), with constants such as k = (12.9898, 78.233) and c = 43758.5453, and it is the most copied line in shader code. It is a positional hash rather than a generator: stateless, order-independent and evaluable in parallel, which is exactly what a fragment shader needs and what a stateful PRNG cannot offer. Everything else in the noise layer sits on top of one — value, Perlin, simplex and Worley noise all begin by hashing lattice coordinates and differ only in what they do with the result. The caveats are real and widely underappreciated. The output is not white noise in any rigorous sense: sin is implemented differently across GPU vendors and drivers, so the same shader gives different results on different hardware; precision loss at large coordinates produces visible banding and repeats; and Jarzynski and Olano's TestU01 evaluation places it well off the quality/speed Pareto frontier, with integer hashes such as PCG3D both faster and dramatically better distributed. Recorded here because it is what almost all published shader code actually contains, and because knowing why it is wrong requires first knowing what it is.",
+      "citation": "Mark Jarzynski and Marc Olano, \"Hash Functions for GPU Rendering\", Journal of Computer Graphics Techniques 9(3):21-38, 2020",
+      "url": "https://jcgt.org/published/0009/03/02/"
     },
     {
       "id": "cp-sat",

@@ -24,7 +24,9 @@ const concepts = ann('concepts');
 
 // The concepts named as already understood. Everything under them starts ticked; the point of
 // the file is to untick what does not belong rather than to tick 51 boxes by hand.
-const KNOWN = ['fractal', 'noise', 'rand', 'graph', 'ca', 'vor', 'tile'];
+// `pick` is here because it was carved out of `rand`, which is: splitting a concept in two
+// does not make half of it unfamiliar. Untick it in the file if that turns out to be wrong.
+const KNOWN = ['fractal', 'noise', 'rand', 'pick', 'graph', 'ca', 'vor', 'tile'];
 
 const conceptIds = [...new Set([...Object.keys(concepts.eli5), ...concepts.additions.map(a => a.id)])];
 
@@ -118,7 +120,9 @@ function generate() {
     const list = byConcept.get(c).slice().sort((a, b) => a.name.localeCompare(b.name));
     L.push(`## algorithm · ${c} (${list.length})`);
     L.push('');
-    for (const a of list) L.push(line(`algorithm:${a.id}`, a.id, a.name, ` · ${a.year}`));
+    // Year is optional: a technique with no single origin has no honest date, and rendering
+    // `· null` next to it would state one anyway.
+    for (const a of list) L.push(line(`algorithm:${a.id}`, a.id, a.name, a.year ? ` · ${a.year}` : ''));
     L.push('');
   }
 

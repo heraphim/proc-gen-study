@@ -92,6 +92,22 @@
       "now": "Anything gameplay logic needs to query cheaply. Reading back is possible, but synchronous readback stalls both processors and the asynchronous form arrives a few frames late, so the usual answer is to compute the gameplay-relevant value on the CPU as well.",
       "why": "\"The CPU never sees it\" is too strong — readback exists and is a documented API. What is true is its price: the CPU normally runs a frame or two ahead of the GPU, and reading results synchronously collapses that pipeline. Unity's own documentation for the asynchronous path states the trade plainly — no stall, but a few frames of latency. The practical advice is unchanged; the reason for it is what tells you whether a frame of latency is acceptable in your case.",
       "source_url": "https://docs.unity3d.com/ScriptReference/Rendering.AsyncGPUReadback.html"
+    },
+    {
+      "concept": "rand",
+      "field": "name",
+      "was": "RNG, tables & seeding",
+      "now": "Pseudo-random generation",
+      "why": "Three things under one label, only one of which is a mechanism. \"RNG\" names the artifact rather than the method, which puts it out of register with every other concept here — `noise` is not called \"noise function objects\". Tables are a separate concept and now have their own, `pick`. Seeding is not a third item at all: a pseudo-random generator *is* a function from a seed to a stream, so naming it alongside is like naming \"functions & their arguments\". \"Pseudo\" stays because the block's whole value is that it is not random — reproducibility from a seed is what lets a world be stored as an integer, and true randomness cannot do that.",
+      "source_url": "https://prng.di.unimi.it/"
+    },
+    {
+      "concept": "rand",
+      "field": "what",
+      "was": "Seeded generators, positional hashing, weighted tables, shuffle bags, distribution shaping.",
+      "now": "Seeded generators, positional hashing, and hierarchical sub-seeding: one integer expanded into an unlimited, repeatable stream of uniform values. What that stream is then shaped into is `pick`.",
+      "why": "Follows the split. Weighted tables, shuffle bags and distribution shaping consume a uniform stream and reshape it; they do not produce one, and nothing about the alias method follows from anything about xoshiro. The catalogue's own tier column had already recorded the divide without anyone acting on it — the six generators filed here are tier `source`, the three selection algorithms are tier `operator`, with no ambiguous case. Sub-seeding is named explicitly because it is the part of seeding that is a technique rather than a property; the property itself belongs in `entry.deterministic`, not in a concept.",
+      "source_url": "https://prng.di.unimi.it/"
     }
   ],
   "additions": [
@@ -281,6 +297,44 @@
           "Metasurface & metalens inverse design",
           "Freeform lens & mirror design",
           "Diffractive optical element design"
+        ]
+      }
+    },
+    {
+      "id": "pick",
+      "name": "Weighted choice & random tables",
+      "facet": "block",
+      "what": "Turning a uniform stream into the distribution you actually wanted: weighted tables, alias sampling, draws without replacement, pity timers, and the continuous shaping — Gaussian, power law — that uniform random never gives you on its own.",
+      "good": "Anything where the outcomes are enumerated in advance and only the odds are in question: loot and rarity tiers, encounter and oracle tables, trait rarity, codon usage, word lists, sampling from a measured population.",
+      "bad": "Producing the outcomes in the first place. A table can only ever return something already written in it, so every bit of invention has to happen before the draw.",
+      "watch": "Uniform draws produce streaks, and people read streaks as broken rather than random. Almost every shipped system quietly draws without replacement or raises the odds after each miss, which means the advertised percentage is an average over that ramp and not a per-roll constant.",
+      "eli5": "A list of possible results, each with a number saying how often it should come up, and a way of picking one. The randomness itself is bought in from somewhere else; what this adds is the shape — that the rare sword stays rare, that no result repeats five times running, and that a long run of bad luck eventually ends.",
+      "why": "It was already in the catalogue, welded to the generators under the label \"RNG, tables & seeding\". Splitting it makes the dependency visible in the direction it actually runs: a generator produces entropy, a table spends it. The evidence was already in the data — of the nine algorithms filed under `rand`, six were tier `source` and three were tier `operator`, and the divide fell exactly on this line with no ambiguous case. The two halves also fail differently. A bad generator has period and correlation problems that a test suite finds; a bad table has \"that felt rigged\" problems that only a player finds. Only the second is what anyone actually complains about, and under the old label it had no name of its own.",
+      "importable": "`WeightedIndex` in Rust's `rand` crate, which is the alias method; `random.choices` in the Python standard library; and `numpy.random.Generator.choice` with a `p=` vector.",
+      "absence": "Without the word, the alias method sat beside the Mersenne Twister as though they were the same kind of thing, and every entry that is pure table work — loot tables, oracle systems, codon optimisation, Diceware — carried a tag naming its power source rather than its mechanism. It also left `samp` looking like the nearest neighbour, which it is not: `samp` chooses *where* in a continuous space, `pick` chooses *which* from an enumerated set.",
+      "applies_to": {
+        "primitives": [
+          "Weighted & shuffled-bag random tables",
+          "Distribution shaping (Gaussian, power law, Perlin-biased)"
+        ],
+        "gameplay": [
+          "Loot tables & drop distributions",
+          "Random tables & oracle systems"
+        ],
+        "art2d": [
+          "Trait-composed collectible art"
+        ],
+        "terrain": [
+          "Whittaker-style biome assignment"
+        ],
+        "characters": [
+          "Population & ethnicity distribution sampling"
+        ],
+        "biomed": [
+          "Codon optimisation for a host"
+        ],
+        "software": [
+          "Diceware & passphrase generation"
         ]
       }
     }

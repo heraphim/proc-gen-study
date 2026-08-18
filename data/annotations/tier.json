@@ -20,7 +20,8 @@
       "Domain warping": "operator",
       "Erosion-weighted / slope-aware noise": "operator",
       "Noise derivatives (analytic)": "operator",
-      "Distribution shaping (Gaussian, power law, Perlin-biased)": "operator",
+      "Weighted & shuffled-bag random tables": "operator",
+    "Distribution shaping (Gaussian, power law, Perlin-biased)": "operator",
       "Deterministic sub-seeding by chunk / entity ID": "operator"
     }
   },

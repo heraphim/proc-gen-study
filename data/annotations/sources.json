@@ -778,6 +778,30 @@
           "relation": "describes"
         }
       ]
+    },
+    {
+      "id": "jcgt-gpu-hash",
+      "url": "https://jcgt.org/published/0009/03/02/",
+      "title": "Hash Functions for GPU Rendering",
+      "kind": "paper",
+      "publisher": "Journal of Computer Graphics Techniques",
+      "year": 2020,
+      "description": "Settles what the fract(sin(dot)) idiom actually is and how good it is. Runs TestU01 over the hashes shader code uses in practice and benchmarks them on GPU, which is what lets the sine hash be recorded as folklore with measured weaknesses rather than as an unsourced trick — and what supplies the alternative, since the paper's Pareto analysis puts integer hashes such as PCG3D ahead of it on both quality and speed.",
+      "retrieved": "2026-08-19",
+      "links": [
+        {
+          "layer": "algorithm",
+          "target": "sine-hash",
+          "relation": "benchmarks",
+          "note": "Measures the sine hash's statistical quality and GPU speed against the alternatives; the source of the claim that it sits off the Pareto frontier."
+        },
+        {
+          "layer": "concept",
+          "target": "rand",
+          "relation": "describes",
+          "note": "The concept's WATCH line calls positional hashing the key to streamable worlds; this is the paper that says which hash to use for it."
+        }
+      ]
     }
   ]
 }
