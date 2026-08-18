@@ -207,7 +207,9 @@ async function askOpenAIShape(provider, base, prompt) {
     // Qwen thinks out loud. Left alone it spends the whole reply reasoning and returns no JSON,
     // which reads downstream as a model that abstained rather than one that was cut off.
     reasoning_format: 'hidden',
-    max_tokens: 1200,
+    // Hidden reasoning is still generated and still spends the budget, so a tight cap leaves
+    // nothing for the answer and the model reads as having abstained.
+    max_tokens: 4000,
     temperature: 0,
   });
 
@@ -293,7 +295,7 @@ const linkPrompt = name => `Find articles, tutorials, talks or write-ups explain
 Answer only with JSON in this exact shape:
 {"links": [{"url": <string>, "title": <string>, "kind": "article" | "blog" | "video" | "docs" | "paper"}]}
 
-At most six. Only include pages you are confident exist at that exact URL. Fewer real ones is better than more invented ones.`;
+At most four. Every URL will be fetched and checked against the title you give, so a URL you are not sure about will simply be recorded as invented. Returning one real page is better than four plausible ones. Return an empty list rather than guessing.`;
 
 // ---- comparison -------------------------------------------------------------
 
@@ -495,28 +497,39 @@ async function research(subject) {
 
   // Only Gemini can actually look anything up. Asking the other two for URLs would be asking
   // them to invent some.
+  // Google Search grounding is not on the free tier -- it answers 429 RESOURCE_EXHAUSTED on the
+  // first call of a run while plain generation on the same key works. So no seat can browse, and
+  // every URL here is recalled from training data rather than looked up.
+  //
+  // That is workable, because it is what the verification step was built for. Every URL is
+  // fetched and title-matched, invented ones are rejected, and the rejections are kept with a
+  // reason. The share of a model's URLs that turn out not to exist is then measured rather than
+  // assumed -- which was always the argument for asking more than one model, and is now the only
+  // way to find any links at all.
   const links = [];
-  if (PROVIDERS.google?.key() && !disabled.has('google')) {
-    const r = await askGemini(linkPrompt(displayName), { grounded: true });
-    // This call failing used to look exactly like it finding nothing, because the result was
-    // read straight through an optional chain. Same swallowing that made the very first run
+  const seenUrls = new Set();
+  for (const [provider, p] of Object.entries(PROVIDERS)) {
+    if (!p.key() || disabled.has(provider)) continue;
+    const r = p.transport === 'google'
+      ? await askGemini(linkPrompt(displayName))
+      : await askOpenAIShape(provider, p.base, linkPrompt(displayName));
+    // A failed call used to look exactly like a search that found nothing, because the result
+    // was read straight through an optional chain. Same swallowing that let the very first run
     // report five successes over zero requests.
-    if (r.error) console.error(`      link search failed: ${String(r.error).replace(/\s+/g, ' ').slice(0, 200)}`);
-    else if (!r.answer?.links?.length) {
-      console.error(`      link search returned nothing usable${r.raw ? `; raw began: ${JSON.stringify(r.raw.slice(0, 160))}` : ' and returned no text at all'}`);
-    }
+    if (r.error) console.error(`      ${provider} link search failed: ${String(r.error).replace(/\s+/g, ' ').slice(0, 160)}`);
     if (has('--debug')) {
-      console.error(`      --- raw grounded response for ${displayName} ---`);
-      console.error(String(r.raw ?? r.error ?? '(nothing)').slice(0, 1500));
-      console.error('      --- end ---');
+      console.error(`      --- ${provider} links ---`);
+      console.error(String(r.raw ?? r.error ?? '(nothing)').slice(0, 900));
+      console.error('      ---');
     }
-    for (const l of (r.answer?.links ?? []).slice(0, 6)) {
-      if (!l?.url) continue;
+    for (const l of (r.answer?.links ?? []).slice(0, 4)) {
+      if (!l?.url || seenUrls.has(l.url)) continue;
+      seenUrls.add(l.url);
       const check = await verifyLink(l.url, l.title ?? displayName);
       links.push({
         layer: subject.layer, target: subject.id, url: l.url,
         title: check.title ?? l.title ?? null, kind: l.kind ?? 'article',
-        found_by: PROVIDERS.google.model, verified: today, ...check,
+        found_by: p.model, verified: today, ...check,
       });
     }
   }
