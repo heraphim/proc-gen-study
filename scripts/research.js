@@ -68,6 +68,9 @@ const SEATS = {
     transport: 'openai',
     base: 'https://api.groq.com/openai/v1',
     model: process.env.GROQ_MODEL || 'qwen/qwen3.6-27b',
+    // Qwen reasons out loud and would otherwise spend the whole reply doing it, returning no
+    // JSON at all -- which reads downstream as a model that abstained rather than one cut off.
+    extra: { reasoning_format: 'hidden' },
     key: () => process.env.GROQ_API_KEY,
     dailyRequests: Number(process.env.GROQ_DAILY_REQUESTS || 100),
     canBrowse: false,
@@ -315,13 +318,14 @@ async function askOpenAIShape(provider, base, prompt) {
       { role: 'user', content: prompt },
     ],
     ...(strict ? { response_format: { type: 'json_object' } } : {}),
-    // Qwen thinks out loud. Left alone it spends the whole reply reasoning and returns no JSON,
-    // which reads downstream as a model that abstained rather than one that was cut off.
-    reasoning_format: 'hidden',
     // Hidden reasoning is still generated and still spends the budget, so a tight cap leaves
     // nothing for the answer and the model reads as having abstained.
     max_tokens: 4000,
     temperature: 0,
+    // Anything the provider alone understands. reasoning_format is Groq's, and sending it to
+    // Mistral returns 422 extra_forbidden -- a provider-specific parameter applied to every
+    // provider, which is how a working seat and a broken one end up looking the same.
+    ...(p.extra ?? {}),
   });
 
   let r = await post(`${base}/chat/completions`, body(true), { authorization: `Bearer ${p.key()}` });
