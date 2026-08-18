@@ -2,10 +2,10 @@
 // records what came of it.
 //
 // The catalogue's algorithm records were largely written by one model. Checking them with that
-// same model repeats its blind spots instead of catching them, so the three here are from three
-// labs -- Google, Meta via Groq, and whatever open-weight model Cerebras is serving. Note that
-// running the same open weights at two providers would buy nothing: one opinion delivered
-// twice is not corroboration.
+// same model repeats its blind spots instead of catching them, so the seats here hold weights
+// from three different labs. Which vendor serves them does not matter and one vendor may hold
+// two seats; what matters is that no two seats run the same model, because that is one opinion
+// delivered twice and the comparison would read it as corroboration.
 //
 // Two rules do the real work.
 //
@@ -24,7 +24,8 @@
 //   node scripts/research.js                  run the budget's worth and record it
 //   node scripts/research.js --subject algorithm:perlin-noise
 //
-// Needs GEMINI_API_KEY, GROQ_API_KEY and CEREBRAS_API_KEY.
+// Needs GEMINI_API_KEY and GROQ_API_KEY. Cerebras is on hold -- every plan including free
+// reports its quota unavailable -- so --providers leaves it out by default.
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
@@ -42,32 +43,53 @@ const val = f => { const i = argv.indexOf(f); return i === -1 ? null : argv[i + 
 const today = process.env.RESEARCH_DATE || new Date().toISOString().slice(0, 10);
 const UA = 'procgen-catalogue research (https://github.com/heraphim/proc-gen-study)';
 
-// Daily free-tier token allowances. These are starting estimates and the run corrects them from
-// response headers where a provider sends them; --measure exists to replace the guesswork with
-// this catalogue's own measured cost per subject.
-const PROVIDERS = {
+// Seats, not vendors. What has to differ between them is the weights: two seats running the same
+// model are one opinion delivered twice, and the comparison would read that as two independent
+// models agreeing — the strongest signal it can emit, manufactured out of nothing. Which company
+// serves them is irrelevant, so one provider can hold two seats as long as the models differ.
+//
+// Cerebras is on hold: every plan including free reports quota unavailable, and it answers 402.
+// Groq carries the seat it vacated with a different lineage, which keeps three.
+const SEATS = {
   google: {
+    transport: 'google',
     model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
     key: () => process.env.GEMINI_API_KEY,
     dailyTokens: Number(process.env.GEMINI_DAILY_TOKENS || 1_000_000),
     canBrowse: true,
   },
   groq: {
-    // Not gpt-oss-120b, which Groq also serves — Cerebras is already running those exact
-    // weights, and the same weights at two providers is one opinion delivered twice. Qwen is a
-    // different lab entirely, which is the only property that matters here.
+    transport: 'openai',
+    base: 'https://api.groq.com/openai/v1',
     model: process.env.GROQ_MODEL || 'qwen/qwen3.6-27b',
     key: () => process.env.GROQ_API_KEY,
     dailyTokens: Number(process.env.GROQ_DAILY_TOKENS || 100_000),
     canBrowse: false,
   },
+  'groq-oss': {
+    transport: 'openai',
+    base: 'https://api.groq.com/openai/v1',
+    model: process.env.GROQ_OSS_MODEL || 'openai/gpt-oss-120b',
+    key: () => process.env.GROQ_API_KEY,
+    dailyTokens: Number(process.env.GROQ_OSS_DAILY_TOKENS || 100_000),
+    canBrowse: false,
+  },
   cerebras: {
+    transport: 'openai',
+    base: 'https://api.cerebras.ai/v1',
     model: process.env.CEREBRAS_MODEL || 'gpt-oss-120b',
     key: () => process.env.CEREBRAS_API_KEY,
     dailyTokens: Number(process.env.CEREBRAS_DAILY_TOKENS || 1_000_000),
     canBrowse: false,
   },
 };
+
+// Which seats this run uses. Cerebras is out of the default until its quota returns; naming it
+// explicitly puts it back.
+const ACTIVE = String(val('--providers') || process.env.RESEARCH_PROVIDERS || 'google,groq,groq-oss')
+  .split(',').map(s => s.trim()).filter(Boolean);
+const PROVIDERS = Object.fromEntries(Object.entries(SEATS).filter(([k]) => ACTIVE.includes(k)));
+for (const k of ACTIVE) if (!SEATS[k]) { console.error(`unknown seat "${k}" — known: ${Object.keys(SEATS).join(', ')}`); process.exit(1); }
 
 // Half by default, so a day's research does not consume the whole free allowance and leave
 // nothing for anything else.
@@ -79,19 +101,19 @@ const FRACTION = Number(val('--budget-fraction') ?? 0.5);
 // checked when nothing was ever asked. Refuse instead.
 const available = Object.entries(PROVIDERS).filter(([, p]) => p.key()).map(([k]) => k);
 if (available.length < 2) {
-  console.error(`only ${available.length} of 3 providers have an API key${available.length ? ` (${available.join(', ')})` : ''}.`);
-  console.error('Set GEMINI_API_KEY, GROQ_API_KEY and CEREBRAS_API_KEY.');
+  console.error(`only ${available.length} of ${ACTIVE.length} active seats have a key${available.length ? ` (${available.join(', ')})` : ''}.`);
+  console.error(`active seats: ${ACTIVE.join(', ')}`);
   console.error('Two is the minimum: with one model there is nothing to compare against, and its');
   console.error('agreement with the catalogue would mean nothing.');
   process.exit(1);
 }
 if (available.length === 2) console.error(`warning: only ${available.join(' and ')} have keys — this run is two-way\n`);
 
-// The decorrelation trap, made a hard error because it is invisible when it happens and it
-// silently destroys the entire premise. Groq and Cerebras both serve gpt-oss-120b. Point two
-// providers at the same weights and you get one model's answer twice, which the comparison then
-// reads as two independent models agreeing — the strongest signal it can produce, manufactured
-// out of nothing. Different vendor is not different model.
+// The decorrelation trap, a hard error because it is invisible while it happens and destroys the
+// premise rather than degrading it. Groq and Cerebras both serve gpt-oss-120b, and Groq holds
+// two seats here. Point two seats at the same weights and you get one model's answer twice,
+// which the comparison then reads as two independent models agreeing -- the strongest signal it
+// can produce, manufactured out of nothing.
 const weights = m => String(m).split('/').pop().toLowerCase();
 const seenWeights = new Map();
 for (const k of available) {
@@ -124,25 +146,25 @@ if (has('--list-models')) {
     for (const n of list.slice(0, 40)) console.log(`  ${n}`);
   };
 
-  if (PROVIDERS.google.key()) {
+  if (SEATS.google.key()) {
     show('google', await get('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200',
-      { 'x-goog-api-key': PROVIDERS.google.key() }),
+      { 'x-goog-api-key': SEATS.google.key() }),
       d => (d.models ?? []).filter(m => (m.supportedGenerationMethods ?? []).includes('generateContent'))
         .map(m => m.name?.replace(/^models\//, '')));
   }
-  if (PROVIDERS.groq.key()) {
+  if (SEATS.groq.key()) {
     show('groq', await get('https://api.groq.com/openai/v1/models',
-      { authorization: `Bearer ${PROVIDERS.groq.key()}` }), d => (d.data ?? []).map(m => m.id));
+      { authorization: `Bearer ${SEATS.groq.key()}` }), d => (d.data ?? []).map(m => m.id));
   }
-  if (PROVIDERS.cerebras.key()) {
+  if (SEATS.cerebras.key()) {
     show('cerebras', await get('https://api.cerebras.ai/v1/models',
-      { authorization: `Bearer ${PROVIDERS.cerebras.key()}` }), d => (d.data ?? []).map(m => m.id));
+      { authorization: `Bearer ${SEATS.cerebras.key()}` }), d => (d.data ?? []).map(m => m.id));
   }
   console.log(`\ncurrently configured: google ${PROVIDERS.google.model} · groq ${PROVIDERS.groq.model} · cerebras ${PROVIDERS.cerebras.model}`);
   process.exit(0);
 }
 
-const spent = { google: 0, groq: 0, cerebras: 0 };
+const spent = Object.fromEntries(Object.keys(PROVIDERS).map(k => [k, 0]));
 const budget = Object.fromEntries(
   Object.entries(PROVIDERS).map(([k, p]) => [k, Math.floor(p.dailyTokens * FRACTION)]));
 
@@ -376,14 +398,24 @@ async function research(subject) {
   const failures = [];
   for (const [provider, p] of Object.entries(PROVIDERS)) {
     if (!p.key()) { models.push({ provider, model: p.model, verdict: null, unsure: true, tokens: 0, skipped: 'no key' }); continue; }
-    const r = provider === 'google'
+    if (disabled.has(provider)) continue;
+    const r = p.transport === 'google'
       ? await askGemini(prompt)
-      : await askOpenAIShape(provider, provider === 'groq' ? 'https://api.groq.com/openai/v1' : 'https://api.cerebras.ai/v1', prompt);
+      : await askOpenAIShape(provider, p.base, prompt);
     if (r.exhausted) return { exhausted: provider };
     if (r.error) {
       // Loud, and counted. A failed call is not a model declining to answer, and the difference
       // matters: abstention is a finding, a broken request is a bug wearing its costume.
-      console.error(`      ${provider} failed: ${r.error}`);
+      //
+      // A bad key, a refused payment or a forbidden model will not fix itself between subjects,
+      // so the seat is dropped for the rest of the run rather than failing identically once per
+      // subject and burying everything else in the log.
+      if (/HTTP 40[123]/.test(r.error)) {
+        disabled.add(provider);
+        console.error(`      ${provider} disabled for this run: ${r.error.split('\n')[0].slice(0, 120)}`);
+      } else {
+        console.error(`      ${provider} failed: ${r.error}`);
+      }
       failures.push({ provider, error: r.error });
       models.push({ provider, model: p.model, verdict: null, unsure: true, tokens: 0 });
       continue;
@@ -475,6 +507,7 @@ function measuredCostPerSubject() {
   return Object.fromEntries(Object.entries(totals).map(([k, t]) => [k, Math.ceil(t / counts[k])]));
 }
 
+const disabled = new Set();
 const done = [];
 const unanswered = [];
 const allLinks = [];

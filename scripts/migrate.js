@@ -503,7 +503,8 @@ if (existsSync(REVIEW_ANNOTATIONS)) {
     algorithm: db.prepare(`SELECT 1 FROM algorithm WHERE id = ?`),
   };
   const AGREEMENT = new Set(['confirmed', 'against-catalogue', 'models-disagree', 'inconclusive']);
-  const PROVIDERS = new Set(['google', 'groq', 'cerebras']);
+  // Seats, not vendors: one provider may hold two, distinguished by the model it runs there.
+  const PROVIDERS = new Set(['google', 'groq', 'groq-oss', 'cerebras']);
   const roundsBySubject = new Map();
 
   for (const r of ann.reviews ?? []) {
