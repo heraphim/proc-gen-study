@@ -2,7 +2,7 @@
 
 A research map of what can be made with procedural generation, and of the machinery that makes
 it. **841 catalogued techniques** across 23 domains, **37 concepts** each with a plain-language
-explanation, **195 algorithms** with checked citations, **26 of them with working code short
+explanation, **3 axes** classifying every entry, **195 algorithms** with checked citations, **26 of them with working code short
 enough to read**, **120 registry-verified implementations** across five registries, **38
 research sources** recording what each one settled, and the relations between all of it.
 
@@ -64,6 +64,9 @@ concept ──uses──▶ concept
    ├─ has ──▶ algorithm ──implemented by──▶ implementation ──runs on──▶ technology
    │
    └─ facet: block | representation | category | deployment
+
+entry ──has a value on──▶ axis
+                          └─ addressing | input_class | runs_at
 ```
 
 **Concepts** — ideas about what can be made, at every grain. *Noise* is a coarse concept;
@@ -75,6 +78,13 @@ concept ──uses──▶ concept
 | representation | 7 | A format for holding structure, not a way of making it |
 | category | 6 | Fails the importable test — a bag containing blocks that were never named |
 | deployment | 2 | Where or how something runs. Not a concept at all |
+
+A fourth test separates a concept from an **axis**: does anything implement it? A concept is
+something you can be sent away and told to build. An axis cannot be built, only observed — every
+entry has a value on it and nothing implements it. Exactly two of the 37 concepts have zero
+algorithm rows, `shader` and `kit`, which are the same two the facet pass had already filed as
+"not a concept at all" on the strength of an argument. The algorithm layer turned that argument
+into a count, and both are now carried by the axis layer below.
 
 The test that does the work is **importable**: `sim` is used in 21 of 23 domains, wider than
 anything but `rand`, and still fails — there is no "simulator" you can import. That is why it
@@ -144,10 +154,10 @@ ever using the word "terrain", which is why the same code also weathers a textur
 | Route | What's there |
 |---|---|
 | `/` | What procedural generation is, what it buys you, a verified history, how this project structures it |
-| `/basic-blocks` | The 37 concepts, faceted, each with a plain-language explanation, the blocks hiding inside each category named, the nine added ones arguing for themselves, and the candidates that were rejected |
+| `/basic-blocks` | The 37 concepts, faceted, each with a plain-language explanation, the blocks hiding inside each category named, the nine added ones arguing for themselves, and the candidates that were rejected. Then the three axes, in the same card shape, each arguing why it is not a concept |
 | `/algorithms` | 195 algorithms, grouped by concept, each with a mechanism description, a plain-language explanation and a checked source |
 | `/implementations` | 120 packages, grouped by concept and then by the algorithm they implement, with the technologies they run on and, where the whole method fits in under 100 lines, the reference code above the libraries that wrap it |
-| `/catalogue` | The 841 entries. Filters serialise into the query string, so a filtered view is a shareable URL |
+| `/catalogue` | The 841 entries, filterable by layer, domain, concept and every axis. Filters serialise into the query string, so a filtered view is a shareable URL |
 | `/definitions` | The three layers explained, with a worked terrain pipeline |
 | `/sources` | The 37 research sources, split by whether they overturned a claim or confirmed one |
 | `/case-studies` `/pitfalls` `/tools` | The original reference material |
@@ -208,7 +218,8 @@ a reviewable diff you can argue with line by line:
 | File | Holds |
 |---|---|
 | `tier.json` | source/operator/generator per entry, as a default per domain plus exceptions |
-| `facet.json` | the four-way concept split, with the blocks hiding inside each category |
+| `facet.json` | the four-way concept split, the four tests, and the blocks hiding inside each category |
+| `axes.json` | the axis layer: what each axis asks, what each value buys and costs, and the rule plus overrides it is classified by |
 | `concepts.json` | the plain-language explanation per concept, corrections to the prose carried over from the source HTML, the nine added concepts, and the candidates rejected |
 | `algorithms.json` | 195 algorithms with citations, descriptions, plain-language explanations and source types |
 | `code-samples.json` | 26 working samples, held as arrays of lines so a change reads as a diff |
@@ -249,10 +260,17 @@ Stated plainly so the map doesn't look more finished than it is.
   operators. This is the piece that would make the model do work rather than just describe. The
   nine added concepts contributed 50 `entry_tag` rows by naming the entries they apply to,
   which is a start on the same problem at a coarser grain.
-- **8 of 9 entry fields are empty** across all 841: `output_type`, `input_class`, `compute_cost`,
-  `deterministic`, `realtime`, `difficulty`, `confidence`, `notes`. `input_class` is the
-  consequential one — it splits the catalogue into what a seed-driven engine could serve and
-  what it structurally cannot.
+- **5 of 9 entry fields are still empty** across all 841: `output_type`, `compute_cost`,
+  `realtime`, `difficulty`, `confidence` and `notes`. Three are now filled and became the axis
+  layer — `input_class`, which splits the catalogue into what a seed-driven engine could serve
+  and what it structurally cannot; `addressing`, which says whether you can reach a point
+  without replaying to it; and `runs_at`. A fourth, `deterministic`, was dropped rather than
+  filled: in a procedural generation catalogue the answer is yes almost everywhere, so it would
+  have sorted 841 rows into one bucket. `addressing` is the question it was reaching for.
+- **The axis classification is a rule with 12 exceptions.** Values are mapped from concept tag
+  and then corrected per entry, and the corrections are the part worth reading, because they are
+  the cases the rule gets wrong. Twelve is almost certainly too few for 841 rows — it is what one
+  pass over the obvious ones found, not what is there.
 - **101 of 195 algorithms have no implementation recorded**, and 11 of 37 concepts have none at
   all. The absolute gap grew — it was 79 of 125 — but only because the denominator did: coverage
   went from 36.8% of algorithms to 48.2%, and concepts with nothing attached fell from 13 of 28

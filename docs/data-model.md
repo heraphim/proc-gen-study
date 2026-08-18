@@ -27,7 +27,7 @@ further_reading ──▶ (concept | algorithm)
 |---|---|---|
 | `domain` | 23 | Top-level subject areas, from the original reference |
 | `grp` | 110 | Sub-groupings within a domain |
-| `entry` | 841 | One generatable thing. Carries the classification columns |
+| `entry` | 841 | One generatable thing. Carries the classification columns and the axis values |
 | `tag` | 37 | Concepts. `facet` splits them four ways; `origin` separates the 28 inherited from the 9 added |
 | `entry_tag` | 1487 | Which concepts an entry draws on. This is a `uses` edge, not an `is-a` |
 | `entry_uses` | 0 | Which sources and operators a generator composes. Not yet populated |
@@ -36,6 +36,31 @@ further_reading ──▶ (concept | algorithm)
 1487 assignments are therefore already a composition graph, just at the coarsest possible grain.
 Refining it means replacing `vor` with the two or three specific concepts an entry actually
 leans on.
+
+### The axis side
+
+| Column | Values | Question |
+|---|---|---|
+| `entry.addressing` | positional · replayable · accumulating | Can you compute one piece of the output without computing the rest? |
+| `entry.input_class` | seed · seed+library · external-data | What does it need besides a seed? |
+| `entry.runs_at` | shader-time · ahead-of-time | Evaluated in the shader every frame, or produced ahead of time and stored? |
+
+An axis is not a concept and is deliberately not in the tag vocabulary. The difference is that
+nothing implements an axis: a concept is something you can be told to go and build, an axis is a
+property of the work that can only be observed. The two concepts that failed that test — `shader`
+and `kit`, the only two with no algorithm rows — are where two of these came from, and their tag
+rows are what the classification reads from.
+
+Values come from a rule keyed on concept tag plus per-entry overrides, both in `axes.json`, the
+same shape `tier.json` uses. The rule is written down rather than applied silently so it can be
+argued with, and where an entry's concepts disagree a stated precedence decides — for
+`addressing`, that if any part of a method accumulates state then the whole method does, because
+that is the direction the constraint actually runs.
+
+`addressing` occupies the column that used to be `deterministic`. That column was never filled
+and was not worth filling: almost everything here is reproducible from a seed, so it sorted 841
+rows into one bucket. Whether you can reach a point without replaying to it is the question it
+was reaching for, and it is the one that decides whether a technique can serve a streamed world.
 
 ### The machinery side
 
@@ -77,10 +102,11 @@ it — so its `applies_to` list in `concepts.json` has to earn them one entry at
 | Column | Values | Filled |
 |---|---|---|
 | `tier` | source / operator / generator | **841 / 841** |
+| `addressing` | positional / replayable / accumulating | **841 / 841** — axis |
+| `input_class` | seed / seed+library / external-data | **841 / 841** — axis |
+| `runs_at` | shader-time / ahead-of-time | **841 / 841** — axis |
 | `output_type` | image, vector, mesh, audio, text, data, schedule, plan, field | 0 |
-| `input_class` | seed / seed+library / external-data | 0 |
 | `compute_cost` | trivial / moderate / heavy / offline-only | 0 |
-| `deterministic` | yes / no / conditional | 0 |
 | `realtime` | yes / no / with-caveats | 0 |
 | `difficulty` | wrap-a-library / weekend / month / research / unsolved | 0 |
 | `confidence` | attested / plausible / unverified | 0 |
@@ -88,7 +114,12 @@ it — so its `applies_to` list in `concepts.json` has to earn them one entry at
 
 `input_class` is the one that matters most for anything built downstream. A large share of the
 catalogue — rostering, radiotherapy planning, patient-specific implants — is a solver over
-supplied data. Those cannot run from a seed at all, and no current column records that.
+supplied data. Those cannot run from a seed at all, and 123 entries now say so.
+
+The three marked *axis* are not just filled columns; they are rendered and argued for on the
+basic blocks page beside the concepts, because how an entry behaves is a different kind of fact
+from what it is made of and the page had no way of saying so. There was a `deterministic` column
+here and it is gone — see the axis section above for why.
 
 ## The annotation pipeline
 
@@ -111,6 +142,12 @@ The migration aborts and rolls back on any of:
 
 - a tier override matching no entry, or more than one
 - an entry left without a tier
+- an axis naming a column `entry` does not have, or colliding with a concept id
+- an axis with fewer than two values, a value missing its what/buys/costs, a default that is not
+  one of its values, or a precedence list that does not name each value exactly once
+- an axis rule or override naming an unknown concept, an unknown entry, or an unknown value
+- an entry left without a value on any axis
+- a column listed as both an axis and still empty
 - a tag left without a facet, or without an `eli5`
 - an algorithm with no citation URL, no description, an invalid `source_type` or an invalid `tier`
 - two algorithms sharing an id
