@@ -14,6 +14,9 @@
   --t-source-ink: #2c5282;
   --t-operator-bg: #eae7f5;
   --t-operator-ink: #55408f;
+  /* The header's real height, republished by app.js whenever the tab strip rewraps.
+     Everything that sticks below it offsets by this rather than a baked-in number. */
+  --topbar-h: 49px;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 }
 
@@ -70,9 +73,19 @@ body {
   white-space: nowrap;
 }
 
-.tabs { display: flex; gap: 2px; flex-wrap: wrap; }
+.tabs {
+  display: flex;
+  gap: 2px;
+  flex-wrap: nowrap;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
 
 .tabs button {
+  flex: 0 0 auto;
   border: 0;
   background: transparent;
   color: var(--ink-2);
@@ -102,10 +115,10 @@ body {
 .sidebar {
   border-right: 1px solid var(--line);
   padding: 16px 14px 60px;
-  height: calc(100vh - 49px);
+  height: calc(100vh - var(--topbar-h));
   overflow-y: auto;
   position: sticky;
-  top: 49px;
+  top: var(--topbar-h);
 }
 
 .content { padding: 18px 22px 80px; min-width: 0; }
@@ -515,7 +528,7 @@ mark { background: color-mix(in oklab, var(--accent) 30%, transparent); color: i
   font-weight: 650; color: var(--ink-3); margin: 0 0 7px;
 }
 .prov-source { margin-bottom: 9px; font-size: 12px; }
-.prov-title { display: flex; gap: 7px; align-items: baseline; flex-wrap: wrap; }
+.prov-title { display: flex; gap: 7px; align-items: baseline; flex-wrap: wrap; overflow-wrap: anywhere; }
 .prov-link { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--line-2); }
 .prov-link:hover { border-bottom-color: var(--accent); }
 .prov-year { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); }
@@ -576,7 +589,7 @@ mark { background: color-mix(in oklab, var(--accent) 30%, transparent); color: i
   padding: 1px 6px; border-radius: 4px; border: 1px solid var(--warn); color: var(--warn); font-weight: 600;
 }
 
-.algo-authors { font-size: 11.5px; color: var(--ink-3); margin-top: 2px; }
+.algo-authors { font-size: 11.5px; color: var(--ink-3); margin-top: 2px; overflow-wrap: anywhere; }
 .algo-summary { font-size: 13px !important; color: var(--ink) !important; margin-top: 8px !important; }
 .algo-description {
   font-size: 12.5px !important;
@@ -590,6 +603,7 @@ mark { background: color-mix(in oklab, var(--accent) 30%, transparent); color: i
   margin-top: 9px; padding-top: 8px; border-top: 1px dashed var(--line-2);
   font-size: 11.5px; color: var(--ink-3); display: flex; gap: 10px;
   align-items: baseline; flex-wrap: wrap;
+  overflow-wrap: anywhere;
 }
 
 .candidates { display: grid; gap: 12px; margin-top: 14px; }
@@ -803,7 +817,7 @@ a.impl-pkg:hover { color: var(--accent); text-decoration: underline; }
 }
 #sql-input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
 
-.sql-actions { display: flex; gap: 10px; align-items: center; margin: 10px 0 16px; }
+.sql-actions { display: flex; gap: 10px; align-items: center; margin: 10px 0 16px; flex-wrap: wrap; }
 
 .sql-actions button {
   background: var(--accent);
@@ -818,6 +832,8 @@ a.impl-pkg:hover { color: var(--accent); text-decoration: underline; }
 }
 .sql-actions select {
   font: inherit;
+  max-width: 100%;
+  min-width: 0;
   font-size: 12.5px;
   padding: 6px 9px;
   color: var(--ink);
@@ -853,7 +869,7 @@ td.null { color: var(--ink-3); font-style: italic; }
 /* ---------- shared page shell ---------- */
 
 .page-toolbar {
-  position: sticky; top: 49px; z-index: 5;
+  position: sticky; top: var(--topbar-h); z-index: 5;
   background: var(--bg);
   padding: 12px 0 10px;
   margin-bottom: 6px;
@@ -861,7 +877,7 @@ td.null { color: var(--ink-3); font-style: italic; }
   display: grid; gap: 8px;
 }
 
-.pt-row { display: flex; align-items: center; gap: 12px; }
+.pt-row { display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; }
 
 .pt-search {
   flex: 0 1 200px; min-width: 120px;
@@ -873,8 +889,10 @@ td.null { color: var(--ink-3); font-style: italic; }
 
 .pt-count { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); }
 
+.pt-actions { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+
 .pt-toggle {
-  margin-left: auto; border: 1px solid var(--line-2); background: var(--panel);
+  border: 1px solid var(--line-2); background: var(--panel);
   color: var(--ink-2); font: inherit; font-size: 11.5px;
   padding: 5px 11px; border-radius: 6px; cursor: pointer; white-space: nowrap;
 }
@@ -883,7 +901,7 @@ td.null { color: var(--ink-3); font-style: italic; }
 /* All filter groups flow on one line, wrapping only when they run out of room. */
 .pt-filters { display: flex; flex-wrap: wrap; align-items: baseline; gap: 7px 18px; }
 
-.pt-filter { display: flex; align-items: baseline; gap: 7px; }
+.pt-filter { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; min-width: 0; }
 .pt-filter + .pt-filter { padding-left: 18px; border-left: 1px solid var(--line); }
 
 .pt-label {
@@ -910,7 +928,7 @@ td.null { color: var(--ink-3); font-style: italic; }
   font: inherit; font-size: 12px; padding: 3px 7px;
   color: var(--ink); background: var(--panel);
   border: 1px solid var(--line-2); border-radius: 6px; cursor: pointer;
-  max-width: 210px;
+  max-width: min(210px, 100%);
 }
 .pt-select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
 
@@ -935,6 +953,9 @@ td.null { color: var(--ink-3); font-style: italic; }
 .grp-note { font-size: 11.5px; color: var(--ink-3); }
 .grp-n { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
 .grp-body { display: grid; gap: 10px; }
+/* A grid item defaults to min-width: auto, so the widest code sample inside a card sets
+   the track width and the whole page scrolls sideways rather than the sample doing it. */
+.grp-body > *, .subgrp-body > * { min-width: 0; }
 
 /* Second level, on the implementations page: concept, then the algorithm inside it. Indented
    and rule-marked rather than boxed, so twenty of them in a row still scan as one list. */
@@ -1049,7 +1070,7 @@ button.rel-chip:hover { border-color: var(--accent); color: var(--accent); }
 .card-body dl { margin: 0; }
 .card-body .algo-summary { border: 0; padding-top: 0; }
 
-@media (max-width: 700px) {
+@media (max-width: 860px) {
   .card-relations, .card-body { padding-left: 14px; }
   .card-metrics { margin-left: 0; width: 100%; }
 }
@@ -1081,3 +1102,123 @@ button.rel-chip:hover { border-color: var(--accent); color: var(--accent); }
 .code-sample[open] .code-show { color: var(--ink-3); }
 .code-sample { border-left: 2px solid var(--accent); }
 
+
+/* ---------- phones and tablets ----------
+   Kept together at the end rather than split across the sections above, because these
+   rules are about one thing — a screen roughly a third the width, driven by a finger —
+   and reading them as a set is the only way to see whether they agree with each other. */
+
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+/* Two stacks of filters fold away on small screens: the catalogue's sidebar facets
+   (~2400px tall, which put the first result three screens below the search box) and the
+   filter groups in each page toolbar (~250px of permanently sticky chrome). They look the
+   same, fold at the same width, and are forced open by app.js above it. */
+.filter-drawer > summary,
+.pt-drawer > summary {
+  display: none; /* becomes flex inside the two media queries below */
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-2);
+  border-radius: 7px;
+  background: var(--panel);
+  font-size: 12.5px;
+  color: var(--ink-2);
+  cursor: pointer;
+  list-style: none;
+}
+.filter-drawer > summary::-webkit-details-marker,
+.pt-drawer > summary::-webkit-details-marker { display: none; }
+.filter-drawer > summary::after,
+.pt-drawer > summary::after {
+  content: '▾';
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--ink-3);
+}
+.filter-drawer[open] > summary::after,
+.pt-drawer[open] > summary::after { content: '▴'; }
+.filter-drawer[open] > summary,
+.pt-drawer[open] > summary { color: var(--ink); }
+
+@media (max-width: 860px) {
+  .filter-drawer > summary,
+  .pt-drawer > summary { display: flex; }
+  .pt-drawer > summary { padding: 7px 11px; }
+  .filter-drawer[open] > summary { margin-bottom: 16px; }
+  .pt-drawer[open] > summary { margin-bottom: 10px; }
+
+  /* The tag list alone is 28 rows. Cap each open drawer and let it scroll on its own, so
+     the results stay reachable with the filters open — and keep the summary pinned inside
+     that scroll, since it is also the control that closes it again. */
+  .filter-drawer[open] { max-height: 62vh; overflow-y: auto; }
+  .pt-drawer[open] { max-height: 55vh; overflow-y: auto; }
+  .filter-drawer > summary,
+  .pt-drawer > summary { position: sticky; top: 0; z-index: 1; }
+
+  /* Parked inside the drawer at this width — see the note in app.js. */
+  .pt-drawer > .pt-actions { margin: 12px 0 2px; }
+
+  .sidebar { padding-bottom: 18px; }
+
+  /* Eleven tabs wrapped to four rows: a 223px sticky header, 27% of the viewport, on
+     every page. One scrolling row instead, bled to the screen edges so the cut-off tab
+     reads as more-to-the-right rather than as the end of the list. */
+  .topbar { gap: 7px 12px; padding: 9px 14px; }
+  .topbar h1 { font-size: 13px; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+  .counts { order: 1; }
+
+  .tabs {
+    order: 2;
+    flex: 0 0 100%;
+    margin: 0 -14px -3px;
+    padding: 0 14px 3px;
+  }
+
+  .content { padding: 16px 14px 72px; }
+  .sidebar { padding: 14px 14px 18px; }
+
+  /* iOS zooms the page in when a focused field is under 16px, and never zooms back out. */
+  #search, .pt-search, #sql-input, .pt-select, .sql-actions select { font-size: 16px; }
+  .pt-search { flex: 1 1 160px; }
+
+  /* Two levels of indent cost 26px of a 375px screen before any text. */
+  .subgrp { padding-left: 9px; }
+
+  .hero { padding-top: 18px; }
+  .hero-def { font-size: 15.5px; }
+  .def-h { margin-top: 30px; }
+  .q { grid-template-columns: 22px minmax(0, 1fr); gap: 10px; }
+  .q-num { font-size: 15px; }
+  .grid-list { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  /* The headline counts need a line of their own beside a title that is already 200px
+     wide, and that line is sticky on every page. They are a summary of the overview's
+     own hero stats, and every list page carries its own live count in its toolbar, so
+     this is the one place where nothing is actually lost by dropping them. */
+  .counts { display: none; }
+}
+
+/* Finger-sized controls, keyed off the input device rather than the width — a small
+   laptop keeps its dense hit areas, a large tablet gets the roomy ones. */
+@media (pointer: coarse) {
+  .tabs button { padding: 9px 13px; }
+  .pills button { padding: 9px 8px; }
+  .clear { padding: 6px 2px; }
+  .tag, .filters .chip, .impl-chip, .rel-chip, .contains-item, .algo-concept { padding: 5px 9px; }
+  .fb-pill { padding: 7px 13px; }
+  .pt-toggle { padding: 9px 12px; }
+  .pt-opt { padding: 6px 0; gap: 7px; }
+  .pt-opt input { width: 17px; height: 17px; top: 3px; }
+  .pt-select, .sql-actions select { padding: 8px 9px; }
+  .sql-actions button { padding: 10px 20px; }
+  .grp-head { padding: 9px 2px 10px; }
+  .subgrp-head { padding: 9px 2px; }
+  .code-head { padding: 11px 11px; }
+  .schema summary { padding: 6px 0; }
+  .entry-ref, .block-name { padding: 3px 0; }
+}

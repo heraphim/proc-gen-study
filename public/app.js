@@ -58,11 +58,35 @@ function filterablePage({
 
   const toggleGroups = el('button', 'pt-toggle', 'Collapse groups');
   const toggleAll = el('button', 'pt-toggle', 'Collapse cards');
-  bar.append(toggleGroups, toggleAll);
+  const actions = el('div', 'pt-actions');
+  actions.append(toggleGroups, toggleAll);
+  bar.append(actions);
   tb.append(bar);
 
+  /* The same disclosure as the catalogue sidebar, for the same reason: these groups wrap
+     to roughly 250px of permanently sticky chrome on a phone, which with the header leaves
+     under half the viewport for the list they filter. Forced open above 860px, where they
+     fit on a line or two and the toolbar reads as a single bar. */
   const filterRow = el('div', 'pt-filters');
-  if (filters.length) tb.append(filterRow);
+  const filterCount = el('span', 'pt-n', '');
+  if (filters.length) {
+    const drawer = el('details', 'pt-drawer');
+    const summary = el('summary');
+    summary.append(el('span', null, 'Filters'), filterCount);
+    drawer.append(summary, filterRow);
+    tb.append(drawer);
+
+    /* The two collapse buttons wrap onto a row of their own on a phone, and a row of a
+       sticky toolbar is worth more than a control that gets pressed once a session — so
+       they go inside the drawer there, and back on the bar when there is room for them. */
+    const wide = window.matchMedia('(min-width: 861px)');
+    const syncDrawer = () => {
+      if (wide.matches) drawer.open = true;
+      (wide.matches ? bar : drawer).append(actions);
+    };
+    wide.addEventListener('change', syncDrawer);
+    syncDrawer();
+  }
 
   // Control type per filter. Small multi-selectable sets get checkboxes, mutually
   // exclusive ones get radios, anything longer collapses into a dropdown so the
@@ -149,6 +173,9 @@ function filterablePage({
     count.textContent = visible.length === items.length
       ? `${items.length} ${noun}`
       : `${visible.length} / ${items.length} ${noun}`;
+
+    const onCount = [...st.active.values()].reduce((n, set) => n + set.size, 0);
+    filterCount.textContent = onCount ? `${onCount} on` : 'none';
 
     for (const ctl of inputs) {
       const set = st.active.get(ctl.f.key);
@@ -504,6 +531,18 @@ $('#tabs').addEventListener('click', e => {
   if (btn) showView(btn.dataset.view);
 });
 
+/* The sidebar and the per-page toolbars stick underneath the header, so they need its
+   height — which is not a constant. Eleven tabs sit on one row on a desktop, and on a
+   phone they become a single scrolling row of a different height again. Measure it and
+   publish it as a custom property rather than baking a number into the stylesheet. */
+{
+  const topbar = $('.topbar');
+  const publishHeight = () => document.documentElement.style.setProperty(
+    '--topbar-h', `${Math.round(topbar.getBoundingClientRect().height)}px`);
+  new ResizeObserver(publishHeight).observe(topbar);
+  publishHeight();
+}
+
 /* ---------------- catalogue filtering ---------------- */
 
 function matches(entry) {
@@ -656,6 +695,7 @@ function renderAll() {
     btn.classList.toggle('on', state.domains.has(btn.dataset.id));
   for (const btn of document.querySelectorAll('#tag-list button'))
     btn.classList.toggle('on', state.tags.has(btn.dataset.id));
+  renderFilterSummary();
   renderEntries();
   writeUrl(true);
 }
@@ -693,6 +733,34 @@ for (const t of data.tags) {
   b.addEventListener('click', () => toggle(state.tags, t.id, renderAll));
   li.append(b);
   $('#tag-list').append(li);
+}
+
+/* The facets run to roughly 2400px — 28 tags, 23 domains, three layers. On a phone that
+   buries the first result three screens under the search box, so they go inside a
+   disclosure that starts closed. Above 860px the sidebar is a column of its own and the
+   disclosure is forced open with its summary hidden, which is the layout as it was. */
+const filterDrawer = el('details', 'filter-drawer');
+const filterSummary = el('summary');
+filterDrawer.append(filterSummary);
+{
+  const sidebar = $('.sidebar');
+  const facets = [...sidebar.querySelectorAll('.facet')];
+  sidebar.append(filterDrawer);
+  filterDrawer.append(...facets);
+
+  const wide = window.matchMedia('(min-width: 861px)');
+  const syncDrawer = () => { if (wide.matches) filterDrawer.open = true; };
+  wide.addEventListener('change', syncDrawer);
+  syncDrawer();
+}
+
+/** How many facet filters are on, so the closed drawer still says what it is hiding. */
+function renderFilterSummary() {
+  const n = state.tiers.size + state.domains.size + state.tags.size;
+  filterSummary.replaceChildren(
+    el('span', null, 'Filters'),
+    el('span', 'pt-n', n ? `${n} on` : 'none'),
+  );
 }
 
 $('#search').addEventListener('input', e => {
@@ -864,8 +932,19 @@ let currentView = 'overview';
 
 function showView(name, { push = true } = {}) {
   currentView = name;
-  document.querySelectorAll('#tabs button').forEach(b =>
+  const tabs = $('#tabs');
+  tabs.querySelectorAll('button').forEach(b =>
     b.classList.toggle('active', b.dataset.view === name));
+
+  /* The strip scrolls sideways where the tabs do not fit, and a view can be opened from a
+     link in the page as well as from the strip itself — so pull the active tab back into
+     view instead of leaving it off the edge. Only the strip's own scroll is touched. */
+  const active = tabs.querySelector('button.active');
+  if (active) {
+    const strip = tabs.getBoundingClientRect(), tab = active.getBoundingClientRect();
+    if (tab.left < strip.left) tabs.scrollLeft -= strip.left - tab.left + 14;
+    else if (tab.right > strip.right) tabs.scrollLeft += tab.right - strip.right + 14;
+  }
   document.querySelectorAll('.view').forEach(v =>
     v.classList.toggle('active', v.id === `view-${name}`));
   if (push) writeUrl();
