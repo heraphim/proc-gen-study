@@ -99,7 +99,7 @@ const SEATS = {
   cohere: {
     transport: 'openai',
     base: 'https://api.cohere.ai/compatibility/v1',
-    model: process.env.COHERE_MODEL || 'command-r-08-2024',
+    model: process.env.COHERE_MODEL || 'command-a-plus-05-2026',
     key: () => process.env.COHERE_API_KEY,
     dailyRequests: Number(process.env.COHERE_DAILY_REQUESTS || 100),
     canBrowse: false,
@@ -110,7 +110,7 @@ const SEATS = {
   openrouter: {
     transport: 'openai',
     base: 'https://openrouter.ai/api/v1',
-    model: process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat:free',
+    model: process.env.OPENROUTER_MODEL || 'nvidia/nemotron-3.5-lightning:free',
     key: () => process.env.OPENROUTER_API_KEY,
     dailyRequests: Number(process.env.OPENROUTER_DAILY_REQUESTS || 50),
     canBrowse: false,
@@ -229,21 +229,37 @@ if (has('--list-models')) {
     for (const n of list.slice(0, 40)) console.log(`  ${n}`);
   };
 
-  if (SEATS.google.key()) {
-    show('google', await get('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200',
-      { 'x-goog-api-key': SEATS.google.key() }),
-      d => (d.models ?? []).filter(m => (m.supportedGenerationMethods ?? []).includes('generateContent'))
-        .map(m => m.name?.replace(/^models\//, '')));
+  // Every seat with a key, not a hardcoded three. Listing models is one cheap request and is
+  // normally metered separately from generation, so this is the way to check a new provider is
+  // wired correctly without spending any of the quota the actual research needs.
+  const seen = new Set();
+  for (const [name, p] of Object.entries(SEATS)) {
+    if (!p.key() || seen.has(p.base ?? name)) continue;
+    seen.add(p.base ?? name);
+
+    if (p.transport === 'google') {
+      show(name, await get('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200',
+        { 'x-goog-api-key': p.key() }),
+        d => (d.models ?? []).filter(m => (m.supportedGenerationMethods ?? []).includes('generateContent'))
+          .map(m => m.name?.replace(/^models\//, '')));
+      continue;
+    }
+
+    let r = await get(`${p.base}/models`, { authorization: `Bearer ${p.key()}` });
+    // Cohere's OpenAI-compatibility layer has no /models; its own API does.
+    if (r.error && /cohere/.test(p.base)) {
+      r = await get('https://api.cohere.com/v1/models?page_size=100', { authorization: `Bearer ${p.key()}` });
+      show(name, r, d => (d.models ?? []).filter(m => (m.endpoints ?? []).includes('chat')).map(m => m.name));
+      continue;
+    }
+    show(name, r, d => (d.data ?? []).map(m => m.id));
   }
-  if (SEATS.groq.key()) {
-    show('groq', await get('https://api.groq.com/openai/v1/models',
-      { authorization: `Bearer ${SEATS.groq.key()}` }), d => (d.data ?? []).map(m => m.id));
+
+  console.log('\nconfigured seats:');
+  for (const [k, p] of Object.entries(SEATS)) {
+    const [, family, lab] = familyOf(p.model);
+    console.log(`  ${k.padEnd(12)} ${String(p.model).padEnd(34)} ${family} / ${lab}${p.key() ? '' : '   (no key — inactive)'}`);
   }
-  if (SEATS.cerebras.key()) {
-    show('cerebras', await get('https://api.cerebras.ai/v1/models',
-      { authorization: `Bearer ${SEATS.cerebras.key()}` }), d => (d.data ?? []).map(m => m.id));
-  }
-  console.log(`\ncurrently configured: google ${PROVIDERS.google.model} · groq ${PROVIDERS.groq.model} · cerebras ${PROVIDERS.cerebras.model}`);
   process.exit(0);
 }
 
