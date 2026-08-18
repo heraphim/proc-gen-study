@@ -861,12 +861,25 @@ if (val('--markdown')) {
   }
 
   L.push('', '## How the run went', '');
+  // Anchors, so a count is a way in rather than a number to go hunting after. GitHub slugs a
+  // heading by lowercasing it, dropping punctuation and hyphenating spaces.
+  const anchor = a => `#${`${a} — ${{
+    'against-catalogue': 'they agree with each other and not with the record',
+    'models-disagree': 'they do not agree with each other',
+    inconclusive: 'too few usable answers',
+    confirmed: 'they agree with the record',
+  }[a]} (${counts[a] ?? 0})`.toLowerCase().replace(/[^a-z0-9 -]/g, '').replace(/ /g, '-')}`;
   L.push('| outcome | subjects | what it means |');
   L.push('| --- | --- | --- |');
-  L.push(`| confirmed | ${counts.confirmed ?? 0} | the models agree with the record |`);
-  L.push(`| against-catalogue | ${counts['against-catalogue'] ?? 0} | they agree with each other and not with it |`);
-  L.push(`| models-disagree | ${counts['models-disagree'] ?? 0} | they do not agree; the subject is not settleable from recall |`);
-  L.push(`| inconclusive | ${counts.inconclusive ?? 0} | too few usable answers |`);
+  for (const a of order) {
+    const gloss = {
+      'against-catalogue': 'they agree with each other and not with the record — **the finding**',
+      'models-disagree': 'they do not agree; the subject is not settleable from recall',
+      inconclusive: 'too few usable answers',
+      confirmed: 'they agree with the record',
+    }[a];
+    L.push(`| ${counts[a] ? `[${a}](${anchor(a)})` : a} | ${counts[a] ?? 0} | ${gloss} |`);
+  }
   L.push('');
   L.push(`${answered} model answers across ${done.length} subjects, ${(answered / Math.max(1, done.length)).toFixed(1)} per subject out of ${available.length} seats.`);
   if (unanswered.length) L.push(`${unanswered.length} subjects were skipped entirely — fewer than two seats answered, so their round was not consumed.`);
@@ -874,12 +887,16 @@ if (val('--markdown')) {
   for (const a of order) {
     const g = group(a);
     if (!g.length) continue;
-    const heading = {
-      'against-catalogue': 'The models agree with each other and not with this catalogue',
-      'models-disagree': 'The models do not agree with each other',
-      inconclusive: 'Not enough usable answers',
-      confirmed: 'Confirmed',
-    }[a];
+    // The heading has to contain the word the summary table uses. It said
+    // "The models agree with each other and not with this catalogue" while the table said
+    // "against-catalogue", so the two never met -- not in a search, not by eye -- and the
+    // findings looked missing from a report that contained them.
+    const heading = `${a} — ${{
+      'against-catalogue': 'they agree with each other and not with the record',
+      'models-disagree': 'they do not agree with each other',
+      inconclusive: 'too few usable answers',
+      confirmed: 'they agree with the record',
+    }[a]}`;
     if (a === 'confirmed') {
       L.push('', `## ${heading} (${g.length})`, '');
       L.push('<details>', '<summary>What each model said</summary>', '');
