@@ -1301,9 +1301,7 @@ function codeBlock(sample) {
   const sum = el('summary', 'code-head');
   sum.append(el('span', 'code-chevron', '▸'));
   sum.append(el('span', 'code-show', 'Show the code'));
-  sum.append(el('span', 'code-lang', techById[sample.technology]?.name ?? sample.technology));
   sum.append(el('span', 'code-lines', `${sample.lines} lines`));
-  if (sample.note) sum.append(el('span', 'code-note', sample.note));
   box.append(sum);
   const pre = el('pre', 'code-body');
   pre.append(el('code', null, sample.code));
@@ -1311,6 +1309,38 @@ function codeBlock(sample) {
   // The card header toggles on click; a click inside the code must not also collapse it.
   box.addEventListener('click', ev => ev.stopPropagation());
   return box;
+}
+
+/** The reference code as a card, shaped like the implementation cards it sits beside. */
+function codeCard(algo, sample) {
+  const body = el('div');
+  if (sample.note) body.append(el('p', 'algo-summary', sample.note));
+
+  const facts = el('dl');
+  for (const [label, val] of [
+    ['Language', techById[sample.technology]?.name ?? sample.technology],
+    ['Length', `${sample.lines} lines`],
+    ['Implements', algo.name],
+    ['Checked', 'executed on every deploy'],
+  ]) facts.append(el('dt', null, label), el('dd', null, String(val)));
+  body.append(facts);
+  body.append(codeBlock(sample));
+
+  const tag = tagById[algo.concept_tag];
+  return entityCard({
+    cls: tag?.facet ? `block-card f-${tag.facet} ref-card` : 'block-card ref-card',
+    title: 'Reference implementation',
+    id: sample.technology,
+    badges: [{ cls: 'src-badge s-code', text: 'the whole method' }],
+    metrics: [`${sample.lines} lines`, techById[sample.technology]?.name ?? sample.technology],
+    relations: [
+      { label: 'Concept', items: [{ text: tag?.name ?? algo.concept_tag, onClick: goToCatalogueTag(algo.concept_tag) }] },
+      { label: 'Algorithms', items: [{ text: algo.name, onClick: goToPage('algorithms') }] },
+      { label: 'Runs on', items: [{ text: techById[sample.technology]?.name ?? sample.technology,
+                                    title: techById[sample.technology]?.note ?? '' }] },
+    ],
+    body,
+  });
 }
 
 const SOURCE_TYPES = ['paper', 'article', 'reference-implementation', 'folklore'];
@@ -1467,9 +1497,6 @@ const implPage = filterablePage({
      than "what is about Voronoi?" — and which would make any filtered count a lie, since one
      match can produce seven cards. Filtering therefore drops to a flat list of the matches. */
   flattenWhenFiltered: true,
-  flattenNote: n => `${n} match${n === 1 ? '' : 'es'}, one card each. `
-    + 'Clear the search and filters to browse them grouped by concept and then by algorithm, '
-    + 'with the reference code for each method.',
   groupBy: i => i.concept_tag,
   groupHeader: (concept, rows) => {
     const box = el('span', 'grp-title');
@@ -1542,10 +1569,7 @@ const implPage = filterablePage({
     if (!samples.length) return null;
     const box = el('div', 'subgrp-code');
     box.id = `code-${algoId}`;
-    box.append(el('div', 'prov-head', samples.length === 1
-      ? 'Reference implementation, the whole mechanism'
-      : `Reference implementations (${samples.length})`));
-    for (const s of samples) box.append(codeBlock(s));
+    for (const s of samples) box.append(codeCard(a, s));
     return box;
   },
   renderItem: implRow,

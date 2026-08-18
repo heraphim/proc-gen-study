@@ -565,9 +565,7 @@ mark { background: color-mix(in oklab, var(--accent) 30%, transparent); color: i
   display: inline-block;
 }
 .code-sample[open] .code-chevron { transform: rotate(90deg); }
-.code-lang { font-family: var(--mono); font-size: 11px; color: var(--accent); font-weight: 650; }
 .code-lines { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); }
-.code-note { font-size: 11px; color: var(--ink-3); flex: 1 1 200px; min-width: 0; }
 .code-body {
   margin: 0; padding: 11px 13px; border-top: 1px solid var(--line);
   background: var(--panel); overflow-x: auto;
