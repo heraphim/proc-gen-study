@@ -1086,7 +1086,6 @@ for (const [name, desc] of Object.entries(facetMeta.tests ?? {})) {
   t.append(el('h4', null, name), el('p', null, desc));
   testHost.append(t);
 }
-$('#block-note').textContent = facetMeta.note ?? '';
 
 const FACET_ORDER = ['block', 'representation', 'category', 'deployment'];
 const FACET_TITLE = {
@@ -1219,10 +1218,6 @@ for (const r of conceptMeta.rejected ?? []) {
   rejectedHost.append(group);
 }
 
-for (const note of [...(facetMeta.contested ?? []), ...(conceptMeta.contested ?? [])]) {
-  $('#facet-contested').append(el('li', null, note));
-}
-
 /* ---------------- algorithms page ---------------- */
 
 const algoMeta = data.algoMeta ?? {};
@@ -1234,7 +1229,6 @@ $('#algo-stats').textContent =
   `${algorithms.length} with checked citations · `
   + `${algorithms.filter(a => (a.code ?? []).length).length} with working code, on the implementations page · `
   + `${Object.values(algoMeta.candidates ?? {}).reduce((n, a) => n + a.length, 0)} candidates awaiting a citation`;
-$('#algo-rule').textContent = algoMeta.rule ?? '';
 
 function algoCard(a) {
   const body = el('div');
@@ -1413,9 +1407,6 @@ $('#impl-stats').textContent =
   + `covering ${coveredAlgos.size} of ${algorithms.length} algorithms · `
   + `${algorithms.filter(a => (a.code ?? []).length).length} with reference code shown here · `
   + `${new Set(implementations.flatMap(i => i.technologies)).size} technologies`;
-$('#impl-method').textContent = implMeta.method ?? '';
-$('#impl-caveat').textContent = implMeta.caveat ?? '';
-if (implMeta.resolved) $('#impl-resolved').textContent = implMeta.resolved;
 
 function implRow(im) {
   const body = el('div');

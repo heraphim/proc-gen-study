@@ -289,29 +289,34 @@
       <div class="hero">
         <h2>Basic blocks</h2>
         <p class="hero-def">
-          The concepts everything else is built out of. Randomness, noise, Voronoi, cellular
-          automata — irreducible, used everywhere, and each one names something you could
-          actually import. Every card opens with the idea in plain words, because a concept that
-          needs its own jargon to explain has not been pinned down yet.
+          A basic block is one of the concepts everything else is built out of — randomness,
+          noise, Voronoi, cellular automata, L-systems. They are the vocabulary layer: the
+          smallest ideas that keep recurring whatever is being generated. Terrain, music,
+          dungeon layouts and textures look like separate subjects until you name the blocks
+          they share, at which point most of them turn out to be the same handful of ideas
+          applied differently.
+        </p>
+        <p class="hero-def">
+          Not everything on this page is a block. Three tests decide — irreducible, widespread,
+          importable — and concepts that fail one are still listed, grouped under what they
+          actually are: a representation is a format for holding structure rather than a way of
+          making it, a category is a bag containing blocks that were never named separately, and
+          deployment describes where code runs rather than what it does.
         </p>
         <p class="hero-sub" id="blocks-stats"></p>
       </div>
 
       <h2 class="def-h">Three tests</h2>
       <div id="block-tests" class="tests"></div>
-      <div class="callout" id="block-note"></div>
 
       <div class="page-toolbar" id="toolbar-blocks"></div>
       <div id="facet-groups"></div>
 
       <h2 class="def-h">Considered and rejected</h2>
-      <p>Concepts that looked like gaps and were not added. The importable test is what usually
-      kills them — a family of techniques with no package you can name is a reading list, not a
-      block. Recorded because an empty rejection list would imply nothing was ever turned down.</p>
+      <p>Concepts that looked like gaps and were not added, with the reason. The importable test
+      is what usually rules them out: a family of techniques with no package you can name is a
+      reading list rather than a block.</p>
       <div id="concept-rejected" class="candidates"></div>
-
-      <h2 class="def-h">Judgement calls worth arguing with</h2>
-      <ul id="facet-contested" class="contested-full"></ul>
 
     </div>
   </section>
@@ -322,21 +327,30 @@
       <div class="hero">
         <h2>Algorithms</h2>
         <p class="hero-def">
-          Named, published methods. The only level of the model that has papers — which is why the
-          catalogue had no citations before this table existed.
+          An algorithm is a named method with an origin you can cite: Perlin noise, Wave Function
+          Collapse, Poisson disk sampling, A*. Where a block names an idea, an algorithm names one
+          concrete way of carrying it out, which is why a single block usually has several —
+          <code>noise</code> covers Perlin, simplex, value, Worley and domain warping, which agree
+          on what they produce and differ in how.
+        </p>
+        <p class="hero-def">
+          Each row carries the source it was checked against, the mechanism in short technical
+          terms, and a plain-language explanation. <code>source_type</code> records what kind of
+          source it is — paper, article, reference implementation, or folklore for methods that
+          are real and widely used but have no canonical origin — so filtering on it narrows the
+          list to the peer-reviewed set. Anything without a checked source is not in the database;
+          those names sit in the candidate list at the bottom.
         </p>
         <p class="hero-sub" id="algo-stats"></p>
       </div>
 
-      <div class="callout" id="algo-rule"></div>
       <div class="page-toolbar" id="toolbar-algorithms"></div>
       <div id="algo-list" class="algo-list"></div>
 
       <h2 class="def-h">Candidates</h2>
       <p>Names pulled out of the catalogue's description prose and out of the category concepts.
-      Each needs its citation checked before it gets a row — so none of them are in the database,
-      and no query over <code>algorithm</code> will ever return something unsourced. This is the
-      queue, not a claim.</p>
+      Each needs its source checked before it gets a row, so none of them are in the database yet
+      and no query over <code>algorithm</code> will return them.</p>
       <div id="algo-candidates" class="candidates"></div>
     </div>
   </section>
@@ -347,16 +361,21 @@
       <div class="hero">
         <h2>Implementations</h2>
         <p class="hero-def">
-          Runnable code, grouped by concept and then by the specific algorithm it implements,
-          with the technologies it runs on. Every row was resolved against its registry before
-          being written down.
+          An implementation is runnable code — a library, package or engine you can install that
+          implements one or more of the algorithms. It is where the model stops describing ideas
+          and starts naming things you can import. Rows are grouped by concept, then by the
+          specific algorithm they implement, and each one carries the technologies it runs on.
+        </p>
+        <p class="hero-def">
+          Every row was resolved against its registry — npm, PyPI, crates.io, NuGet, or GitHub for
+          the C++ and shader libraries that live only there — so version, licence and last release
+          are the registry's answer rather than a claim. That also means the metadata is only as
+          good as what the registry publishes: a few GitHub-hosted rows carry licence terms no
+          automated check can classify, and one long-unmaintained package is listed because a lot
+          of existing C# code depends on it. Read the repository before shipping.
         </p>
         <p class="hero-sub" id="impl-stats"></p>
       </div>
-
-      <div class="callout" id="impl-method"></div>
-      <div class="warn-note" id="impl-caveat"></div>
-      <div class="callout" id="impl-resolved"></div>
 
       <h2 class="def-h">Reference code</h2>
       <div id="code-index" class="code-index"></div>
