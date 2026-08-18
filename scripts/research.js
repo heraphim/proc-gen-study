@@ -174,15 +174,25 @@ async function post(url, body, headers) {
 // Everything except Gemini speaks the OpenAI shape, so one caller covers two providers.
 async function askOpenAIShape(provider, base, prompt) {
   const p = PROVIDERS[provider];
-  const r = await post(`${base}/chat/completions`, {
+  const body = strict => ({
     model: p.model,
     messages: [
-      { role: 'system', content: 'You answer from what you know. If you are not confident, say so by setting unsure to true rather than guessing. Reply with JSON only.' },
+      { role: 'system', content: 'You answer from what you know. If you are not confident, say so by setting unsure to true rather than guessing. Reply with the JSON object only, with no explanation before or after it.' },
       { role: 'user', content: prompt },
     ],
-    response_format: { type: 'json_object' },
+    ...(strict ? { response_format: { type: 'json_object' } } : {}),
     temperature: 0,
-  }, { authorization: `Bearer ${p.key()}` });
+  });
+
+  let r = await post(`${base}/chat/completions`, body(true), { authorization: `Bearer ${p.key()}` });
+
+  // Strict JSON mode is not uniformly implemented. Groq rejects the whole request with
+  // json_validate_failed and an empty generation when the model emits anything before the
+  // object -- reasoning models routinely do. Falling back to plain text costs nothing, because
+  // parseJSON below already has to cope with fences and preamble anyway.
+  if (r.error && /json_validate_failed|response_format/i.test(r.error)) {
+    r = await post(`${base}/chat/completions`, body(false), { authorization: `Bearer ${p.key()}` });
+  }
 
   if (!r.data) return r;
   const tokens = r.data.usage?.total_tokens ?? 0;
