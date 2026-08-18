@@ -77,11 +77,21 @@ CREATE TABLE entry (
   -- The three-layer split: 'source' | 'operator' | 'generator'. NULL until classified.
   tier         TEXT,
 
-  -- Classification metadata. All NULL until the classification pass runs.
+  -- The axis layer. `addressing`, `input_class` and `runs_at` are filled by the axis pass
+  -- from data/annotations/axes.json, which also holds the prose the pages render. The rest
+  -- are still NULL and are listed as not-yet-axes in that file.
+  --
+  -- `addressing` replaced a `deterministic` column that asked yes/no whether the same seed
+  -- gives the same result. It was never filled, and it would not have been worth filling:
+  -- in a procedural generation catalogue the answer is yes almost everywhere, so it sorted
+  -- 841 rows into one bucket. The question worth asking is whether you can reach a point
+  -- without replaying to it, which is the one that decides whether a technique can serve a
+  -- streamed world.
   output_type   TEXT,  -- image | vector | mesh | audio | text | data | schedule | plan | field
   input_class   TEXT,  -- seed | seed+library | external-data
   compute_cost  TEXT,  -- trivial | moderate | heavy | offline-only
-  deterministic TEXT,  -- yes | no | conditional
+  addressing    TEXT,  -- positional | replayable | accumulating
+  runs_at       TEXT,  -- shader-time | ahead-of-time
   realtime      TEXT,  -- yes | no | with-caveats
   difficulty    TEXT,  -- wrap-a-library | weekend | month | research | unsolved
   confidence    TEXT,  -- attested | plausible | unverified

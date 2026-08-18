@@ -1,0 +1,207 @@
+{
+  "_about": "The axis layer. A concept says what a technique is made of; an axis says how it behaves. Every entry has a value on every axis here, and nothing implements one.",
+  "_test": "An axis passes where a concept fails: nothing implements it. `shader` and `kit` are the only two of the 37 concepts with zero algorithm rows, which is the measurable form of the argument the facet pass already made in prose — that they name where or how something runs rather than a way of making anything. Both are folded into axes below, and their tag rows are what the classification is read from.",
+  "_why_not_concepts": "Kept separate rather than added to the concept vocabulary, because a concept is something you can be told to go and implement. An axis cannot be implemented, only observed, and mixing the two is what let `shader` sit in a list of algorithm families for as long as it did.",
+  "_rules": {
+    "classification": "Each axis carries a `rule` keyed on concept tag plus per-entry `overrides`. The rule is stated rather than applied silently, so it can be argued with; the overrides are where the actual thinking is, because they are the cases the rule gets wrong.",
+    "precedence": "An entry usually carries several tags, and they can disagree. `precedence` lists the values from strongest to weakest claim: the first one any of the entry's tags maps to wins. It is not alphabetical and not arbitrary — for `addressing` it says that if any part of a method accumulates state, the whole method does, which is the direction the constraint actually runs.",
+    "completeness": "Every entry must end up with a value on every axis. The migration fails otherwise, the same way it fails on an unclassified tier.",
+    "eli5": "Same rule and same register check as the concept and algorithm layers: no jargon, 20 to 110 words.",
+    "notable": "A value marked `notable` gets a chip on the catalogue row; the rest are reachable from the filter block and the axis card but do not print. A chip carried by most rows is furniture — it costs a line of height on all 841 and tells you nothing when it is there, because you only notice it when it is absent, and absence is invisible. So the row flags departures from the ordinary case: positional addressing, an authored library, external data, shader-time evaluation. Between them they land on about four rows in ten."
+  },
+  "axes": [
+    {
+      "id": "addressing",
+      "column": "addressing",
+      "name": "Addressing",
+      "question": "Can you compute one piece of the output without computing the rest?",
+      "eli5": "Some methods let you ask about one spot directly — what is at this coordinate, in this chunk — and answer without working out anything else. Others have to be run from their beginning to reach any particular moment, and a few build on their own results as they go, so there is no way into the middle at all except to run the whole thing. Which of the three you are holding decides whether a world can be endless.",
+      "why": "The property this catalogue asserts most often and records nowhere. The `rand` concept's watch line calls positional hashing the key to infinite streamable worlds; four entry descriptions repeat it — hash(x,y,z) is stateless and order-independent, positional hashing makes voxel chunks order-independent, positional hashing makes chunk seams agree, sub-seeding by chunk ID is how infinite worlds stay consistent across sessions — and the Philox row states it a fifth time in the algorithm layer. Six places, one claim, no column. It is also the honest form of the question the empty `deterministic` column was asking: almost everything here is reproducible from a seed, so answering yes told nobody anything, while answering whether you can reach a point without replaying to it decides whether a technique can serve a streamed world at all.",
+      "values": [
+        {
+          "id": "positional",
+          "name": "Positional",
+          "what": "Any point computes directly from the seed and the position. Nothing else runs.",
+          "buys": "Endless and streamable. Chunk 5000 without chunks 1 to 4999, neighbours that agree without talking to each other, and every point evaluable in parallel.",
+          "costs": "The method cannot refer to anything it has not been given. No erosion, no reachability, no global constraint — anything requiring a view of the whole is out of reach by construction.",
+          "notable": true
+        },
+        {
+          "id": "replayable",
+          "name": "Replayable",
+          "what": "Run it from the seed and you get the result. The interior is not addressable, but the run is short and self-contained.",
+          "buys": "Reproducibility from a small seed, and cheap enough re-derivation that not storing the output is a real option.",
+          "costs": "No random access. Reaching the thousandth item means producing the first nine hundred and ninety-nine, unless the method is splittable and the units are separately seeded."
+        },
+        {
+          "id": "accumulating",
+          "name": "Accumulating",
+          "what": "The result is the endpoint of a process feeding on its own prior state.",
+          "buys": "History. Erosion, settlement, competition and convergence produce structure nobody placed, and that is exactly what cannot be had from a formula over a coordinate.",
+          "costs": "There is no way in except from the start, so the cost of any state is the cost of the whole run. This is the value that rules a technique out of a seed-driven engine, and it is the most common one here."
+        }
+      ],
+      "rule": {
+        "_about": "Mapped from concept tag. Untagged concepts fall to the default.",
+        "default": "replayable",
+        "precedence": [
+          "accumulating",
+          "replayable",
+          "positional"
+        ],
+        "by_concept": {
+          "noise": "positional",
+          "fractal": "positional",
+          "sdf": "positional",
+          "shader": "positional",
+          "tile": "positional",
+          "colour": "positional",
+          "filter": "positional",
+          "vor": "positional",
+          "sim": "accumulating",
+          "ero": "accumulating",
+          "hydro": "accumulating",
+          "agent": "accumulating",
+          "ca": "accumulating",
+          "rd": "accumulating",
+          "evo": "accumulating",
+          "cons": "accumulating",
+          "wfc": "accumulating",
+          "ml": "accumulating",
+          "topopt": "accumulating",
+          "texsyn": "accumulating",
+          "morph": "accumulating"
+        }
+      },
+      "overrides": {
+        "primitives": {
+          "Hash-based / positional randomness": "positional",
+          "Deterministic sub-seeding by chunk / entity ID": "positional"
+        },
+        "terrain": {
+          "Heightfields from fBm & ridged noise": "positional",
+          "Voxel worlds & chunked infinite terrain": "positional"
+        },
+        "levels": {
+          "Level streaming & chunk seams": "positional"
+        }
+      }
+    },
+    {
+      "id": "input_class",
+      "column": "input_class",
+      "name": "Input class",
+      "question": "What does it need besides a seed?",
+      "eli5": "A seed is a single number, and some methods need nothing else — hand them one and they produce the whole result. Others need a set of pieces somebody drew or modelled first, and assemble those. And some need a body of real material, a photograph or a scan or a table of records, without which they have nothing to work from. The three cases decide what has to ship alongside the code.",
+      "why": "The split between what a seed-driven engine can serve and what it structurally cannot. It also gives the `kit` concept somewhere to live: modular kitbashing is not a way of making anything, it is the statement that generation consumes a hand-authored library, which is a value on this axis rather than a family of methods. Its zero algorithms are the proof — there is nothing to implement, only a condition on the input.",
+      "values": [
+        {
+          "id": "seed",
+          "name": "Seed only",
+          "what": "An integer in, a result out. Nothing else ships.",
+          "buys": "The whole thing reconstructs from a short code, so it costs storage nothing and travels as a URL.",
+          "costs": "Everything the result contains has to be expressible as a rule. Nothing can be hand-placed, and taste has to be encoded rather than applied."
+        },
+        {
+          "id": "seed+library",
+          "name": "Seed plus library",
+          "what": "Needs a set of authored pieces to assemble — kit parts, trim sheets, sockets, blendshapes, sample banks.",
+          "buys": "Every piece looks good because a person made it, and the variety comes from the assembly. This is what shipped games actually run.",
+          "costs": "The library is the ceiling. Storage scales with it, and no amount of clever assembly produces a silhouette the kit does not contain.",
+          "notable": true
+        },
+        {
+          "id": "external-data",
+          "name": "External data",
+          "what": "Needs a corpus, a scan, a survey or a dataset that was measured rather than authored.",
+          "buys": "Plausibility that no rule reproduces — real population statistics, a real street layout, a real texture.",
+          "costs": "Cannot live in a seed-driven engine at all. It also inherits the licensing, the bias and the staleness of whatever it was trained or built on.",
+          "notable": true
+        }
+      ],
+      "rule": {
+        "_about": "Mapped from concept tag. Everything not named needs only a seed.",
+        "default": "seed",
+        "precedence": [
+          "external-data",
+          "seed+library",
+          "seed"
+        ],
+        "by_concept": {
+          "kit": "seed+library",
+          "morph": "external-data",
+          "texsyn": "external-data",
+          "ml": "external-data"
+        }
+      },
+      "overrides": {
+        "architecture": {
+          "OSM & GIS-driven city reconstruction": "external-data"
+        },
+        "audio": {
+          "Sonification of scientific data": "external-data"
+        },
+        "software": {
+          "Static site generation from datasets": "external-data"
+        },
+        "film": {
+          "Data-driven explainer animation": "external-data"
+        },
+        "characters": {
+          "Population & ethnicity distribution sampling": "external-data"
+        },
+        "biomed": {
+          "Codon optimisation for a host": "external-data"
+        },
+        "bizops": {
+          "Invoice, statement & report generation": "external-data"
+        }
+      }
+    },
+    {
+      "id": "runs_at",
+      "column": "runs_at",
+      "name": "Evaluation time",
+      "question": "Is it evaluated in the shader every frame, or produced ahead of time and stored?",
+      "eli5": "One way to have a texture is to make the picture and keep it. The other is to keep only the recipe and have the graphics card work out each pixel afresh, sixty times a second, for the pixels it can currently see. Nothing is stored in the second case and nothing blurs when you get close, but the result exists only while it is on screen, and anything that needs to ask a question about it later has nowhere to look.",
+      "why": "This is the `shader` concept, which the facet pass filed as deployment and described in its own words as not a concept at all. It has 51 entries across 10 domains and zero algorithms, because there is no such thing as the shader-time algorithm — there are noise, SDFs and Voronoi, evaluated in a particular place. Folding it into an axis lets those 51 entries say what they are actually made of, and 17 of them will turn out to say nothing at all, because the tag was standing in for a mechanism nobody recorded.",
+      "values": [
+        {
+          "id": "shader-time",
+          "name": "Shader-time",
+          "what": "Evaluated per-pixel or per-vertex each frame. The output is never stored.",
+          "buys": "No disk cost, no resolution ceiling, and no seams. Detail appears as you approach it because it was never sampled.",
+          "costs": "Nothing else can read it. Gameplay wanting the same value has to recompute it on the CPU, because synchronous readback stalls both processors and the asynchronous form arrives late.",
+          "notable": true
+        },
+        {
+          "id": "ahead-of-time",
+          "name": "Ahead of time",
+          "what": "Produced once and held as data — a mesh, an image, a table, a level.",
+          "buys": "Everything downstream can inspect it. It can be edited by hand, checked, diffed, shipped and depended on.",
+          "costs": "It occupies space, it fixes a resolution, and the decision of how much to generate has to be made before anyone sees it."
+        }
+      ],
+      "rule": {
+        "_about": "Read straight off the `shader` tag, which is what the tag has always meant.",
+        "default": "ahead-of-time",
+        "precedence": [
+          "shader-time",
+          "ahead-of-time"
+        ],
+        "by_concept": {
+          "shader": "shader-time"
+        }
+      },
+      "overrides": {}
+    }
+  ],
+  "_still_empty": {
+    "_about": "Columns that exist on `entry` and are not yet axes. Listed here rather than on the definitions page so there is one place that knows what the axis layer does and does not cover.",
+    "output_type": "image · vector · mesh · audio · text · data · schedule · plan · field. Worth doing and largely derivable from domain and representation tags.",
+    "compute_cost": "trivial · moderate · heavy · offline-only. Duplicates `realtime` at finer grain; one of the two should be dropped before either is filled.",
+    "realtime": "yes · no · with-caveats. Wanted, and not the same question as `runs_at` — plenty of ahead-of-time work still has to finish inside a frame.",
+    "difficulty": "wrap-a-library · weekend · month · research · unsolved. Judgement rather than fact, and 841 rows of it. Its own project.",
+    "confidence": "attested · plausible · unverified. This is about the catalogue rather than the technique, so it belongs with `source_type`, not on an axis card."
+  }
+}

@@ -3,15 +3,16 @@
   "_tests": {
     "irreducible": "Cannot be decomposed into other concepts in the catalogue.",
     "widespread": "Many unrelated domains point at it.",
-    "importable": "You can name the concrete thing you would import."
+    "importable": "You can name the concrete thing you would import.",
+    "implemented": "Something implements it. A concept is a thing you can be sent away to build; if nothing implements it, it is a property of work rather than a way of doing any, and it belongs on an axis."
   },
   "_kinds": {
     "block": "Passes all three tests. Substrate — everything else is built out of these.",
     "representation": "A format for holding structure, not a way of making it. A block makes; a representation stores.",
     "category": "Fails the importable test. A bag containing blocks that were never named separately.",
-    "deployment": "Where or how something runs. Not a concept at all."
+    "deployment": "Where or how something runs. Not a concept at all — both of these are carried by the axis layer now, and their tag rows are what it is classified from."
   },
-  "_note": "The importable test is the one that does the work. `sim` is used in 21 of 23 domains — wider than anything but `rand` — and still fails, because there is no simulator you can import. That is why it became a dumping ground.",
+  "_note": "The importable test is the one that does the work. `sim` is used in 21 of 23 domains — wider than anything but `rand` — and still fails, because there is no simulator you can import. That is why it became a dumping ground. The fourth test is the one that took longest to state and is the easiest to check: `shader` and `kit` are the only two concepts here with no algorithm rows, which is what an axis looks like from the algorithm layer.",
 
   "facets": {
     "rand": "block",

@@ -14,11 +14,15 @@ const ann = name => JSON.parse(readFileSync(join(root, 'data', 'annotations', `$
 
 const algorithms = ann('algorithms');
 const concepts = ann('concepts');
+const axes = ann('axes');
 
 const texts = [
   ...algorithms.algorithms.map(a => [`algorithm:${a.id}`, a.eli5]),
   ...Object.entries(concepts.eli5).map(([id, t]) => [`concept:${id}`, t]),
   ...concepts.additions.map(a => [`concept:${a.id}`, a.eli5]),
+  // Axes render the same paragraph in the same place on the same card, so a register that
+  // drifts here drifts in front of the reader exactly as it would on a concept.
+  ...axes.axes.map(a => [`axis:${a.id}`, a.eli5]),
 ];
 
 // Never appropriate here: each one is a diminutive or a hedge that adds nothing.

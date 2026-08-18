@@ -25,6 +25,7 @@ const SOURCE_ANNOTATIONS = join(root, 'data', 'annotations', 'sources.json');
 const CORRECTION_ANNOTATIONS = join(root, 'data', 'annotations', 'corrections.json');
 const REVIEW_ANNOTATIONS = join(root, 'data', 'annotations', 'reviews.json');
 const FURTHER_ANNOTATIONS = join(root, 'data', 'annotations', 'further-reading.json');
+const AXIS_ANNOTATIONS = join(root, 'data', 'annotations', 'axes.json');
 
 /** Longest a code sample may be. The claim on the page is "under 100 lines"; this enforces it. */
 const CODE_LINE_LIMIT = 100;
@@ -274,6 +275,120 @@ if (existsSync(FACET_ANNOTATIONS)) {
   for (const r of db.prepare(`SELECT facet, COUNT(*) n FROM tag GROUP BY facet`).all()) {
     facetStats[r.facet] = r.n;
   }
+}
+
+// ---- axes ------------------------------------------------------------------
+// The axis layer: properties every entry has, that nothing implements. Concepts answer
+// what a technique is made of, axes answer how it behaves, and the test that separates
+// them is whether anything implements it — which is why `shader` and `kit`, the only two
+// concepts with no algorithms, are folded in here rather than left in the vocabulary.
+//
+// Each axis states a rule over concept tags and then overrides it per entry. The rule is
+// written down rather than applied silently so it can be argued with; the overrides are
+// where the thinking is, because they are the cases the rule gets wrong.
+
+const axisStats = { axes: 0, values: 0, classified: 0, byRule: 0, byOverride: 0 };
+let axisMeta = null;
+
+if (existsSync(AXIS_ANNOTATIONS)) {
+  const ann = JSON.parse(readFileSync(AXIS_ANNOTATIONS, 'utf8'));
+  const problems = [];
+
+  // The column name comes out of an annotation file and is interpolated into SQL, so it is
+  // checked against the table rather than trusted.
+  const columns = new Set(db.prepare(`SELECT name FROM pragma_table_info('entry')`).all().map(r => r.name));
+  const tagExists = db.prepare(`SELECT 1 FROM tag WHERE id = ?`);
+  const findEntry = db.prepare(`
+    SELECT e.id FROM entry e JOIN grp g ON g.id = e.group_id
+    WHERE g.domain_id = ? AND e.name = ?`);
+  const entriesWithTags = db.prepare(`
+    SELECT e.id, g.domain_id, e.name,
+           (SELECT group_concat(tag_id) FROM entry_tag et WHERE et.entry_id = e.id) AS tags
+    FROM entry e JOIN grp g ON g.id = e.group_id`).all();
+
+  for (const ax of ann.axes ?? []) {
+    for (const field of ['id', 'column', 'name', 'question', 'eli5', 'why']) {
+      if (!ax[field]) problems.push(`axis "${ax.id ?? '?'}" is missing ${field}`);
+    }
+    if (!columns.has(ax.column)) {
+      problems.push(`axis "${ax.id}" names column "${ax.column}", which entry does not have`);
+      continue;
+    }
+    // An axis that something implements is a concept wearing the wrong label. This is the
+    // test from the facet pass, enforced rather than asserted.
+    if (tagExists.get(ax.id)) problems.push(`axis "${ax.id}" collides with a concept of the same id`);
+
+    const values = ax.values ?? [];
+    if (values.length < 2) problems.push(`axis "${ax.id}" has fewer than two values, so it sorts nothing`);
+    const valueIds = new Set(values.map(v => v.id));
+    for (const v of values) {
+      for (const field of ['id', 'name', 'what', 'buys', 'costs']) {
+        if (!v[field]) problems.push(`axis "${ax.id}" value "${v.id ?? '?'}" is missing ${field}`);
+      }
+      axisStats.values++;
+    }
+
+    const rule = ax.rule ?? {};
+    const order = rule.precedence ?? [];
+    if (!valueIds.has(rule.default)) problems.push(`axis "${ax.id}" has default "${rule.default}", which is not one of its values`);
+    if (new Set(order).size !== valueIds.size || order.some(v => !valueIds.has(v))) {
+      problems.push(`axis "${ax.id}" precedence must list each of its values exactly once`);
+    }
+    for (const [tag, value] of Object.entries(rule.by_concept ?? {})) {
+      if (!tagExists.get(tag)) problems.push(`axis "${ax.id}" rule names unknown concept "${tag}"`);
+      if (!valueIds.has(value)) problems.push(`axis "${ax.id}" rule maps "${tag}" to unknown value "${value}"`);
+    }
+
+    // Overrides resolve to entry ids first, so a renamed or missing entry fails here rather
+    // than silently leaving the rule's answer in place.
+    const override = new Map();
+    for (const [domainId, entries] of Object.entries(ax.overrides ?? {})) {
+      for (const [name, value] of Object.entries(entries)) {
+        const row = findEntry.get(domainId, name);
+        if (!row) { problems.push(`axis "${ax.id}" override: no entry "${name}" in ${domainId}`); continue; }
+        if (!valueIds.has(value)) { problems.push(`axis "${ax.id}" override "${name}" uses unknown value "${value}"`); continue; }
+        override.set(row.id, value);
+      }
+    }
+
+    const setValue = db.prepare(`UPDATE entry SET ${ax.column} = ? WHERE id = ?`);
+    for (const e of entriesWithTags) {
+      let value = override.get(e.id);
+      if (value) axisStats.byOverride++;
+      else {
+        const tags = (e.tags ?? '').split(',').filter(Boolean);
+        const claimed = new Set(tags.map(t => rule.by_concept?.[t]).filter(Boolean));
+        value = order.find(v => claimed.has(v)) ?? rule.default;
+        axisStats.byRule++;
+      }
+      setValue.run(value, e.id);
+    }
+    axisStats.axes++;
+  }
+
+  const filled = ann.axes?.map(a => a.column) ?? [];
+  for (const col of filled) {
+    if (!columns.has(col)) continue;
+    const missing = db.prepare(`SELECT COUNT(*) n FROM entry WHERE ${col} IS NULL`).get().n;
+    if (missing) problems.push(`${missing} entries left with no value on "${col}"`);
+  }
+  axisStats.classified = filled.length ? db.prepare(`SELECT COUNT(*) n FROM entry`).get().n : 0;
+
+  // An axis with a column that is also listed as not-yet-an-axis is the file contradicting
+  // itself about what has been done.
+  for (const col of Object.keys(ann._still_empty ?? {})) {
+    if (col.startsWith('_')) continue;
+    if (filled.includes(col)) problems.push(`"${col}" is both an axis and listed as still empty`);
+    else if (!columns.has(col)) problems.push(`"${col}" is listed as still empty but entry has no such column`);
+  }
+
+  if (problems.length) {
+    db.exec('ROLLBACK');
+    console.error('axis annotation errors:');
+    for (const p of problems) console.error(`  - ${p}`);
+    process.exit(1);
+  }
+  axisMeta = ann;
 }
 
 // ---- technologies, algorithms, implementations -----------------------------
@@ -629,6 +744,13 @@ console.log(`  tools        ${count('SELECT COUNT(*) n FROM tool')}`);
 console.log(`  reading      ${count('SELECT COUNT(*) n FROM reading')}`);
 console.log(`\n  tiers:  ${tierStats.source} source · ${tierStats.operator} operator · ${tierStats.generator} generator`);
 console.log(`  facets: ${Object.entries(facetStats).map(([k, v]) => `${v} ${k}`).join(' · ')}`);
+if (axisStats.axes) {
+  const spread = axisMeta.axes.map(a =>
+    `${a.id} ${db.prepare(`SELECT COUNT(DISTINCT ${a.column}) n FROM entry`).get().n}`).join(' · ');
+  console.log(`  axes:   ${axisStats.axes} over ${axisStats.classified} entries · ${axisStats.values} values `
+    + `(${axisStats.byRule} by rule, ${axisStats.byOverride} by override)`);
+  console.log(`          ${spread}`);
+}
 console.log(`\n  technologies    ${layerStats.technologies}`);
 console.log(`  algorithms      ${layerStats.algorithms}  (verified citations only)`);
 console.log(`    with eli5     ${layerStats.eli5} / ${layerStats.algorithms}`);
