@@ -23,6 +23,10 @@ on:
         description: 'Research and report without recording anything'
         type: boolean
         default: false
+      list_models:
+        description: 'Only ask each provider which models it serves, then stop'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -71,8 +75,16 @@ jobs:
             git checkout -B research/nightly origin/main
           fi
 
+      - name: Which models does each provider actually serve?
+        if: github.event.inputs.list_models == 'true'
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+        run: node scripts/research.js --list-models
+
       - name: Ask the three models
-        if: steps.backlog.outputs.skip == 'false'
+        if: steps.backlog.outputs.skip == 'false' && github.event.inputs.list_models != 'true'
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -87,7 +99,7 @@ jobs:
       # The gate. A run that produced something the migration rejects proposes nothing: the
       # fairness invariant, the round contiguity and the link rules all fail here first.
       - name: Validate
-        if: steps.backlog.outputs.skip == 'false'
+        if: steps.backlog.outputs.skip == 'false' && github.event.inputs.list_models != 'true'
         run: |
           npm run migrate
           npm run check-samples
@@ -95,7 +107,7 @@ jobs:
           npm run check-guards
 
       - name: Anything to propose?
-        if: steps.backlog.outputs.skip == 'false'
+        if: steps.backlog.outputs.skip == 'false' && github.event.inputs.list_models != 'true'
         id: check
         run: |
           if git diff --quiet -- data/annotations/; then

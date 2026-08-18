@@ -84,6 +84,43 @@ if (available.length < 2) {
 }
 if (available.length === 2) console.error(`warning: only ${available.join(' and ')} have keys — this run is two-way\n`);
 
+// Model names go stale faster than anything else here -- providers retire them on their own
+// schedule and a wrong one fails as an opaque 400 or 404. This asks each provider what it
+// actually serves today, which is one round trip instead of three guesses.
+if (has('--list-models')) {
+  const get = async (url, headers) => {
+    try {
+      const r = await fetch(url, { headers: { 'user-agent': UA, ...headers } });
+      if (!r.ok) return { error: `HTTP ${r.status}: ${(await r.text()).slice(0, 300)}` };
+      return { data: await r.json() };
+    } catch (e) { return { error: e.message }; }
+  };
+
+  const show = (label, r, names) => {
+    if (r.error) { console.log(`\n${label}\n  FAILED  ${r.error}`); return; }
+    const list = names(r.data) ?? [];
+    console.log(`\n${label}  (${list.length})`);
+    for (const n of list.slice(0, 40)) console.log(`  ${n}`);
+  };
+
+  if (PROVIDERS.google.key()) {
+    show('google', await get('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200',
+      { 'x-goog-api-key': PROVIDERS.google.key() }),
+      d => (d.models ?? []).filter(m => (m.supportedGenerationMethods ?? []).includes('generateContent'))
+        .map(m => m.name?.replace(/^models\//, '')));
+  }
+  if (PROVIDERS.groq.key()) {
+    show('groq', await get('https://api.groq.com/openai/v1/models',
+      { authorization: `Bearer ${PROVIDERS.groq.key()}` }), d => (d.data ?? []).map(m => m.id));
+  }
+  if (PROVIDERS.cerebras.key()) {
+    show('cerebras', await get('https://api.cerebras.ai/v1/models',
+      { authorization: `Bearer ${PROVIDERS.cerebras.key()}` }), d => (d.data ?? []).map(m => m.id));
+  }
+  console.log(`\ncurrently configured: google ${PROVIDERS.google.model} · groq ${PROVIDERS.groq.model} · cerebras ${PROVIDERS.cerebras.model}`);
+  process.exit(0);
+}
+
 const spent = { google: 0, groq: 0, cerebras: 0 };
 const budget = Object.fromEntries(
   Object.entries(PROVIDERS).map(([k, p]) => [k, Math.floor(p.dailyTokens * FRACTION)]));
@@ -305,19 +342,34 @@ async function research(subject) {
 
   const models = [];
   const answers = [];
+  const failures = [];
   for (const [provider, p] of Object.entries(PROVIDERS)) {
     if (!p.key()) { models.push({ provider, model: p.model, verdict: null, unsure: true, tokens: 0, skipped: 'no key' }); continue; }
     const r = provider === 'google'
       ? await askGemini(prompt)
       : await askOpenAIShape(provider, provider === 'groq' ? 'https://api.groq.com/openai/v1' : 'https://api.cerebras.ai/v1', prompt);
     if (r.exhausted) return { exhausted: provider };
+    if (r.error) {
+      // Loud, and counted. A failed call is not a model declining to answer, and the difference
+      // matters: abstention is a finding, a broken request is a bug wearing its costume.
+      console.error(`      ${provider} failed: ${r.error}`);
+      failures.push({ provider, error: r.error });
+      models.push({ provider, model: p.model, verdict: null, unsure: true, tokens: 0 });
+      continue;
+    }
     const answer = r.answer ?? null;
     answers.push({ provider, answer });
     models.push({
       provider, model: p.model, verdict: answer,
       unsure: Boolean(answer?.unsure ?? true), tokens: r.tokens ?? 0,
-      ...(r.error ? { error: r.error } : {}),
     });
+  }
+
+  // A subject where fewer than two models actually answered was not reviewed. Recording it as
+  // `inconclusive` would consume its place in the rotation and leave the catalogue looking
+  // checked, which is the failure this whole design exists to avoid.
+  if (answers.length < 2) {
+    return { unanswered: true, failures, subject };
   }
 
   const verdict = isAlgorithm ? classifyAttribution(record, answers) : classifyMembership(known, answers);
@@ -393,6 +445,7 @@ function measuredCostPerSubject() {
 }
 
 const done = [];
+const unanswered = [];
 const allLinks = [];
 let stopped = null;
 
@@ -402,6 +455,11 @@ for (const s of subjects) {
 
   const out = await research(s);
   if (out.exhausted) { stopped = `${out.exhausted} is rate limited — the day's allowance is gone`; break; }
+  if (out.unanswered) {
+    unanswered.push(out);
+    console.error(`  SKIPPED            ${s.key.padEnd(42)} fewer than two models answered — not recorded, round not consumed`);
+    continue;
+  }
 
   done.push(out);
   allLinks.push(...out.links);
@@ -496,6 +554,14 @@ if (val('--markdown')) {
   writeFileSync(val('--markdown'), `${L.join('\n')}\n`);
 }
 
+if (unanswered.length) {
+  const why = {};
+  for (const u of unanswered) for (const f of u.failures) why[`${f.provider}: ${f.error}`] = (why[`${f.provider}: ${f.error}`] ?? 0) + 1;
+  console.error(`
+${unanswered.length} subjects were skipped because fewer than two models answered:`);
+  for (const [k, n] of Object.entries(why)) console.error(`  ${n} x  ${k}`);
+}
+
 if (writes && done.length) {
   const reviews = ann('reviews');
   reviews.reviews = [...(reviews.reviews ?? []), ...done.map(d => d.review)];
@@ -508,4 +574,11 @@ if (writes && done.length) {
   console.log(`\nrecorded ${done.length} reviews and ${allLinks.length} links`);
 } else if (done.length) {
   console.log(`\nnothing written (${measuring ? '--measure' : '--dry-run'})`);
+}
+
+// A run where every call failed is a broken run, not a quiet one. Without this it exits 0 and
+// the workflow reports success over five subjects nothing was ever asked about.
+if (!done.length && unanswered.length) {
+  console.error('\nno subject was answered by two models. Nothing was researched.');
+  process.exit(1);
 }
