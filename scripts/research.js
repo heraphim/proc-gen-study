@@ -257,12 +257,23 @@ function parseJSON(text) {
 // Neither prompt mentions what this catalogue says. That is the point: anchoring a model on the
 // existing answer turns agreement into an echo.
 
-const attributionPrompt = name => `For the algorithm or method known as "${name}", identify the originating publication.
+// Asking "identify the originating publication" of a method that has none gets an abstention,
+// correctly. 24 of the 184 algorithms here are folklore, a write-up, or a reference
+// implementation, and the catalogue already records which -- the first run abstained on three
+// such subjects and read as three failures.
+//
+// So the question asks what *kind* of origin the method has before asking for its details. That
+// makes the answer checkable in both directions: models agreeing a method is folklore confirms a
+// folklore record, and models naming a real paper for something recorded as folklore is a
+// finding rather than a shrug.
+const attributionPrompt = name => `For the algorithm or method known as "${name}", identify where it comes from.
 
 Answer only with JSON in this exact shape:
-{"year": <number or null>, "authors": [<surnames as strings>], "title": <string or null>, "venue": <string or null>, "unsure": <true or false>}
+{"origin_kind": "paper" | "folklore" | "implementation" | "unknown", "year": <number or null>, "authors": [<surnames as strings>], "title": <string or null>, "venue": <string or null>, "unsure": <true or false>}
 
-Give the paper that introduced the method, not the paper that popularised it or applied it to a new field. If you are not confident which publication is the original, set "unsure" to true rather than naming a likely-sounding one.`;
+"paper" means a specific publication or written article introduced it. "folklore" means it is widely used with no single origin — a standard technique nobody published first. "implementation" means a particular piece of software is its definitive origin rather than any document.
+
+If it is a paper or an article, give the one that introduced the method, not the one that popularised it or carried it into a new field. If you are not confident, set "unsure" to true rather than naming something plausible.`;
 
 const membershipPrompt = name => `List the named, published algorithms or methods that belong to the field of "${name}" in procedural generation and computer graphics.
 
@@ -295,7 +306,33 @@ const sameAuthors = (a, b) => {
 const norm = s => String(s ?? '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
 // Four outcomes, and which one a subject lands in is the whole result.
+// What the catalogue's own source_type implies the models should say.
+const EXPECTED_ORIGIN = {
+  paper: 'paper', article: 'paper',
+  folklore: 'folklore', 'reference-implementation': 'implementation',
+};
+
 function classifyAttribution(record, answers) {
+  const expected = EXPECTED_ORIGIN[record.source_type];
+
+  // For anything the catalogue does not claim a publication for, the question is whether the
+  // models agree there is no publication. A model naming one is the interesting case.
+  if (expected !== 'paper') {
+    const kinds = answers.filter(a => a.answer?.origin_kind && a.answer.origin_kind !== 'unknown');
+    if (kinds.length < 2) return { agreement: 'inconclusive', note: `fewer than two models would say what kind of origin this has` };
+    const claimPaper = kinds.filter(a => a.answer.origin_kind === 'paper');
+    if (claimPaper.length >= 2) {
+      return {
+        agreement: 'against-catalogue',
+        note: `the catalogue records this as ${record.source_type}, but ${claimPaper.length} models name a publication: `
+          + claimPaper.map(a => `${a.provider} says ${a.answer.year} ${(a.answer.authors ?? []).join(', ')}`).join('; '),
+      };
+    }
+    const agreeing = kinds.filter(a => a.answer.origin_kind === expected);
+    if (agreeing.length >= 2) return { agreement: 'confirmed', note: `${agreeing.length} models agree this has no single publication, matching the record's ${record.source_type}` };
+    return { agreement: 'models-disagree', note: `origins offered: ${kinds.map(a => `${a.provider} ${a.answer.origin_kind}`).join(', ')}` };
+  }
+
   const usable = answers.filter(a => a.answer && !a.answer.unsure && a.answer.year);
   if (usable.length < 2) return { agreement: 'inconclusive', note: `${answers.length - usable.length} of ${answers.length} models abstained or gave no year` };
 
