@@ -824,6 +824,88 @@ if (done.length && used.length) {
   console.log(`\nat this rate a run affords ${affordable} subjects, so ${Math.ceil(220 / Math.max(1, affordable))} runs complete a round of all 220.`);
 }
 
+if (writes && done.length) {
+  const reviews = ann('reviews');
+  reviews.reviews = [...(reviews.reviews ?? []), ...done.map(d => d.review)];
+  writeFileSync(annPath('reviews'), `${JSON.stringify(reviews, null, 2)}\n`);
+
+  const reading = ann('further-reading');
+  reading.reading = [...(reading.reading ?? []), ...allLinks.map(({ detail, ...l }) => l)];
+  writeFileSync(annPath('further-reading'), `${JSON.stringify(reading, null, 2)}\n`);
+
+  // Where three or more families back the same answer against the record, edit the record and
+  // log what it used to say. Fewer than three is reported and left alone.
+  //
+  // The correction row is not bookkeeping around the edit -- it is the point of it. This project
+  // already refuses to change an assertion quietly, and an automated editor is exactly the case
+  // that rule was written for: every value a run overwrites stays readable, with who said
+  // otherwise and on what day, so a wrong edit is findable rather than merely regrettable.
+  const algorithms = ann('algorithms');
+  const corrections = ann('corrections');
+  for (const d of done) {
+    const p = d.verdict.proposal;
+    if (!p || p.families.length < 3 || d.review.layer !== 'algorithm') continue;
+    const record = algorithms.algorithms.find(a => a.id === d.review.target);
+    if (!record) continue;
+
+    const was = `${record.year} — ${record.authors}`;
+    const now = `${p.year} — ${p.authors.join(', ')}`;
+    if (was === now) continue;
+
+    // Only a disputed year is edited automatically. The first run to have this power produced
+    // two edits and both were wrong, in the same way: splitmix went from Steele, Lea and Flood
+    // -- who wrote it -- to Vigna, who wrote the popular C variant; and chew-ruppert-refinement
+    // lost Ruppert, from a record named after him. Three families agreed on each.
+    //
+    // Both had the year already right. Recalling who published something in a given year is a
+    // different task from recalling when it was published, and models are markedly worse at it:
+    // they converge on whoever is most associated with the idea rather than whoever is on the
+    // paper. A catalogue that says "Ruppert, building on Chew (1989)" also carries a
+    // relationship that a list of surnames cannot express, so replacing it loses information
+    // even when nobody is wrong.
+    //
+    // So an authors-only difference is reported and left alone, however many families back it.
+    if (Number(record.year) === Number(p.year)) {
+      reportedOnly.push({ target: d.review.target, was, now, families: p.families });
+      continue;
+    }
+
+    record.year = p.year;
+    record.authors = p.authors.join(', ');
+    corrections.corrections.push({
+      layer: 'algorithm',
+      target: d.review.target,
+      field: 'year / authors',
+      was,
+      now,
+      why: `${p.families.length} independent model families agreed on this attribution and none supported the recorded one`
+        + `${p.title ? `, naming "${p.title}"${p.venue ? ` in ${p.venue}` : ''}` : ''}`
+        + `. Asked blind on ${today} by ${p.backedBy.join(', ')}. Not checked against the publication itself.`,
+    });
+    applied.push({ target: d.review.target, was, now, families: p.families });
+  }
+
+  if (applied.length) {
+    writeFileSync(annPath('algorithms'), `${JSON.stringify(algorithms, null, 2)}\n`);
+    writeFileSync(annPath('corrections'), `${JSON.stringify(corrections, null, 2)}\n`);
+  }
+
+  console.log(`\nrecorded ${done.length} reviews and ${allLinks.length} links`);
+  console.log(applied.length
+    ? `applied ${applied.length} edits, each with a correction row keeping the previous value`
+    : 'no edit reached three agreeing families on a disputed year, so nothing was changed');
+  for (const r of reportedOnly) {
+    console.log(`  reported only  ${r.target}: authors differ but the year matches — ${r.was}  vs  ${r.now}`);
+  }
+  for (const a of applied) console.log(`  ${a.target}: ${a.was}  ->  ${a.now}   (${a.families.join(', ')})`);
+} else if (done.length) {
+  console.log(`\nnothing written (${measuring ? '--measure' : '--dry-run'})`);
+}
+
+// Written after the edits, not before. Generated first, the report read `applied` while it
+// was still empty and said "What this changes: nothing" on a run whose diff changed a
+// record -- the one claim in the whole report a reader would take on trust rather than
+// check against the diff beside it.
 if (val('--markdown')) {
   const L = [];
   const order = ['against-catalogue', 'models-disagree', 'inconclusive', 'confirmed'];
@@ -952,84 +1034,6 @@ if (unanswered.length) {
   console.error(`
 ${unanswered.length} subjects were skipped because fewer than two models answered:`);
   for (const [k, n] of Object.entries(why)) console.error(`  ${n} x  ${k}`);
-}
-
-if (writes && done.length) {
-  const reviews = ann('reviews');
-  reviews.reviews = [...(reviews.reviews ?? []), ...done.map(d => d.review)];
-  writeFileSync(annPath('reviews'), `${JSON.stringify(reviews, null, 2)}\n`);
-
-  const reading = ann('further-reading');
-  reading.reading = [...(reading.reading ?? []), ...allLinks.map(({ detail, ...l }) => l)];
-  writeFileSync(annPath('further-reading'), `${JSON.stringify(reading, null, 2)}\n`);
-
-  // Where three or more families back the same answer against the record, edit the record and
-  // log what it used to say. Fewer than three is reported and left alone.
-  //
-  // The correction row is not bookkeeping around the edit -- it is the point of it. This project
-  // already refuses to change an assertion quietly, and an automated editor is exactly the case
-  // that rule was written for: every value a run overwrites stays readable, with who said
-  // otherwise and on what day, so a wrong edit is findable rather than merely regrettable.
-  const algorithms = ann('algorithms');
-  const corrections = ann('corrections');
-  for (const d of done) {
-    const p = d.verdict.proposal;
-    if (!p || p.families.length < 3 || d.review.layer !== 'algorithm') continue;
-    const record = algorithms.algorithms.find(a => a.id === d.review.target);
-    if (!record) continue;
-
-    const was = `${record.year} — ${record.authors}`;
-    const now = `${p.year} — ${p.authors.join(', ')}`;
-    if (was === now) continue;
-
-    // Only a disputed year is edited automatically. The first run to have this power produced
-    // two edits and both were wrong, in the same way: splitmix went from Steele, Lea and Flood
-    // -- who wrote it -- to Vigna, who wrote the popular C variant; and chew-ruppert-refinement
-    // lost Ruppert, from a record named after him. Three families agreed on each.
-    //
-    // Both had the year already right. Recalling who published something in a given year is a
-    // different task from recalling when it was published, and models are markedly worse at it:
-    // they converge on whoever is most associated with the idea rather than whoever is on the
-    // paper. A catalogue that says "Ruppert, building on Chew (1989)" also carries a
-    // relationship that a list of surnames cannot express, so replacing it loses information
-    // even when nobody is wrong.
-    //
-    // So an authors-only difference is reported and left alone, however many families back it.
-    if (Number(record.year) === Number(p.year)) {
-      reportedOnly.push({ target: d.review.target, was, now, families: p.families });
-      continue;
-    }
-
-    record.year = p.year;
-    record.authors = p.authors.join(', ');
-    corrections.corrections.push({
-      layer: 'algorithm',
-      target: d.review.target,
-      field: 'year / authors',
-      was,
-      now,
-      why: `${p.families.length} independent model families agreed on this attribution and none supported the recorded one`
-        + `${p.title ? `, naming "${p.title}"${p.venue ? ` in ${p.venue}` : ''}` : ''}`
-        + `. Asked blind on ${today} by ${p.backedBy.join(', ')}. Not checked against the publication itself.`,
-    });
-    applied.push({ target: d.review.target, was, now, families: p.families });
-  }
-
-  if (applied.length) {
-    writeFileSync(annPath('algorithms'), `${JSON.stringify(algorithms, null, 2)}\n`);
-    writeFileSync(annPath('corrections'), `${JSON.stringify(corrections, null, 2)}\n`);
-  }
-
-  console.log(`\nrecorded ${done.length} reviews and ${allLinks.length} links`);
-  console.log(applied.length
-    ? `applied ${applied.length} edits, each with a correction row keeping the previous value`
-    : 'no edit reached three agreeing families on a disputed year, so nothing was changed');
-  for (const r of reportedOnly) {
-    console.log(`  reported only  ${r.target}: authors differ but the year matches — ${r.was}  vs  ${r.now}`);
-  }
-  for (const a of applied) console.log(`  ${a.target}: ${a.was}  ->  ${a.now}   (${a.families.join(', ')})`);
-} else if (done.length) {
-  console.log(`\nnothing written (${measuring ? '--measure' : '--dry-run'})`);
 }
 
 // A run where every call failed is a broken run, not a quiet one. Without this it exits 0 and
