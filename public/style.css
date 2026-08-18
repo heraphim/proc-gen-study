@@ -1067,11 +1067,18 @@ button.rel-chip:hover { border-color: var(--accent); color: var(--accent); }
 .card-body { padding: 12px 14px 13px 33px; }
 .ent-card.collapsed .card-body { display: none; }
 .card-body > p:first-child { margin-top: 0 !important; }
-.card-body dl { margin: 0; }
+/* Zeroed only where it opens the body; elsewhere it follows prose or an eli5 block and
+   needs the same gap between them as anything else. */
+.card-body dl { margin: 10px 0 0; }
+.card-body > dl:first-child { margin-top: 0; }
 .card-body .algo-summary { border: 0; padding-top: 0; }
 
 @media (max-width: 860px) {
   .card-relations, .card-body { padding-left: 14px; }
+  /* The metrics drop to a line of their own, which only works if the head wraps: a
+     100%-wide item that cannot shrink otherwise squeezes the title to nothing and the
+     name breaks one word per line. */
+  .card-head { flex-wrap: wrap; }
   .card-metrics { margin-left: 0; width: 100%; }
 }
 
