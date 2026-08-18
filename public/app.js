@@ -41,7 +41,10 @@ function filterablePage({
   flattenWhenFiltered, flattenNote, flatExtras,
   renderItem, noun, groupOrder, emptyText = 'Nothing matches those filters.',
 }) {
-  const st = { q: '', active: new Map(filters.map(f => [f.key, new Set()])), collapsed: new Set(), cardsCollapsed: false };
+  /* Cards start closed. These pages are lists of a few hundred things and the question they
+     answer first is "which of these do I want", which the name and the plain-words paragraph
+     answer between them — the rest is for after that choice is made. */
+  const st = { q: '', active: new Map(filters.map(f => [f.key, new Set()])), collapsed: new Set(), cardsCollapsed: true };
   const tb = $(toolbar);
   const listHost = $(host);
 
@@ -156,6 +159,19 @@ function filterablePage({
     filterRow.append(row);
   }
 
+  /* Cards reach the page three ways: renderItem, the reference code a sub-group carries as
+     its intro, and the flat view's extras. Only the first went through the collapse, which
+     left the implementations page with 24 reference cards open while everything around them
+     was shut. */
+  const applyCardState = node => {
+    if (st.cardsCollapsed && node?.querySelectorAll) {
+      for (const c of node.querySelectorAll('.ent-card')) {
+        if (c.querySelector('.card-body')) c.classList.add('collapsed');
+      }
+    }
+    return node;
+  };
+
   const matches = it => {
     for (const f of filters) {
       const set = st.active.get(f.key);
@@ -214,14 +230,7 @@ function filterablePage({
     if (flattenWhenFiltered && !unfiltered) {
       if (flattenNote) listHost.append(el('p', 'flat-note', flattenNote(visible.length)));
       const extras = flatExtras?.(st);
-      if (extras) {
-        if (st.cardsCollapsed) {
-          for (const c of extras.querySelectorAll('.ent-card')) {
-            if (c.querySelector('.card-body')) c.classList.add('collapsed');
-          }
-        }
-        listHost.append(extras);
-      }
+      if (extras) listHost.append(applyCardState(extras));
       const flat = el('div', 'grp-body');
       for (const it of visible) {
         const node = renderItem(it);
@@ -311,7 +320,7 @@ function filterablePage({
           });
           const sbody = el('div', 'subgrp-body');
           const intro = subGroupIntro?.(sk, subs.get(sk), key);
-          if (intro) sbody.append(intro);
+          if (intro) sbody.append(applyCardState(intro));
           for (const it of subs.get(sk)) sbody.append(place(it));
           sub.append(shead, sbody);
           body.append(sub);
@@ -381,9 +390,10 @@ function filterablePage({
 }
 
 /* ---------------- shared card ----------------
-   One card shape for every page. The header and the relation strip stay visible when
-   collapsed — that is the scanning view: what it is, what kind, and what it connects to.
-   The body holds the prose and is hidden until wanted. */
+   One card shape for every page. The header, the relation strip and the plain-words
+   paragraph stay visible when collapsed — that is the scanning view: what it is, what kind,
+   what it connects to, and what it does in a sentence. The rest of the prose is hidden
+   until wanted. */
 
 function entityCard({ cls = '', title, id, badges = [], metrics = [], relations = [], body }) {
   const card = el('article', `card ent-card ${cls}`.trim());
@@ -434,8 +444,24 @@ function entityCard({ cls = '', title, id, badges = [], metrics = [], relations 
   if (body) {
     const b = el('div', 'card-body');
     b.append(body);
-    card.append(b);
-    head.addEventListener('click', () => card.classList.toggle('collapsed'));
+
+    /* Lifted out of the body so the collapse cannot take it with it. It stays first, and
+       directly above the prose it is meant to be checked against, so the reason it was put
+       there survives the move. */
+    const snippet = b.querySelector('.eli5');
+    if (snippet) {
+      const box = el('div', 'card-snippet');
+      box.append(snippet);
+      card.append(box);
+    }
+
+    // A card whose body was nothing but that paragraph has nothing left to open.
+    if (b.textContent.trim()) {
+      card.append(b);
+      head.addEventListener('click', () => card.classList.toggle('collapsed'));
+    } else {
+      head.classList.add('no-body');
+    }
   } else {
     head.classList.add('no-body');
   }

@@ -1057,6 +1057,14 @@ button.rel-chip:hover { border-color: var(--accent); color: var(--accent); }
 .rel-chip.r-corrects, .rel-chip.r-disputes { border-color: var(--warn); color: var(--warn); }
 .rel-chip.r-defines { border-color: var(--accent); color: var(--accent); }
 
+/* Outside .card-body, so collapsing the card does not take it with it. Indented to the
+   same column as the body it introduces. */
+.card-snippet { padding: 2px 14px 12px 33px; }
+.card-snippet .eli5 { margin-top: 0; }
+/* Open, the paragraph runs straight into the prose it belongs with, so the body closes the
+   gap the snippet already left. */
+.ent-card:not(.collapsed) .card-snippet { padding-bottom: 0; }
+
 .card-body { padding: 12px 14px 13px 33px; }
 .ent-card.collapsed .card-body { display: none; }
 .card-body > p:first-child { margin-top: 0 !important; }
@@ -1067,7 +1075,7 @@ button.rel-chip:hover { border-color: var(--accent); color: var(--accent); }
 .card-body .algo-summary { border: 0; padding-top: 0; }
 
 @media (max-width: 860px) {
-  .card-relations, .card-body { padding-left: 14px; }
+  .card-relations, .card-body, .card-snippet { padding-left: 14px; }
   /* The metrics drop to a line of their own, which only works if the head wraps: a
      100%-wide item that cannot shrink otherwise squeezes the title to nothing and the
      name breaks one word per line. */
