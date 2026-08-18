@@ -72,15 +72,24 @@ jobs:
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # Continue the open branch if there is one, so a night's work adds to a single reviewable
-      # pull request rather than opening a new one and conflicting on the same annotation files.
-      - name: Continue the open branch, or start from main
+      # Code from main, data from the open branch.
+      #
+      # Continuing the branch wholesale was wrong: it carried the scripts too, so once a night
+      # had run, every later night re-ran that night's code. A fix pushed to main would never
+      # execute, and the run would report the old behaviour while the repository showed the new.
+      # That happened, and the only reason it was noticed is that a log message still had its
+      # old wording.
+      #
+      # Findings not yet merged still need to accumulate in one reviewable pull request, so the
+      # annotation files -- and only those -- are carried forward.
+      - name: Start from main, keeping any unmerged findings
         if: steps.backlog.outputs.skip == 'false'
         run: |
+          git checkout -B research/nightly origin/main
           if git ls-remote --exit-code --heads origin research/nightly >/dev/null 2>&1; then
-            git checkout -B research/nightly origin/research/nightly
-          else
-            git checkout -B research/nightly origin/main
+            git checkout origin/research/nightly -- \
+              data/annotations/reviews.json data/annotations/further-reading.json 2>/dev/null || true
+            git diff --cached --quiet || echo "carried forward unmerged findings from research/nightly"
           fi
 
       - name: Which models does each provider actually serve?
