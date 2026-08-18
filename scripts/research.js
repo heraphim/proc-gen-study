@@ -24,6 +24,8 @@
 //   node scripts/research.js                  run the budget's worth and record it
 //   node scripts/research.js --subject algorithm:perlin-noise
 //   node scripts/research.js --debug --count 2   print every model's raw reply
+//   node scripts/research.js --links             also gather links -- see the note in research()
+//                                                before using this; it currently finds nothing
 //
 // Needs GEMINI_API_KEY and GROQ_API_KEY. Cerebras is on hold -- every plan including free
 // reports its quota unavailable -- so --providers leaves it out by default.
@@ -497,18 +499,28 @@ async function research(subject) {
 
   // Only Gemini can actually look anything up. Asking the other two for URLs would be asking
   // them to invent some.
-  // Google Search grounding is not on the free tier -- it answers 429 RESOURCE_EXHAUSTED on the
-  // first call of a run while plain generation on the same key works. So no seat can browse, and
-  // every URL here is recalled from training data rather than looked up.
+  // Off by default, and the code below is kept so it can be switched back on with --links the
+  // moment there is a real source to plug in.
   //
-  // That is workable, because it is what the verification step was built for. Every URL is
-  // fetched and title-matched, invented ones are rejected, and the rejections are kept with a
-  // reason. The share of a model's URLs that turn out not to exist is then measured rather than
-  // assumed -- which was always the argument for asking more than one model, and is now the only
-  // way to find any links at all.
+  // No seat can browse. Google Search grounding is not on the free tier -- it answers 429
+  // RESOURCE_EXHAUSTED on the first call of a run while plain generation on the same key works
+  // -- so every URL a model offers is recalled from training data rather than looked up.
+  //
+  // Asking anyway was tried and should not be tried again. Three models produced six URLs for
+  // one subject and every one of them failed verification: nothing real was found, and the two
+  // extra requests per subject exhausted Gemini's daily request quota after a single subject.
+  // Verification catching invented URLs was never an argument for asking models to invent them;
+  // it is an argument for checking links that came from somewhere real.
+  //
+  // To plug a source back in, give it a function returning [{url, title, kind}] and call it here
+  // instead of the models. Everything downstream -- fetching, title-matching, recording
+  // rejections with a reason -- already works and is what the further_reading table is shaped
+  // for. Candidates: Gemini grounding with billing enabled, a search API such as Brave, or the
+  // arXiv and Wikipedia APIs, which return real URLs by construction but only reach citations
+  // and encyclopaedia entries rather than write-ups.
   const links = [];
   const seenUrls = new Set();
-  for (const [provider, p] of Object.entries(PROVIDERS)) {
+  for (const [provider, p] of (has('--links') ? Object.entries(PROVIDERS) : [])) {
     if (!p.key() || disabled.has(provider)) continue;
     const r = p.transport === 'google'
       ? await askGemini(linkPrompt(displayName))
