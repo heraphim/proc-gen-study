@@ -23,6 +23,7 @@
 //   node scripts/research.js --dry-run        run the budget's worth, print, write nothing
 //   node scripts/research.js                  run the budget's worth and record it
 //   node scripts/research.js --subject algorithm:perlin-noise
+//   node scripts/research.js --debug --count 2   print every model's raw reply
 //
 // Needs GEMINI_API_KEY and GROQ_API_KEY. Cerebras is on hold -- every plan including free
 // reports its quota unavailable -- so --providers leaves it out by default.
@@ -219,7 +220,8 @@ async function askOpenAIShape(provider, base, prompt) {
   if (!r.data) return r;
   const tokens = r.data.usage?.total_tokens ?? 0;
   spent[provider] += tokens;
-  return { answer: parseJSON(r.data.choices?.[0]?.message?.content), tokens };
+  const raw = r.data.choices?.[0]?.message?.content ?? '';
+  return { answer: parseJSON(raw), tokens, raw };
 }
 
 async function askGemini(prompt, { grounded = false } = {}) {
@@ -458,6 +460,11 @@ async function research(subject) {
       continue;
     }
     const answer = r.answer ?? null;
+    if (has('--debug')) {
+      console.error(`      --- ${provider} (${p.model}) said ---`);
+      console.error(String(r.raw ?? '(no text)').slice(0, 1200));
+      console.error('      ---');
+    }
     answers.push({ provider, answer });
     models.push({
       provider, model: p.model, verdict: answer,
@@ -486,7 +493,7 @@ async function research(subject) {
     else if (!r.answer?.links?.length) {
       console.error(`      link search returned nothing usable${r.raw ? `; raw began: ${JSON.stringify(r.raw.slice(0, 160))}` : ' and returned no text at all'}`);
     }
-    if (has('--debug-links')) {
+    if (has('--debug')) {
       console.error(`      --- raw grounded response for ${displayName} ---`);
       console.error(String(r.raw ?? r.error ?? '(nothing)').slice(0, 1500));
       console.error('      --- end ---');

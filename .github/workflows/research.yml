@@ -13,8 +13,13 @@ on:
   workflow_dispatch:
     inputs:
       count:
-        description: 'How many subjects (default: as many as half the daily budget affords)'
+        description: 'How many subjects this run researches'
         required: false
+        default: '10'
+      debug:
+        description: 'Print every raw model reply and the raw grounded search response'
+        type: boolean
+        default: false
       budget_fraction:
         description: 'Share of each daily allowance this run may spend'
         required: false
@@ -92,8 +97,9 @@ jobs:
         run: |
           node scripts/research.js \
             --budget-fraction '${{ github.event.inputs.budget_fraction || 0.5 }}' \
-            ${{ github.event.inputs.count && format('--count {0}', github.event.inputs.count) || '' }} \
+            --count '${{ github.event.inputs.count || 10 }}' \
             ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }} \
+            ${{ github.event.inputs.debug == 'true' && '--debug' || '' }} \
             --markdown research-report.md
 
       # The gate. A run that produced something the migration rejects proposes nothing: the
