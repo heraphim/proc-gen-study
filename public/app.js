@@ -531,6 +531,31 @@ $('#tabs').addEventListener('click', e => {
   if (btn) showView(btn.dataset.view);
 });
 
+/* Below the menu breakpoint the tab row is behind a button. The open state lives as a
+   class on the header, so the stylesheet decides what "open" looks like and this only has
+   to say whether it is — which means nothing here needs to know the breakpoint. */
+const menuToggle = $('#menu-toggle');
+
+function setMenu(open) {
+  $('.topbar').classList.toggle('menu-open', open);
+  menuToggle.setAttribute('aria-expanded', String(open));
+}
+
+menuToggle.addEventListener('click', () =>
+  setMenu(menuToggle.getAttribute('aria-expanded') !== 'true'));
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || menuToggle.getAttribute('aria-expanded') !== 'true') return;
+  setMenu(false);
+  menuToggle.focus();
+});
+
+/* A tap outside it should dismiss it, the way a menu is expected to behave — but not a tap
+   on the button itself, which would close and reopen in one gesture. */
+document.addEventListener('click', e => {
+  if (!e.target.closest('.topbar')) setMenu(false);
+});
+
 /* The sidebar and the per-page toolbars stick underneath the header, so they need its
    height — which is not a constant. Eleven tabs sit on one row on a desktop, and on a
    phone they become a single scrolling row of a different height again. Measure it and
@@ -932,19 +957,12 @@ let currentView = 'overview';
 
 function showView(name, { push = true } = {}) {
   currentView = name;
-  const tabs = $('#tabs');
-  tabs.querySelectorAll('button').forEach(b =>
+  document.querySelectorAll('#tabs button').forEach(b =>
     b.classList.toggle('active', b.dataset.view === name));
 
-  /* The strip scrolls sideways where the tabs do not fit, and a view can be opened from a
-     link in the page as well as from the strip itself — so pull the active tab back into
-     view instead of leaving it off the edge. Only the strip's own scroll is touched. */
-  const active = tabs.querySelector('button.active');
-  if (active) {
-    const strip = tabs.getBoundingClientRect(), tab = active.getBoundingClientRect();
-    if (tab.left < strip.left) tabs.scrollLeft -= strip.left - tab.left + 14;
-    else if (tab.right > strip.right) tabs.scrollLeft += tab.right - strip.right + 14;
-  }
+  /* Picking a view is the end of the menu's job, whether it was picked from the menu or
+     from a link in the page. */
+  setMenu(false);
   document.querySelectorAll('.view').forEach(v =>
     v.classList.toggle('active', v.id === `view-${name}`));
   if (push) writeUrl();
