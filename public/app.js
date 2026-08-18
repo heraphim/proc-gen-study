@@ -38,6 +38,7 @@ const NO_SUBGROUP = '(no algorithm)';
 function filterablePage({
   toolbar, host, items, searchIn, filters = [], groupBy, groupHeader,
   subGroupBy, subGroupHeader, subGroupOrder, subGroupIntro, extraSubGroups, extraGroups,
+  flattenWhenFiltered, flattenNote,
   renderItem, noun, groupOrder, emptyText = 'Nothing matches those filters.',
 }) {
   const st = { q: '', active: new Map(filters.map(f => [f.key, new Set()])), collapsed: new Set(), cardsCollapsed: false };
@@ -175,6 +176,27 @@ function filterablePage({
 
     if (!visible.length) { listHost.append(el('p', 'empty', emptyText)); return; }
 
+    const unfiltered = !st.q && [...st.active.values()].every(s => s.size === 0);
+
+    /* Grouping is for browsing. Filtering is a question, and the answer is the items — so when
+       a filter or a search is on, drop the hierarchy and show one card per match. On a page
+       where one item can sit under several headings this is not cosmetic: narrowing the 120
+       implementations to the 14 written in Rust used to render 45 cards, because a package
+       repeats under every algorithm it implements, plus ten blocks of reference code belonging
+       to algorithms rather than to any of the matches. The count said 14. */
+    if (flattenWhenFiltered && !unfiltered) {
+      if (flattenNote) listHost.append(el('p', 'flat-note', flattenNote(visible.length)));
+      const flat = el('div', 'grp-body');
+      for (const it of visible) {
+        const node = renderItem(it);
+        if (st.cardsCollapsed && node.querySelector?.('.card-body')) node.classList.add('collapsed');
+        flat.append(node);
+      }
+      listHost.append(flat);
+      syncToggleAll();
+      return;
+    }
+
     const groups = new Map();
     for (const it of visible) {
       const g = groupBy ? groupBy(it) : '';
@@ -185,7 +207,6 @@ function filterablePage({
     /* Groups with no items of their own. Only in the unfiltered view: every filter here is a
        property of an item, so a group holding none cannot satisfy one, and showing it anyway
        would mean a filtered count that does not match what is on screen. */
-    const unfiltered = !st.q && [...st.active.values()].every(s => s.size === 0);
     if (unfiltered) for (const g of extraGroups?.() ?? []) if (!groups.has(g)) groups.set(g, []);
 
     const keys = [...groups.keys()];
@@ -1438,9 +1459,14 @@ filterablePage({
         === (i.algorithms ?? []).some(a => (algoById[a]?.code ?? []).length > 0),
     },
   ],
-  /* Two levels: the concept a package serves, then the specific algorithm it implements.
-     A package with several algorithms appears under each of them, which is what makes the
-     inner heading answer "what implements Delaunay?" rather than "what is about Voronoi?". */
+  /* Two levels, but only while browsing. A package with several algorithms appears under each
+     of them, which is what makes the inner heading answer "what implements Delaunay?" rather
+     than "what is about Voronoi?" — and which would make any filtered count a lie, since one
+     match can produce seven cards. Filtering therefore drops to a flat list of the matches. */
+  flattenWhenFiltered: true,
+  flattenNote: n => `${n} match${n === 1 ? '' : 'es'}, one card each. `
+    + 'Clear the search and filters to browse them grouped by concept and then by algorithm, '
+    + 'with the reference code for each method.',
   groupBy: i => i.concept_tag,
   groupHeader: (concept, rows) => {
     const box = el('span', 'grp-title');

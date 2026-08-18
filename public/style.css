@@ -1083,3 +1083,13 @@ button.rel-chip:hover { border-color: var(--accent); color: var(--accent); }
   .card-relations, .card-body { padding-left: 14px; }
   .card-metrics { margin-left: 0; width: 100%; }
 }
+
+/* Shown when a filter collapses a grouped page into a flat list of matches. */
+.flat-note {
+  margin: 14px 0 10px;
+  padding: 8px 12px;
+  border-left: 2px solid var(--line-2);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--ink-3);
+}

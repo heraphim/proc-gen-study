@@ -149,7 +149,9 @@ ever using the word "terrain", which is why the same code also weathers a textur
 
 Every list page shares one shell: search, horizontal filters (checkbox / radio / dropdown chosen
 by what the filter is), live counts that exclude their own filter, and independent collapse for
-groups and cards. Every card shows its relations when collapsed, so you can scan structure
+groups and cards. Grouping is for browsing; filtering is a question, so on the implementations
+page — the one page where an item legitimately appears under several headings — a filter or a
+search drops the hierarchy and returns one card per match. Every card shows its relations when collapsed, so you can scan structure
 without opening anything.
 
 ## How things get into the data
