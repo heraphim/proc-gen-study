@@ -6,7 +6,7 @@
     "confirmed": "All three agree with the catalogue. No change. This is a result, not a wasted run, and it is the expected outcome for most subjects.",
     "against-catalogue": "The models agree with each other and disagree with this catalogue. The strongest signal here, and the shape the `mpm` misattribution would have had.",
     "models-disagree": "The models do not agree with one another. Says the subject cannot be settled from recall, which is also what the original claim was probably built from.",
-    "inconclusive": "Too many abstained to conclude anything. The subject returns to the queue."
+    "inconclusive": "Too many models abstained to conclude anything. This still consumes the round: rounds are contiguous per subject, so there is nowhere to put a review that did not happen. It comes round again in the next pass, which is the honest answer anyway -- the same models on the same day would abstain again."
   },
   "_rules": {
     "blind": "Models are asked what they know, never whether the catalogue is right. Showing a model the current answer anchors it, and agreement obtained that way carries no information.",

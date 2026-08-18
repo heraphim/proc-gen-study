@@ -53,7 +53,7 @@ const UA = 'procgen-catalogue research (https://github.com/heraphim/proc-gen-stu
 const SEATS = {
   google: {
     transport: 'google',
-    model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
+    model: process.env.GEMINI_MODEL || 'gemini-3.6-flash',
     key: () => process.env.GEMINI_API_KEY,
     dailyTokens: Number(process.env.GEMINI_DAILY_TOKENS || 1_000_000),
     canBrowse: true,
