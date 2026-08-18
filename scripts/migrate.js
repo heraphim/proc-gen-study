@@ -504,7 +504,9 @@ if (existsSync(REVIEW_ANNOTATIONS)) {
   };
   const AGREEMENT = new Set(['confirmed', 'against-catalogue', 'models-disagree', 'inconclusive']);
   // Seats, not vendors: one provider may hold two, distinguished by the model it runs there.
-  const PROVIDERS = new Set(['google', 'groq', 'groq-oss', 'cerebras']);
+  // Must stay in step with SEATS in scripts/research.js -- adding a seat there and not here
+  // means a run does the work, records it, and is then refused at this gate.
+  const PROVIDERS = new Set(['google', 'groq', 'groq-oss', 'cerebras', 'mistral', 'cohere', 'openrouter']);
   const roundsBySubject = new Map();
 
   for (const r of ann.reviews ?? []) {
