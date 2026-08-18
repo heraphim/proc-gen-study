@@ -758,8 +758,18 @@ const allLinks = [];
 let stopped = null;
 
 for (const s of subjects) {
-  const overspent = Object.entries(spent).find(([k, v]) => v >= budget[k]);
-  if (overspent) { stopped = `${overspent[0]} reached its ${FRACTION * 100}% budget`; break; }
+  // Requests against a request budget. This compared tokens against it and stopped a ten-subject
+  // run after one, because 1,262 tokens read as far past a budget of 25 requests. A leftover
+  // from moving the budget off tokens, and one that looks like a working stop condition.
+  //
+  // Every seat being out is what ends a run. One seat being out only means the others carry it,
+  // and a subject is skipped by the two-answer rule if too few remain -- so a run does not stop
+  // because its most limited seat did.
+  const spentOut = Object.keys(PROVIDERS).filter(k => calls[k] >= budget[k] || disabled.has(k));
+  if (spentOut.length >= Object.keys(PROVIDERS).length - 1) {
+    stopped = `only ${Object.keys(PROVIDERS).length - spentOut.length} seat left with budget (${spentOut.join(', ')} spent or disabled)`;
+    break;
+  }
 
   const out = await research(s);
   if (out.exhausted) { stopped = `${out.exhausted} is rate limited — the day's allowance is gone`; break; }
