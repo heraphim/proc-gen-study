@@ -877,7 +877,7 @@ for (const ax of axisMeta.axes) {
   axisFacetHost.append(box);
 }
 
-/* The facets run to roughly 2400px — 28 tags, 23 domains, three layers. On a phone that
+/* The facets run to roughly 2400px — 37 tags, 23 domains, three layers, three axes. On a phone that
    buries the first result three screens under the search box, so they go inside a
    disclosure that starts closed. Above 860px the sidebar is a column of its own and the
    disclosure is forced open with its summary hidden, which is the layout as it was. */

@@ -37,6 +37,17 @@ further_reading ──▶ (concept | algorithm)
 Refining it means replacing `vor` with the two or three specific concepts an entry actually
 leans on.
 
+Four more tables carry the rest of the original reference through unchanged. They have no
+annotation file and nothing is built on top of them; they exist so that migrating to SQLite lost
+nothing, and they are what `/case-studies`, `/pitfalls` and `/tools` render.
+
+| Table | Rows | Notes |
+|---|---|---|
+| `case_study` | 31 | Worked examples from the reference, tagged with concepts via `case_study_tag` (60 rows) |
+| `pitfall` | 10 | Named failure modes |
+| `tool` | 29 | Software the reference recommended |
+| `reading` | 10 | The reference's reading list. A flat list of names with no target — which is why this project's own link table had to be called `further_reading` |
+
 ### The axis side
 
 | Column | Values | Question |
@@ -88,6 +99,13 @@ cases have been found this way.
 | `review` | What the scheduled audit found, one row per subject per round. History is kept: a later round contradicting an earlier one is the models being unstable, which is a third finding and only exists while both are here |
 | `review_model` | Each model's answer separately, with what it cost in tokens. Two models agreeing against this catalogue and two disagreeing with each other mean opposite things, and a merged verdict cannot tell them apart |
 | `further_reading` | Articles and write-ups for a concept or algorithm. Not sources — a source settled a question, this is worth reading. Rejected candidates stay, with a reason: the share of URLs a model invents is the measure of how far to trust it |
+
+The last three are at **0 rows**. `review`, `review_model` and `further_reading` are written by
+the nightly audit, which is built and gated but has not yet run against anything — see *The
+automations* in the README. Nothing renders them and nothing has populated them, so
+`scripts/check-guards.js` is currently the only thing exercising their validation rules at all:
+it writes fixtures in, runs the migration against each, and restores. A guard nobody has seen
+fail is a guard nobody knows works.
 
 `tag.eli5` and `algorithm.eli5` hold a jargon-free explanation. This is not decoration: a
 concept that cannot be explained without its own vocabulary has not been pinned down, and
@@ -175,14 +193,15 @@ silent no-ops.
 
 Two endpoints, both read-only.
 
-`GET /api/bootstrap` returns everything the UI needs in one payload. All filtering happens
-client-side; there is no per-query round trip.
+`GET /api/bootstrap.json` returns everything the UI needs in one payload. All filtering happens
+client-side; there is no per-query round trip. The static build freezes it to a file of the same
+name, so the client fetches one path either way.
 
-It is now ~869 KB, up from ~380 KB, and the growth is worth naming because it is the price of
-this design rather than a leak: 350 KB is the 841 entries, 361 KB is the algorithm layer, and
-within that 59 KB is code samples and 65 KB is plain-language explanations. Everything gzips to roughly a fifth
-of that over the wire. If it doubles again, the answer is to split the algorithm layer into its
-own lazily-fetched payload rather than to trim the prose.
+It is now ~920 KB, up from ~380 KB, and the growth is worth naming because it is the price of
+this design rather than a leak: 379 KB is the 841 entries, 382 KB is the algorithm layer, and
+within that 59 KB is code samples and 59 KB is plain-language explanations. It gzips to ~238 KB,
+which is what actually crosses the wire. If it doubles again, the answer is to split the
+algorithm layer into its own lazily-fetched payload rather than to trim the prose.
 
 `POST /api/query` takes `{ sql }` and runs it. `SELECT` and `WITH` only, one statement at a
 time, against a read-only connection. This is what makes the SQL page possible and is the main

@@ -112,7 +112,7 @@
           <div class="model-body">
             <p>A concept that is <em>irreducible</em>, <em>used across unrelated domains</em>, and
             <em>has something concrete you could import</em>. Randomness, Voronoi, noise, cellular
-            automata. Roughly fifteen of them. Everything else is built out of these.</p>
+            automata. Twenty-two of them. Everything else is built out of these.</p>
             <p class="test">Test: simulation is used in 21 of 23 domains, more than anything except
             randomness — and it fails, because there is no "simulator" you can import. It's a
             category, not a block. That is exactly why it became a dumping ground.</p>
@@ -123,9 +123,9 @@
           <div class="model-body">
             <p>Named, published, pinned-down methods. Perlin noise. Fortune's sweepline. FABRIK.
             Knuth–Plass. <strong>This is the only level that has papers</strong>, which is why the
-            catalogue has no citations today — it never had this layer. Some concepts have an
-            algorithm; many, like cobblestone paving, have none of their own and only wire others
-            together.</p>
+            catalogue had no citations before this layer existed — it never had one. 195 of them
+            now, each with a checked source. Some concepts have an algorithm; many, like
+            cobblestone paving, have none of their own and only wire others together.</p>
           </div>
         </div>
         <div class="model-row">
@@ -138,8 +138,20 @@
         <div class="model-row">
           <div class="model-name">Technologies</div>
           <div class="model-body">
-            <p>Languages and runtimes. A separate axis entirely — JavaScript, Python, Node, the GPU.
-            Not a property of a concept, a property of where its code can execute.</p>
+            <p>Languages and runtimes — JavaScript, Python, Node, the GPU. Not a property of a
+            concept, a property of where its code can execute.</p>
+          </div>
+        </div>
+        <div class="model-row">
+          <div class="model-name">Axes</div>
+          <div class="model-body">
+            <p>How an entry behaves rather than what it is made of. Every entry carries a value on
+            all three — whether you can reach one piece of the output without computing the rest,
+            what it needs besides a seed, and whether it runs in the shader or ahead of time.</p>
+            <p class="test">Test: nothing implements an axis. A concept is something you can be
+            sent away and told to build; an axis can only be observed. That is what separated
+            <strong>shader</strong> and <strong>kit</strong> out of the concept list — the only two
+            with no algorithm rows, which is the countable form of the same argument.</p>
           </div>
         </div>
       </div>
@@ -152,9 +164,12 @@
 
       <h3 class="sub-h">What is not done yet</h3>
       <p>Stated plainly so the map doesn't look more finished than it is. The layer classification
-      is complete. The algorithm, implementation and technology levels do not exist yet — they are
-      the rebuild. Nine per-entry fields are defined and empty. And the catalogue carries known
-      errors, listed in the README, left in place deliberately rather than quietly patched.</p>
+      and all three axes are complete on every entry. The algorithm, implementation and technology
+      levels exist now — 195, 120 and 11 rows — but 101 algorithms still have no implementation
+      recorded, and nothing yet records which sources and operators a generator is built from,
+      which is the piece that would make the model do work rather than only describe. Six
+      per-entry fields are still defined and empty. And the catalogue carries known errors, listed
+      in the README, left in place deliberately rather than quietly patched.</p>
 
     </div>
   </section>

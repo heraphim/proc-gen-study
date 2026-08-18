@@ -1157,7 +1157,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   .filter-drawer[open] > summary { margin-bottom: 16px; }
   .pt-drawer[open] > summary { margin-bottom: 10px; }
 
-  /* The tag list alone is 28 rows. Cap each open drawer and let it scroll on its own, so
+  /* The tag list alone is 37 rows. Cap each open drawer and let it scroll on its own, so
      the results stay reachable with the filters open — and keep the summary pinned inside
      that scroll, since it is also the control that closes it again. */
   .filter-drawer[open] { max-height: 62vh; overflow-y: auto; }

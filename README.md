@@ -9,7 +9,7 @@ research sources** recording what each one settled, and the relations between al
 This is a research artefact, not a product. It exists to understand the territory before
 building anything, and it is deliberately honest about what it does not yet know. Where it has
 found itself wrong, the fix is applied to the data and the pages show the corrected value; the
-record of **20 corrections** stays in the database rather than on the pages.
+record of **22 corrections** stays in the database rather than on the pages.
 
 ## Run
 
@@ -132,7 +132,7 @@ in seven languages.
 not of the idea it implements.
 
 **Sources** — every URL consulted while checking a claim, with the question it answered and
-what it bears on. 11 of the 62 links are marked `corrects`, meaning that source overturned
+what it bears on. 11 of the 65 links are marked `corrects`, meaning that source overturned
 something this catalogue had already asserted.
 
 ### Cutting across all of it: three layers
@@ -159,7 +159,7 @@ ever using the word "terrain", which is why the same code also weathers a textur
 | `/implementations` | 120 packages, grouped by concept and then by the algorithm they implement, with the technologies they run on and, where the whole method fits in under 100 lines, the reference code above the libraries that wrap it |
 | `/catalogue` | The 841 entries, filterable by layer, domain, concept and every axis. Filters serialise into the query string, so a filtered view is a shareable URL |
 | `/definitions` | The three layers explained, with a worked terrain pipeline |
-| `/sources` | The 37 research sources, split by whether they overturned a claim or confirmed one |
+| `/sources` | The 38 research sources, split by whether they overturned a claim or confirmed one |
 | `/case-studies` `/pitfalls` `/tools` | The original reference material |
 | `/sql` | Read-only SQL console over the database. Local only — not in the published build |
 
@@ -181,10 +181,10 @@ important techniques — domain warping, pity timers, falling-sand — and so mi
 as more academic than it is. Filter on `source_type = 'paper'` to get the strict set back.
 
 ```
-paper                    160
-folklore                   9
+paper                    167
+folklore                  11
 article                    9
-reference-implementation   6
+reference-implementation   8
 ```
 
 **Implementations** were resolved against a registry before being written down: npm, PyPI,
@@ -228,6 +228,8 @@ a reviewable diff you can argue with line by line:
 | `technologies.json` | languages, runtimes, platforms |
 | `sources.json` | every URL consulted, what it settled, and what it is attached to |
 | `corrections.json` | what this catalogue said, what it says now, and why — recorded in the `correction` table, not shown on the pages |
+| `reviews.json` | what the scheduled audit found, one entry per subject per round, with each model's answer kept separately. Written by the audit and read by the rotation, so it is data the automation depends on rather than a log of it |
+| `further-reading.json` | write-ups and talks for a concept or algorithm, each URL fetched and title-matched before it is accepted. Rejected candidates stay, with the reason |
 
 Each file carries `_contested`, `_rejected` or `_orphan_reason` notes recording calls that could
 reasonably go the other way.
@@ -235,18 +237,86 @@ reasonably go the other way.
 A concept correction has to quote the text it replaces. If the source HTML changes underneath
 it, the build fails rather than applying a stale fix.
 
+### The automations
+
+Three workflows besides the Pages deploy. The two that write anything write to a branch and
+open a pull request, never to `main` — the whole point of keeping judgement in reviewable text
+is lost if a robot can merge it.
+
+`.github/workflows/validate.yml` runs the whole gate on every pull request and every push to a
+branch that is not `main` — migrate, `check-samples`, `check-register`, `check-guards`, build.
+The migration is this project's test suite, so until this existed a pull request could sit green
+and still be rejected the moment it merged.
+
+`.github/workflows/registry-poll.yml` re-resolves all 120 implementations against npm, PyPI,
+crates.io, NuGet and the GitHub API every Monday, and proposes whatever moved. There is no
+language model anywhere in it: the registry owns the answer, so there is nothing to infer and
+nothing to get creatively wrong. Version, release date, stars and archived flags are the
+registry's, and hand-editing them only means the next run overwrites you.
+
+```bash
+npm run poll
+```
+
+`.github/workflows/research.yml` runs nightly and is the audit. It asks every model there is an
+API key for about whichever subjects are furthest behind, compares the answers mechanically, and
+proposes the result. Four rules do the work, and each is there because the obvious alternative
+fails:
+
+- **No Claude seat, enforced rather than intended.** The algorithm records were largely written
+  by Claude; checking them with Claude repeats its blind spots instead of catching them. What
+  has to differ between seats is the model *family*, not the vendor — two vendors re-hosting the
+  same weights is one opinion delivered twice, and the comparison would read it as corroboration.
+- **Ask blind.** A model is never shown what this catalogue currently claims. Show it the
+  existing answer and it agrees with it, and agreement obtained that way carries no information.
+- **Compare mechanically.** No model adjudicates, because the model that would judge is the one
+  whose output is on trial. The comparison is a diff. Two models agreeing against the catalogue
+  is the finding; two disagreeing with each other says the subject cannot be settled from recall,
+  which is probably how the original claim was made.
+- **Fairness before priority.** Everything gets one review before anything gets two, so the
+  rotation always picks from whichever subjects have the fewest. The migration enforces the same
+  invariant from the other side, so a bug in the picker fails the build rather than quietly
+  starving a subject.
+
+Two limits stop it running away. It spends at most half of any provider's daily request
+allowance, and it skips the night entirely once seven unreviewed rounds are already open — a
+queue of unread findings is worse than none, because it makes the catalogue look reviewed when
+it is only proposed.
+
+Which subjects go first is a person's call, in `docs/research-seed.md`: tick what you could
+catch a wrong answer about. That is a calibration set, not a wishlist. Three models researching
+`perlin-noise` produce an answer you can referee; the same three on
+`dantzig-wolfe-decomposition` produce one you cannot, and a confident wrong answer is
+indistinguishable from a confident right one until someone knows the difference. Once every
+subject has had a first review the seed stops mattering.
+
+```bash
+npm run seed       # regenerate the checklist, keeping existing ticks
+npm run pick       # what the rotation would look at next
+npm run research   # ask the models locally; --dry-run to record nothing
+```
+
 ## Layout
 
 ```
 source/     the original single-file HTML reference — still the source of truth for entries
 data/       annotations (committed) and catalogue.db (derived, gitignored)
-            annotations/ holds ten files: tier, facet, concepts, algorithms, code-samples,
-            implementations, implementation-algorithms, technologies, sources, corrections
+            annotations/ holds thirteen files: tier, facet, axes, concepts, algorithms,
+            code-samples, implementations, implementation-algorithms, technologies,
+            sources, corrections, reviews, further-reading
 db/         schema
-scripts/    migrate.js       — HTML + annotations -> SQLite, idempotent, fails loudly
-            check-samples.js — runs every code sample; CI fails if one does not execute
-            build-static.js  — the same read layer, frozen into dist/ for Pages
-            serve-dist.js    — serves dist/ the way Pages does, for checking a build
+docs/       data-model.md    — the schema, and why it is shaped that way
+            research-seed.md — which subjects the audit runs first (generated, ticks kept)
+scripts/    migrate.js        — HTML + annotations -> SQLite, idempotent, fails loudly
+            check-samples.js  — runs every code sample; CI fails if one does not execute
+            check-register.js — keeps the plain-language explanations plain
+            check-guards.js   — checks the review guards still reject what they claim to
+            build-static.js   — the same read layer, frozen into dist/ for Pages
+            serve-dist.js     — serves dist/ the way Pages does, for checking a build
+            poll-registries.js — re-resolves every implementation against its registry
+            research-seed.js  — generates and reads docs/research-seed.md
+            pick-subject.js   — chooses what the audit looks at next
+            research.js       — asks the models, compares answers, records the result
 lib/        catalogue.js — the read layer: bootstrap payload, SQL console, route list
 server.js   static files + /api/bootstrap.json + /api/query
 public/     the browser UI
@@ -260,7 +330,7 @@ Stated plainly so the map doesn't look more finished than it is.
   operators. This is the piece that would make the model do work rather than just describe. The
   nine added concepts contributed 50 `entry_tag` rows by naming the entries they apply to,
   which is a start on the same problem at a coarser grain.
-- **5 of 9 entry fields are still empty** across all 841: `output_type`, `compute_cost`,
+- **6 of 9 entry fields are still empty** across all 841: `output_type`, `compute_cost`,
   `realtime`, `difficulty`, `confidence` and `notes`. Three are now filled and became the axis
   layer — `input_class`, which splits the catalogue into what a seed-driven engine could serve
   and what it structurally cannot; `addressing`, which says whether you can reach a point
@@ -291,7 +361,13 @@ Stated plainly so the map doesn't look more finished than it is.
   concept is most likely to look finished exactly where nobody has looked. The largest known hole
   is still coding theory — Reed–Solomon and the QR symbology, which five catalogue entries depend
   on and no concept covers.
-- **The corrections record is not a completeness claim either.** 20 corrections is what has been
+- **The audit has run nowhere yet.** `review`, `review_model` and `further_reading` are at 0
+  rows. The pipeline is built and gated — the rotation, the fairness invariant, the link
+  verification and the guards that check the guards all exist and all pass — but nothing has
+  been through it, so every algorithm record on the pages is still a single-model claim that
+  survived a citation check. `docs/research-seed.md` has 59 of 232 subjects ticked, which is
+  where it would start.
+- **The corrections record is not a completeness claim either.** 22 corrections is what has been
   found, not what is there. Six of the nine concept corrections came from reading the concept
   layer against this catalogue's own algorithm layer and finding them contradicting each other,
   which is the cheapest kind of check and had not been run.

@@ -2,11 +2,12 @@
 --
 -- Design notes:
 --  * Everything the flat HTML held is preserved verbatim. Nothing is invented here.
---  * The columns that are currently empty (entry.tier, entry.output_type, ...) exist so
---    the classification passes have somewhere to land without a migration. They stay NULL
---    until those passes are actually run and reviewed.
---  * tag.facet is likewise NULL until the tag vocabulary is re-faceted into
---    mechanism / representation / deployment.
+--  * The classification columns on `entry` exist so a pass has somewhere to land without a
+--    migration. Four have since been run: `tier` and the three axis columns are filled on
+--    all 841 rows. The other six are still NULL — see `_still_empty` in
+--    data/annotations/axes.json for what each would cost and whether it is worth filling.
+--  * tag.facet has likewise been filled: all 37 concepts are split into
+--    block / representation / category / deployment.
 
 PRAGMA foreign_keys = ON;
 
@@ -37,7 +38,8 @@ DROP TABLE IF EXISTS tag;
 CREATE TABLE tag (
   id       TEXT PRIMARY KEY,
   name     TEXT NOT NULL,
-  -- 'block' | 'representation' | 'category' | 'deployment' -- NULL until faceted.
+  -- 'block' | 'representation' | 'category' | 'deployment'. Filled from
+  -- data/annotations/facet.json; the migration rejects a tag left without one.
   facet    TEXT,
   what     TEXT,
   good     TEXT,
@@ -74,7 +76,8 @@ CREATE TABLE entry (
   description TEXT,
   position    INTEGER,
 
-  -- The three-layer split: 'source' | 'operator' | 'generator'. NULL until classified.
+  -- The three-layer split: 'source' | 'operator' | 'generator'. Filled from
+  -- data/annotations/tier.json; the migration rejects an entry left without one.
   tier         TEXT,
 
   -- The axis layer. `addressing`, `input_class` and `runs_at` are filled by the axis pass

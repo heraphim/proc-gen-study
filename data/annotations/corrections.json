@@ -3,6 +3,24 @@
   "_why": "The README already lists errors inherited from the source data and leaves them visible on purpose. This is the same policy applied to the project's own output: a catalogue that silently corrects itself gives no way to judge how often it is wrong.",
   "corrections": [
     {
+      "layer": "readme",
+      "target": "How this project structures it (overview page)",
+      "field": "state of the rebuild",
+      "was": "\"This is the only level that has papers, which is why the catalogue has no citations today — it never had this layer.\" and \"The algorithm, implementation and technology levels do not exist yet — they are the rebuild. Nine per-entry fields are defined and empty.\"",
+      "now": "The three levels exist — 195 algorithms with checked sources, 120 verified implementations, 11 technologies — the axis layer is described alongside them, and six per-entry fields are empty rather than nine.",
+      "why": "Written before the rebuild and never revisited, so the front page of the published site spent the whole rebuild telling every reader it had not happened. That is the inverse of the failure the known-errors section guards against and no less damaging: a map that understates itself still does not match the territory, and a reader who believed it would have concluded the citations they were looking at could not exist. The tell was the present tense — \"has no citations today\" dates itself and goes stale silently, where \"had no citations before this layer existed\" stays true.",
+      "source_url": null
+    },
+    {
+      "layer": "readme",
+      "target": "What is not done",
+      "field": "empty entry field count",
+      "was": "\"5 of 9 entry fields are still empty across all 841: output_type, compute_cost, realtime, difficulty, confidence and notes.\"",
+      "now": "6 of 9. Three of the nine are filled and became the axis layer; the six named in the bullet are what is left.",
+      "why": "The bullet named six fields and counted five of them in the same sentence, so it was refutable without reading past the line. Same failure as the coverage-ratio row above and in the same section: a claim of self-criticism that is arithmetically false buys credibility it has not earned, which is worse here than an overclaim would be anywhere else. Nobody counted the list they had just written.",
+      "source_url": null
+    },
+    {
       "layer": "algorithm",
       "target": "mpm",
       "field": "year / authors / citation",

@@ -2,7 +2,7 @@
 //
 // The seed set is not a list of favourites. It decides which subjects the audit looks at first,
 // and the reason to go first is that they are checkable: on a subject you know, a confidently
-// wrong model answer and a confidently right one look different. On the other 133 they look
+// wrong model answer and a confidently right one look different. On the other 173 they look
 // identical. So the seed set is what proves the pipeline is worth running before it is pointed
 // at anything nobody here can referee.
 //
@@ -23,7 +23,7 @@ const facets = ann('facet').facets;
 const concepts = ann('concepts');
 
 // The concepts named as already understood. Everything under them starts ticked; the point of
-// the file is to untick what does not belong rather than to tick 51 boxes by hand.
+// the file is to untick what does not belong rather than to tick 70 boxes by hand.
 // `pick` is here because it was carved out of `rand`, which is: splitting a concept in two
 // does not make half of it unfamiliar. Untick it in the file if that turns out to be wrong.
 const KNOWN = ['fractal', 'noise', 'rand', 'pick', 'graph', 'ca', 'vor', 'tile'];
@@ -111,7 +111,7 @@ function generate() {
   L.push('');
 
   // Algorithms grouped by concept, the concepts named as known first, so the ticked block is
-  // together at the top instead of scattered through 184 lines.
+  // together at the top instead of scattered through 195 lines.
   const conceptOrder = [...byConcept.keys()].sort((a, b) => {
     const ka = KNOWN.includes(a), kb = KNOWN.includes(b);
     return (kb ? 1 : 0) - (ka ? 1 : 0) || a.localeCompare(b);

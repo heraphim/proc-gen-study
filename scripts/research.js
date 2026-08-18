@@ -417,7 +417,7 @@ function parseJSON(text) {
 // existing answer turns agreement into an echo.
 
 // Asking "identify the originating publication" of a method that has none gets an abstention,
-// correctly. 24 of the 184 algorithms here are folklore, a write-up, or a reference
+// correctly. 28 of the 195 algorithms here are folklore, a write-up, or a reference
 // implementation, and the catalogue already records which -- the first run abstained on three
 // such subjects and read as three failures.
 //
