@@ -7,9 +7,9 @@ enough to read**, **120 registry-verified implementations** across five registri
 research sources** recording what each one settled, and the relations between all of it.
 
 This is a research artefact, not a product. It exists to understand the territory before
-building anything, and it is deliberately honest about what it does not yet know — and about
-what it previously got wrong, which is kept as a ledger of **18 corrections** rather than
-quietly edited away.
+building anything, and it is deliberately honest about what it does not yet know. Where it has
+found itself wrong, the fix is applied to the data and the pages show the corrected value; the
+record of **18 corrections** stays in the database rather than on the pages.
 
 ## Run
 
@@ -143,7 +143,7 @@ ever using the word "terrain", which is why the same code also weathers a textur
 | `/implementations` | 120 packages, grouped by concept and then by the algorithm they implement, with the technologies they run on and, where the whole method fits in under 100 lines, the reference code above the libraries that wrap it |
 | `/catalogue` | The 841 entries. Filters serialise into the query string, so a filtered view is a shareable URL |
 | `/definitions` | The three layers explained, with a worked terrain pipeline |
-| `/sources` | The 37 research sources, split by whether they overturned a claim or confirmed one, plus the full corrections ledger |
+| `/sources` | The 37 research sources, split by whether they overturned a claim or confirmed one |
 | `/case-studies` `/pitfalls` `/tools` | The original reference material |
 | `/sql` | Read-only SQL console over the database. Local only — not in the published build |
 
@@ -210,7 +210,7 @@ a reviewable diff you can argue with line by line:
 | `implementation-algorithms.json` | which implementation implements which algorithm |
 | `technologies.json` | languages, runtimes, platforms |
 | `sources.json` | every URL consulted, what it settled, and what it is attached to |
-| `corrections.json` | what this catalogue said, what it says now, and why |
+| `corrections.json` | what this catalogue said, what it says now, and why — recorded in the `correction` table, not shown on the pages |
 
 Each file carries `_contested`, `_rejected` or `_orphan_reason` notes recording calls that could
 reasonably go the other way.
@@ -262,7 +262,7 @@ Stated plainly so the map doesn't look more finished than it is.
   missing. It emptied once and immediately refilled with 44 entries when the concept vocabulary
   widened, which is the same lesson twice. The largest known hole is coding theory —
   Reed–Solomon and the QR symbology, which five catalogue entries depend on and no concept covers.
-- **The corrections ledger is not a completeness claim either.** 18 corrections is what has been
+- **The corrections record is not a completeness claim either.** 18 corrections is what has been
   found, not what is there. Six of the seven concept corrections came from reading the concept
   layer against this catalogue's own algorithm layer and finding them contradicting each other,
   which is the cheapest kind of check and had not been run.
@@ -271,8 +271,8 @@ Stated plainly so the map doesn't look more finished than it is.
 ## Known errors carried over from the source data
 
 Left in place deliberately rather than quietly patched, so the provenance stays visible. These
-are errors in `source/`, not in the layers built on top of it — for those, see the corrections
-ledger on `/sources`.
+are errors in `source/`, not in the layers built on top of it — those were fixed where they sat,
+and the pages show the corrected value.
 
 - The **AlphaChip** case study reads as settled. Nature added an editor's note in 2023, the paper
   carries an expression of concern, and Cheng & Kahng failed to reproduce it. It is a live dispute.

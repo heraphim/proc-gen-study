@@ -507,35 +507,13 @@ mark { background: color-mix(in oklab, var(--accent) 30%, transparent); color: i
 .cand-group dd { margin: 0; line-height: 1.55; color: var(--ink-2); }
 .cand-group dd.watch { color: var(--warn); }
 
-/* ---------- provenance: corrections and sources ---------- */
+/* ---------- provenance: sources ---------- */
 
 .provenance { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line-2); }
 .prov-head {
   font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em;
   font-weight: 650; color: var(--ink-3); margin: 0 0 7px;
 }
-.prov-head.warn { color: var(--warn); }
-.provenance .prov-head:not(:first-child) { margin-top: 13px; }
-
-.correction {
-  margin-bottom: 9px; padding-left: 9px;
-  border-left: 2px solid var(--warn);
-  font-size: 12px; line-height: 1.55;
-}
-.corr-field {
-  font-family: var(--mono); font-size: 10px; color: var(--ink-3);
-  text-transform: uppercase; letter-spacing: 0.05em;
-}
-.corr-was { color: var(--ink-3); text-decoration: line-through; text-decoration-color: var(--line-2); }
-.corr-now { color: var(--ink); }
-.corr-why { color: var(--ink-2); margin-top: 3px; }
-.corr-tag {
-  font-family: var(--mono); font-size: 9.5px; text-transform: uppercase;
-  color: var(--ink-3); margin-right: 6px; letter-spacing: 0.05em;
-  text-decoration: none; display: inline-block;
-}
-.corr-why .tl-src { margin-left: 7px; }
-
 .prov-source { margin-bottom: 9px; font-size: 12px; }
 .prov-title { display: flex; gap: 7px; align-items: baseline; flex-wrap: wrap; }
 .prov-link { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--line-2); }
