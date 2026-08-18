@@ -81,6 +81,11 @@ const SEATS = {
     canBrowse: false,
   },
   cerebras: {
+    // On hold: every plan including free reports its quota unavailable and it answers 402. Left
+    // configured, but out of the default line-up -- with a key present it would otherwise claim
+    // a seat and collide with groq-oss, since gpt-oss-120b is the only chat model it serves that
+    // this project would want.
+    onHold: true,
     transport: 'openai',
     base: 'https://api.cerebras.ai/v1',
     model: process.env.CEREBRAS_MODEL || 'gpt-oss-120b',
@@ -154,7 +159,7 @@ const familyOf = model => FAMILIES.find(([re]) => re.test(String(model)))
 // than ending it, which is what makes that default safe: Cerebras still has a key and still
 // answers 402, and it now costs one failed request instead of the whole run.
 const ACTIVE = String(val('--providers') || process.env.RESEARCH_PROVIDERS
-  || Object.entries(SEATS).filter(([, p]) => p.key()).map(([k]) => k).join(','))
+  || Object.entries(SEATS).filter(([, p]) => p.key() && !p.onHold).map(([k]) => k).join(','))
   .split(',').map(s => s.trim()).filter(Boolean);
 const PROVIDERS = Object.fromEntries(Object.entries(SEATS).filter(([k]) => ACTIVE.includes(k)));
 for (const k of ACTIVE) if (!SEATS[k]) { console.error(`unknown seat "${k}" — known: ${Object.keys(SEATS).join(', ')}`); process.exit(1); }
@@ -163,56 +168,9 @@ for (const k of ACTIVE) if (!SEATS[k]) { console.error(`unknown seat "${k}" — 
 // nothing for anything else.
 const FRACTION = Number(val('--budget-fraction') ?? 0.5);
 
-// A subject researched by one model is not a three-way comparison, and a subject researched by
-// none is not research. Without keys the run would still walk the queue and record every subject
-// as `inconclusive`, consuming its place in the rotation and leaving the catalogue looking
-// checked when nothing was ever asked. Refuse instead.
-const available = Object.entries(PROVIDERS).filter(([, p]) => p.key()).map(([k]) => k);
-if (available.length < 2) {
-  console.error(`only ${available.length} of ${ACTIVE.length} active seats have a key${available.length ? ` (${available.join(', ')})` : ''}.`);
-  console.error(`active seats: ${ACTIVE.join(', ')}`);
-  console.error('Two is the minimum: with one model there is nothing to compare against, and its');
-  console.error('agreement with the catalogue would mean nothing.');
-  process.exit(1);
-}
-if (available.length === 2) console.error(`warning: only ${available.join(' and ')} have keys — this run is two-way\n`);
-
-// The decorrelation trap, a hard error because it is invisible while it happens and destroys the
-// premise rather than degrading it. Two seats on one family produce one model's answer twice,
-// which the comparison then reads as two independent models agreeing -- the strongest signal it
-// can emit, manufactured out of nothing.
-const seatFamily = new Map();
-const seenFamily = new Map(), seenLab = new Map();
-for (const k of available) {
-  const [, family, lab] = familyOf(PROVIDERS[k].model);
-  seatFamily.set(k, family);
-
-  if (lab === 'anthropic') {
-    console.error(`${k} is set to a Claude model.`);
-    console.error('This catalogue was largely written by Claude, and checking it with Claude');
-    console.error('repeats those blind spots rather than catching them. That is the whole reason');
-    console.error('this script exists, so the one model it must never ask is that one.');
-    process.exit(1);
-  }
-  if (seenFamily.has(family)) {
-    console.error(`${seenFamily.get(family)} and ${k} both run the ${family} family.`);
-    console.error('Their answers are not independent, so any agreement between them is an echo.');
-    console.error('Point one of them at a different family.');
-    process.exit(1);
-  }
-  seenFamily.set(family, k);
-
-  // Not fatal. Gemma and Gemini are different models trained by the same people on overlapping
-  // data, so they are less independent than their names suggest without being duplicates.
-  if (lab !== 'unknown' && seenLab.has(lab)) {
-    console.error(`note: ${seenLab.get(lab)} and ${k} are both ${lab} models — different families, correlated training`);
-  }
-  seenLab.set(lab, k);
-}
-
-// Model names go stale faster than anything else here -- providers retire them on their own
-// schedule and a wrong one fails as an opaque 400 or 404. This asks each provider what it
-// actually serves today, which is one round trip instead of three guesses.
+// Diagnostics run before the guards below, because their whole purpose is telling you what to
+// configure so those guards pass. Refusing to list models until the models are right is a
+// locked door with the key inside.
 if (has('--list-models')) {
   const get = async (url, headers) => {
     try {
@@ -267,6 +225,56 @@ if (has('--list-models')) {
 // budget sat almost untouched -- Gemini stopped after using 0.6% of its tokens, and OpenRouter's
 // free tier does not meter tokens at all. Tokens are still counted, because the cost per subject
 // is worth knowing; they are just not what runs out.
+// A subject researched by one model is not a three-way comparison, and a subject researched by
+// none is not research. Without keys the run would still walk the queue and record every subject
+// as `inconclusive`, consuming its place in the rotation and leaving the catalogue looking
+// checked when nothing was ever asked. Refuse instead.
+const available = Object.entries(PROVIDERS).filter(([, p]) => p.key()).map(([k]) => k);
+if (available.length < 2) {
+  console.error(`only ${available.length} of ${ACTIVE.length} active seats have a key${available.length ? ` (${available.join(', ')})` : ''}.`);
+  console.error(`active seats: ${ACTIVE.join(', ')}`);
+  console.error('Two is the minimum: with one model there is nothing to compare against, and its');
+  console.error('agreement with the catalogue would mean nothing.');
+  process.exit(1);
+}
+if (available.length === 2) console.error(`warning: only ${available.join(' and ')} have keys — this run is two-way\n`);
+
+// The decorrelation trap, a hard error because it is invisible while it happens and destroys the
+// premise rather than degrading it. Two seats on one family produce one model's answer twice,
+// which the comparison then reads as two independent models agreeing -- the strongest signal it
+// can emit, manufactured out of nothing.
+const seatFamily = new Map();
+const seenFamily = new Map(), seenLab = new Map();
+for (const k of available) {
+  const [, family, lab] = familyOf(PROVIDERS[k].model);
+  seatFamily.set(k, family);
+
+  if (lab === 'anthropic') {
+    console.error(`${k} is set to a Claude model.`);
+    console.error('This catalogue was largely written by Claude, and checking it with Claude');
+    console.error('repeats those blind spots rather than catching them. That is the whole reason');
+    console.error('this script exists, so the one model it must never ask is that one.');
+    process.exit(1);
+  }
+  if (seenFamily.has(family)) {
+    console.error(`${seenFamily.get(family)} and ${k} both run the ${family} family.`);
+    console.error('Their answers are not independent, so any agreement between them is an echo.');
+    console.error('Point one of them at a different family.');
+    process.exit(1);
+  }
+  seenFamily.set(family, k);
+
+  // Not fatal. Gemma and Gemini are different models trained by the same people on overlapping
+  // data, so they are less independent than their names suggest without being duplicates.
+  if (lab !== 'unknown' && seenLab.has(lab)) {
+    console.error(`note: ${seenLab.get(lab)} and ${k} are both ${lab} models — different families, correlated training`);
+  }
+  seenLab.set(lab, k);
+}
+
+// Model names go stale faster than anything else here -- providers retire them on their own
+// schedule and a wrong one fails as an opaque 400 or 404. This asks each provider what it
+// actually serves today, which is one round trip instead of three guesses.
 const spent = Object.fromEntries(Object.keys(PROVIDERS).map(k => [k, 0]));
 const calls = Object.fromEntries(Object.keys(PROVIDERS).map(k => [k, 0]));
 const budget = Object.fromEntries(
