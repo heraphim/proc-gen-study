@@ -477,8 +477,20 @@ async function research(subject) {
   // Only Gemini can actually look anything up. Asking the other two for URLs would be asking
   // them to invent some.
   const links = [];
-  if (PROVIDERS.google.key()) {
+  if (PROVIDERS.google?.key() && !disabled.has('google')) {
     const r = await askGemini(linkPrompt(displayName), { grounded: true });
+    // This call failing used to look exactly like it finding nothing, because the result was
+    // read straight through an optional chain. Same swallowing that made the very first run
+    // report five successes over zero requests.
+    if (r.error) console.error(`      link search failed: ${String(r.error).replace(/\s+/g, ' ').slice(0, 200)}`);
+    else if (!r.answer?.links?.length) {
+      console.error(`      link search returned nothing usable${r.raw ? `; raw began: ${JSON.stringify(r.raw.slice(0, 160))}` : ' and returned no text at all'}`);
+    }
+    if (has('--debug-links')) {
+      console.error(`      --- raw grounded response for ${displayName} ---`);
+      console.error(String(r.raw ?? r.error ?? '(nothing)').slice(0, 1500));
+      console.error('      --- end ---');
+    }
     for (const l of (r.answer?.links ?? []).slice(0, 6)) {
       if (!l?.url) continue;
       const check = await verifyLink(l.url, l.title ?? displayName);
