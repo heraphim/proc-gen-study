@@ -23,6 +23,8 @@ const CONCEPT_ANNOTATIONS = join(root, 'data', 'annotations', 'concepts.json');
 const CODE_ANNOTATIONS = join(root, 'data', 'annotations', 'code-samples.json');
 const SOURCE_ANNOTATIONS = join(root, 'data', 'annotations', 'sources.json');
 const CORRECTION_ANNOTATIONS = join(root, 'data', 'annotations', 'corrections.json');
+const REVIEW_ANNOTATIONS = join(root, 'data', 'annotations', 'reviews.json');
+const FURTHER_ANNOTATIONS = join(root, 'data', 'annotations', 'further-reading.json');
 
 /** Longest a code sample may be. The claim on the page is "under 100 lines"; this enforces it. */
 const CODE_LINE_LIMIT = 100;
@@ -480,6 +482,125 @@ if (existsSync(CORRECTION_ANNOTATIONS)) {
   });
 }
 
+// ---- review and further reading --------------------------------------------
+// The audit's own output, checked at least as hard as anything a person wrote.
+//
+// Nothing renders either table yet, which is exactly why the checks matter. The rotation picks
+// its next subject from the review counts, so if those go wrong the automation quietly starts
+// re-reviewing one subject and never touching another, and no page would ever show it.
+
+const reviewStats = { reviews: 0, verdicts: 0, reading: 0, rejected: 0 };
+
+if (existsSync(REVIEW_ANNOTATIONS)) {
+  const ann = JSON.parse(readFileSync(REVIEW_ANNOTATIONS, 'utf8'));
+  const insReview = db.prepare(`
+    INSERT INTO review (layer, target_id, round, reviewed, agreement, note) VALUES (?, ?, ?, ?, ?, ?)`);
+  const insModel = db.prepare(`
+    INSERT INTO review_model (review_id, model, provider, verdict, unsure) VALUES (?, ?, ?, ?, ?)`);
+
+  const TARGET = {
+    concept: db.prepare(`SELECT 1 FROM tag WHERE id = ?`),
+    algorithm: db.prepare(`SELECT 1 FROM algorithm WHERE id = ?`),
+  };
+  const AGREEMENT = new Set(['confirmed', 'against-catalogue', 'models-disagree', 'inconclusive']);
+  const PROVIDERS = new Set(['google', 'groq', 'cerebras']);
+  const roundsBySubject = new Map();
+
+  for (const r of ann.reviews ?? []) {
+    const key = `${r.layer}:${r.target}`;
+    const check = TARGET[r.layer];
+    if (!check) { layerProblems.push(`review of "${key}" uses unknown layer "${r.layer}"`); continue; }
+    if (!check.get(r.target)) { layerProblems.push(`review target "${r.target}" is not a known ${r.layer}`); continue; }
+    if (!AGREEMENT.has(r.agreement)) { layerProblems.push(`review of "${key}" has unknown agreement "${r.agreement}"`); continue; }
+    if (!Number.isInteger(r.round) || r.round < 1) { layerProblems.push(`review of "${key}" has a round that is not a positive integer`); continue; }
+    if (!r.reviewed) { layerProblems.push(`review of "${key}" round ${r.round} has no date`); continue; }
+    if (!(r.models ?? []).length) { layerProblems.push(`review of "${key}" round ${r.round} records no model answers, so it is not a review of anything`); continue; }
+
+    const id = insReview.run(r.layer, r.target, r.round, r.reviewed, r.agreement, r.note ?? null).lastInsertRowid;
+    reviewStats.reviews++;
+
+    for (const m of r.models) {
+      if (!PROVIDERS.has(m.provider)) { layerProblems.push(`review of "${key}" names unknown provider "${m.provider}"`); continue; }
+      if (!m.model) { layerProblems.push(`review of "${key}" has a ${m.provider} answer with no model id`); continue; }
+      insModel.run(id, m.model, m.provider, m.verdict == null ? null : JSON.stringify(m.verdict), m.unsure ? 1 : 0);
+      reviewStats.verdicts++;
+    }
+
+    if (!roundsBySubject.has(key)) roundsBySubject.set(key, []);
+    roundsBySubject.get(key).push(r.round);
+  }
+
+  // Rounds start at 1 and do not skip. A gap means a run recorded a result it should not have,
+  // or that one was removed by hand, and either way the counts below stop meaning anything.
+  for (const [key, list] of roundsBySubject) {
+    const sorted = [...list].sort((a, b) => a - b);
+    const expected = sorted.map((_, i) => i + 1);
+    if (sorted.join(',') !== expected.join(',')) {
+      layerProblems.push(`"${key}" has rounds ${sorted.join(', ')} — they must start at 1 and not skip or repeat`);
+    }
+  }
+
+  // The fairness invariant. Everything reaches one review before anything reaches two, so the
+  // spread across every reviewable subject can never exceed 1. Subjects never reviewed count as
+  // zero, and that is the case that matters: without them a run could review the same handful
+  // over and over and the spread among those few would look perfectly even.
+  if (reviewStats.reviews) {
+    const subjects = [
+      ...db.prepare(`SELECT 'concept:' || id AS k FROM tag`).all(),
+      ...db.prepare(`SELECT 'algorithm:' || id AS k FROM algorithm`).all(),
+    ].map(row => row.k);
+    const counts = subjects.map(k => (roundsBySubject.get(k) ?? []).length);
+    const min = Math.min(...counts);
+    const max = Math.max(...counts);
+    if (max - min > 1) {
+      const ahead = subjects.filter((k, i) => counts[i] === max).slice(0, 5);
+      layerProblems.push(
+        `review rotation is unfair: some subjects have ${max} reviews while others have ${min} `
+        + `(${ahead.join(', ')}). Everything reaches ${min + 1} before anything reaches ${min + 2}.`);
+    }
+  }
+}
+
+if (existsSync(FURTHER_ANNOTATIONS)) {
+  const ann = JSON.parse(readFileSync(FURTHER_ANNOTATIONS, 'utf8'));
+  const ins = db.prepare(`
+    INSERT INTO further_reading (layer, target_id, url, title, kind, found_by, http_status, verified, rejected, reason)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+  const TARGET = {
+    concept: db.prepare(`SELECT 1 FROM tag WHERE id = ?`),
+    algorithm: db.prepare(`SELECT 1 FROM algorithm WHERE id = ?`),
+  };
+  const REASONS = new Set(['gone', 'title-mismatch', 'unreachable', 'duplicate']);
+  const seen = new Set();
+
+  for (const l of ann.reading ?? []) {
+    const key = `${l.layer}:${l.target}`;
+    const check = TARGET[l.layer];
+    if (!check) { layerProblems.push(`further reading for "${key}" uses unknown layer "${l.layer}"`); continue; }
+    if (!check.get(l.target)) { layerProblems.push(`further reading target "${l.target}" is not a known ${l.layer}`); continue; }
+    if (!l.url) { layerProblems.push(`further reading for "${key}" has no url`); continue; }
+    const dedupe = `${key}|${l.url}`;
+    if (seen.has(dedupe)) { layerProblems.push(`further reading repeats ${l.url} for "${key}"`); continue; }
+    seen.add(dedupe);
+
+    if (l.rejected) {
+      // A rejection with no reason is a deleted row that still costs storage. The reason is the
+      // whole point of keeping it.
+      if (!REASONS.has(l.reason)) { layerProblems.push(`rejected reading ${l.url} for "${key}" has no valid reason`); continue; }
+      reviewStats.rejected++;
+    } else {
+      // An accepted link was fetched, answered 200, and its title matched what it was described
+      // as. Anything less is a claim rather than a check.
+      if (l.http_status !== 200) { layerProblems.push(`accepted reading ${l.url} for "${key}" was not a 200 (${l.http_status ?? 'never fetched'})`); continue; }
+      if (!l.title) { layerProblems.push(`accepted reading ${l.url} for "${key}" has no title, so nothing was matched against`); continue; }
+      if (!l.verified) { layerProblems.push(`accepted reading ${l.url} for "${key}" has no verification date`); continue; }
+      reviewStats.reading++;
+    }
+    ins.run(l.layer, l.target, l.url, l.title ?? null, l.kind ?? null, l.found_by ?? null,
+      l.http_status ?? null, l.verified ?? null, l.rejected ? 1 : 0, l.reason ?? null);
+  }
+}
+
 // Concept corrections were logged during the concept pass, so count them here.
 corrections += conceptStats.corrected;
 
@@ -516,6 +637,8 @@ console.log(`\n  concepts: ${conceptStats.eli5} with eli5 · ${conceptStats.adde
   + `(${conceptStats.addedLinks} entry links) · ${conceptStats.corrected} prose corrections`);
 console.log(`  sources         ${sourceStats.sources}  (${sourceStats.links} links to concepts/algorithms/implementations)`);
 console.log(`  corrections     ${corrections}`);
+console.log(`  reviews         ${reviewStats.reviews}  (${reviewStats.verdicts} model answers)`);
+console.log(`  further reading ${reviewStats.reading} accepted · ${reviewStats.rejected} rejected and kept`);
 
 if (orphanTags.size) {
   console.warn(`\n  WARNING: tag ids used by entries but absent from the algorithm cards: ${[...orphanTags].join(', ')}`);

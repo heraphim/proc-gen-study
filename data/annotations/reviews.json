@@ -1,0 +1,17 @@
+{
+  "_about": "What the scheduled audit found, one entry per subject per round. Written by the audit, read by the rotation. This is the ledger that decides what gets looked at next, so it is data the automation depends on rather than a record of it.",
+  "_why_history": "Rounds are kept, not overwritten. A subject where round 2 contradicts round 1 with the same three models is not a subject where the second answer is better -- it is a subject where the models are guessing, and neither answer should be trusted. That is a different finding from either round alone and it only exists while both are here.",
+  "_why_three": "The catalogue's algorithm records were largely written by one model. Checking them with that same model repeats its blind spots rather than catching them. Three models from three labs give decorrelated errors, which is not the same as truth -- it is a second and third opinion. The deterministic checks in the migration are what actually verify anything.",
+  "_agreement": {
+    "confirmed": "All three agree with the catalogue. No change. This is a result, not a wasted run, and it is the expected outcome for most subjects.",
+    "against-catalogue": "The models agree with each other and disagree with this catalogue. The strongest signal here, and the shape the `mpm` misattribution would have had.",
+    "models-disagree": "The models do not agree with one another. Says the subject cannot be settled from recall, which is also what the original claim was probably built from.",
+    "inconclusive": "Too many abstained to conclude anything. The subject returns to the queue."
+  },
+  "_rules": {
+    "blind": "Models are asked what they know, never whether the catalogue is right. Showing a model the current answer anchors it, and agreement obtained that way carries no information.",
+    "rounds": "Round numbers are contiguous per subject, starting at 1. A gap means a run recorded a result it should not have.",
+    "fairness": "No subject may be more than one round ahead of the least-reviewed subject. Everything reaches 1 before anything reaches 2. The migration enforces this, because the rotation depends on data nobody looks at and a silent breach would never surface."
+  },
+  "reviews": []
+}

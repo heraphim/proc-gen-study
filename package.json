@@ -12,7 +12,8 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "check-register": "node scripts/check-register.js",
-    "poll": "node scripts/poll-registries.js"
+    "poll": "node scripts/poll-registries.js",
+    "check-guards": "node scripts/check-guards.js"
   },
   "engines": {
     "node": ">=22.5"

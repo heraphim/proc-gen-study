@@ -10,6 +10,9 @@
 
 PRAGMA foreign_keys = ON;
 
+DROP TABLE IF EXISTS review_model;
+DROP TABLE IF EXISTS review;
+DROP TABLE IF EXISTS further_reading;
 DROP TABLE IF EXISTS source_link;
 DROP TABLE IF EXISTS source;
 DROP TABLE IF EXISTS correction;
@@ -272,11 +275,82 @@ CREATE TABLE correction (
   position   INTEGER
 );
 
+-- ---------------------------------------------------------------------------
+-- What the scheduled audit found. One row per subject per round, and each model's answer kept
+-- separately rather than merged.
+--
+-- The separation is the point. Two models agreeing against the catalogue and two models
+-- disagreeing with each other mean opposite things -- the first says the catalogue is probably
+-- wrong, the second says nothing is reliable here including the original claim -- and a single
+-- merged verdict cannot tell them apart.
+--
+-- History is kept rather than overwritten. A later round contradicting an earlier one, with the
+-- same models on the same subject, is the models being unstable on that subject; that is a
+-- third answer again, and it only exists if the earlier round is still here.
+--
+-- `layer` + `target_id` rather than a foreign key, because concepts and algorithms have
+-- separate id spaces -- `noise` is a tag, `perlin-noise` is an algorithm. Same shape as
+-- source_link, and scripts/migrate.js checks the target exists.
+
+CREATE TABLE review (
+  id        INTEGER PRIMARY KEY,
+  layer     TEXT NOT NULL,        -- concept | algorithm
+  target_id TEXT NOT NULL,
+  round     INTEGER NOT NULL,
+  reviewed  TEXT NOT NULL,        -- ISO date
+  -- confirmed              all three agree, nothing to change
+  -- against-catalogue      the models agree with each other and not with this catalogue
+  -- models-disagree        the models do not agree; the subject is unverifiable from recall
+  -- inconclusive           too many abstained to say anything
+  agreement TEXT NOT NULL,
+  note      TEXT,
+  UNIQUE (layer, target_id, round)
+);
+
+CREATE TABLE review_model (
+  review_id INTEGER NOT NULL REFERENCES review(id) ON DELETE CASCADE,
+  model     TEXT NOT NULL,
+  provider  TEXT NOT NULL,        -- google | groq | cerebras
+  verdict   TEXT,                 -- the structured answer, as the model returned it
+  unsure    INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (review_id, model)
+);
+
+-- ---------------------------------------------------------------------------
+-- Named `further_reading` because `reading` is already taken by the reading list carried over
+-- from the source HTML, which is a flat list of book and site names with no target.
+--
+-- Further reading found for a subject: articles, write-ups, talks. Not sources -- a source in
+-- this catalogue is a page that settled a specific question, and mixing the two would destroy
+-- what makes the sources table worth having.
+--
+-- Rejected candidates are kept on purpose. A model with no browsing tool answers "find me
+-- writing about Voronoi" from memory, and the share of URLs it proposes that turn out not to
+-- exist is the measure of how much it invents. That number is the entire argument for asking
+-- three models instead of one, so throwing the failures away would throw away the evidence.
+
+CREATE TABLE further_reading (
+  id          INTEGER PRIMARY KEY,
+  layer       TEXT NOT NULL,      -- concept | algorithm
+  target_id   TEXT NOT NULL,
+  url         TEXT NOT NULL,
+  title       TEXT,
+  kind        TEXT,               -- article | blog | video | docs | paper | thread
+  found_by    TEXT,               -- which model proposed it
+  http_status INTEGER,
+  verified    TEXT,               -- date the URL was last fetched
+  rejected    INTEGER NOT NULL DEFAULT 0,
+  reason      TEXT,               -- gone | title-mismatch | unreachable | duplicate
+  UNIQUE (layer, target_id, url)
+);
+
 CREATE INDEX idx_algo_concept ON algorithm(concept_tag);
 CREATE INDEX idx_impl_concept ON implementation(concept_tag);
 CREATE INDEX idx_code_algo    ON code_sample(algorithm_id);
 CREATE INDEX idx_srclink_tgt  ON source_link(layer, target_id);
 CREATE INDEX idx_corr_target  ON correction(layer, target_id);
+CREATE INDEX idx_review_target  ON review(layer, target_id);
+CREATE INDEX idx_further_target ON further_reading(layer, target_id);
 
 CREATE INDEX idx_entry_group ON entry(group_id);
 CREATE INDEX idx_grp_domain  ON grp(domain_id);
