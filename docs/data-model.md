@@ -28,12 +28,12 @@ further_reading ──▶ (concept | algorithm)
 | `domain` | 23 | Top-level subject areas, from the original reference |
 | `grp` | 110 | Sub-groupings within a domain |
 | `entry` | 841 | One generatable thing. Carries the classification columns |
-| `tag` | 36 | Concepts. `facet` splits them four ways; `origin` separates the 28 inherited from the 8 added |
-| `entry_tag` | 1478 | Which concepts an entry draws on. This is a `uses` edge, not an `is-a` |
+| `tag` | 37 | Concepts. `facet` splits them four ways; `origin` separates the 28 inherited from the 9 added |
+| `entry_tag` | 1487 | Which concepts an entry draws on. This is a `uses` edge, not an `is-a` |
 | `entry_uses` | 0 | Which sources and operators a generator composes. Not yet populated |
 
 `entry_tag` deserves a note: "cobblestone paving is tagged `vor`" *means* "uses Voronoi". The
-1478 assignments are therefore already a composition graph, just at the coarsest possible grain.
+1487 assignments are therefore already a composition graph, just at the coarsest possible grain.
 Refining it means replacing `vor` with the two or three specific concepts an entry actually
 leans on.
 
@@ -41,7 +41,7 @@ leans on.
 
 | Table | Rows | Notes |
 |---|---|---|
-| `algorithm` | 184 | Named methods. `source_type` records how well-sourced |
+| `algorithm` | 185 | Named methods. `source_type` records how well-sourced |
 | `implementation` | 120 | Packages, verified against npm, PyPI, crates.io, NuGet or the GitHub API |
 | `implementation_algorithm` | 262 | Many-to-many. The important link |
 | `technology` | 11 | Languages, runtimes, platforms |

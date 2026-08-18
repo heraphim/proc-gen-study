@@ -1,15 +1,15 @@
 # Procedural Generation Catalogue
 
 A research map of what can be made with procedural generation, and of the machinery that makes
-it. **841 catalogued techniques** across 23 domains, **36 concepts** each with a plain-language
-explanation, **184 algorithms** with checked citations, **26 of them with working code short
-enough to read**, **120 registry-verified implementations** across five registries, **37
+it. **841 catalogued techniques** across 23 domains, **37 concepts** each with a plain-language
+explanation, **185 algorithms** with checked citations, **26 of them with working code short
+enough to read**, **120 registry-verified implementations** across five registries, **38
 research sources** recording what each one settled, and the relations between all of it.
 
 This is a research artefact, not a product. It exists to understand the territory before
 building anything, and it is deliberately honest about what it does not yet know. Where it has
 found itself wrong, the fix is applied to the data and the pages show the corrected value; the
-record of **18 corrections** stays in the database rather than on the pages.
+record of **20 corrections** stays in the database rather than on the pages.
 
 ## Run
 
@@ -71,7 +71,7 @@ concept ──uses──▶ concept
 
 | Facet | Count | Meaning |
 |---|---|---|
-| block | 21 | Irreducible, used across unrelated domains, and something concrete implements it |
+| block | 22 | Irreducible, used across unrelated domains, and something concrete implements it |
 | representation | 7 | A format for holding structure, not a way of making it |
 | category | 6 | Fails the importable test — a bag containing blocks that were never named |
 | deployment | 2 | Where or how something runs. Not a concept at all |
@@ -82,11 +82,17 @@ became a dumping ground for everything unclassifiable. The same test is what kee
 out: `motion` was considered and rejected because there is no motion-matching library you can
 install, and the package whose name suggests otherwise turns out to be database instrumentation.
 
-28 of the 36 came from the original reference. Eight were added here — `field`, `mesh`,
-`filter`, `hydro`, `texsyn`, `subdiv`, `colour`, `topopt` — each of which had to name a real
-package and say what its absence had been costing. Two were the operator layer's own substrate
-going unnamed: everything in the catalogue passes fields and meshes around, and neither had a
-word.
+28 of the 37 came from the original reference. Nine were added here — `field`, `mesh`,
+`filter`, `hydro`, `texsyn`, `subdiv`, `colour`, `topopt`, `pick` — each of which had to name a
+real package and say what its absence had been costing. Two were the operator layer's own
+substrate going unnamed: everything in the catalogue passes fields and meshes around, and
+neither had a word.
+
+`pick` arrived differently from the other eight. They were holes — subjects with no word at all.
+It was a split: `rand` was carrying generators and the tables that consume them under one label,
+and the catalogue's own tier column had already recorded the divide without anyone acting on it,
+with the six generators filed as `source` and the three selection algorithms as `operator` and
+no ambiguous case between them.
 
 Every concept also carries a **plain-language explanation** — the idea stated without its own
 vocabulary, for a reader who does not know the field. That is not decoration. A concept that
@@ -125,8 +131,8 @@ Every entry answers one question — *does anything go in?*
 
 | Layer | Count | Test |
 |---|---|---|
-| source | 29 | Nothing goes in. Seed and parameters only |
-| operator | 246 | Something goes in, and you can say what comes out without knowing what it is for |
+| source | 28 | Nothing goes in. Seed and parameters only |
+| operator | 247 | Something goes in, and you can say what comes out without knowing what it is for |
 | generator | 566 | You can only explain it by naming the result |
 
 The shorthand: *can you describe it without saying what it's for?* If yes, it's a source or an
@@ -138,8 +144,8 @@ ever using the word "terrain", which is why the same code also weathers a textur
 | Route | What's there |
 |---|---|
 | `/` | What procedural generation is, what it buys you, a verified history, how this project structures it |
-| `/basic-blocks` | The 36 concepts, faceted, each with a plain-language explanation, the blocks hiding inside each category named, the eight added ones arguing for themselves, and the candidates that were rejected |
-| `/algorithms` | 184 algorithms, grouped by concept, each with a mechanism description, a plain-language explanation and a checked source |
+| `/basic-blocks` | The 37 concepts, faceted, each with a plain-language explanation, the blocks hiding inside each category named, the nine added ones arguing for themselves, and the candidates that were rejected |
+| `/algorithms` | 185 algorithms, grouped by concept, each with a mechanism description, a plain-language explanation and a checked source |
 | `/implementations` | 120 packages, grouped by concept and then by the algorithm they implement, with the technologies they run on and, where the whole method fits in under 100 lines, the reference code above the libraries that wrap it |
 | `/catalogue` | The 841 entries. Filters serialise into the query string, so a filtered view is a shareable URL |
 | `/definitions` | The three layers explained, with a worked terrain pipeline |
@@ -203,8 +209,8 @@ a reviewable diff you can argue with line by line:
 |---|---|
 | `tier.json` | source/operator/generator per entry, as a default per domain plus exceptions |
 | `facet.json` | the four-way concept split, with the blocks hiding inside each category |
-| `concepts.json` | the plain-language explanation per concept, corrections to the prose carried over from the source HTML, the eight added concepts, and the candidates rejected |
-| `algorithms.json` | 184 algorithms with citations, descriptions, plain-language explanations and source types |
+| `concepts.json` | the plain-language explanation per concept, corrections to the prose carried over from the source HTML, the nine added concepts, and the candidates rejected |
+| `algorithms.json` | 185 algorithms with citations, descriptions, plain-language explanations and source types |
 | `code-samples.json` | 26 working samples, held as arrays of lines so a change reads as a diff |
 | `implementations.json` | registry-verified packages across five registries |
 | `implementation-algorithms.json` | which implementation implements which algorithm |
@@ -241,29 +247,29 @@ Stated plainly so the map doesn't look more finished than it is.
 
 - **`entry_uses` has 0 rows.** Nothing records which generator is built from which sources and
   operators. This is the piece that would make the model do work rather than just describe. The
-  eight added concepts contributed 41 `entry_tag` rows by naming the entries they apply to,
+  nine added concepts contributed 50 `entry_tag` rows by naming the entries they apply to,
   which is a start on the same problem at a coarser grain.
 - **8 of 9 entry fields are empty** across all 841: `output_type`, `input_class`, `compute_cost`,
   `deterministic`, `realtime`, `difficulty`, `confidence`, `notes`. `input_class` is the
   consequential one — it splits the catalogue into what a seed-driven engine could serve and
   what it structurally cannot.
-- **94 of 184 algorithms have no implementation recorded**, and 10 of 36 concepts have none at
+- **95 of 185 algorithms have no implementation recorded**, and 11 of 37 concepts have none at
   all. The absolute gap grew — it was 79 of 125 — but only because the denominator did: coverage
-  went from 36.8% of algorithms to 48.9%, and concepts with nothing attached fell from 13 of 28
-  to 10 of 36. The method blind spot this bullet used to name — registry verification not
+  went from 36.8% of algorithms to 48.6%, and concepts with nothing attached fell from 13 of 28
+  to 11 of 37. The method blind spot this bullet used to name — registry verification not
   reaching GitHub-hosted C++ — is fixed. What remains is a real gap, and it is concentrated in
   the newest concepts and in anything whose reference implementation is a paper.
 - **Coverage is still lopsided by language.** Python 51 and JavaScript 47 against C++ 16, Rust
   14, C# 6 and GLSL 3. Those four were at zero and are no longer, but a C#-first reader is still
   much worse served than a Python one.
-- **26 of 184 algorithms have code.** The ones without are a mix of genuinely-too-large — marching
+- **26 of 185 algorithms have code.** The ones without are a mix of genuinely-too-large — marching
   cubes' 256-case table, CP-SAT, anything with a trained model — and simply not done yet.
 - **An empty candidate queue is not completeness.** It means nothing currently identified is
   missing. It emptied once and immediately refilled with 44 entries when the concept vocabulary
   widened, which is the same lesson twice. The largest known hole is coding theory —
   Reed–Solomon and the QR symbology, which five catalogue entries depend on and no concept covers.
-- **The corrections record is not a completeness claim either.** 18 corrections is what has been
-  found, not what is there. Six of the seven concept corrections came from reading the concept
+- **The corrections record is not a completeness claim either.** 20 corrections is what has been
+  found, not what is there. Six of the nine concept corrections came from reading the concept
   layer against this catalogue's own algorithm layer and finding them contradicting each other,
   which is the cheapest kind of check and had not been run.
 - Gap-hunting outside games, and an honest difficulty distribution, have not been started.

@@ -26,7 +26,7 @@ mattering, because from then on the rotation is driven purely by who is behind.
 - [ ] `lsys` — L-systems · block · 3 algorithms
 - [ ] `markov` — Markov chains & n-grams · block · 3 algorithms
 - [x] `noise` — Noise functions · block · 11 algorithms
-- [x] `rand` — RNG, tables & seeding · block · 9 algorithms
+- [x] `rand` — Pseudo-random generation · block · 7 algorithms
 - [ ] `rd` — Reaction–diffusion · block · 1 algorithm
 - [ ] `samp` — Sampling & packing · block · 9 algorithms
 - [x] `tile` — Tiling & symmetry · block · 7 algorithms
@@ -46,6 +46,7 @@ mattering, because from then on the rotation is driven purely by who is behind.
 - [ ] `ml` — Machine learning (PCGML) · category · 8 algorithms
 - [ ] `morph` — Morphable & statistical shape models · representation · 4 algorithms
 - [ ] `part` — Space partitioning · representation · 4 algorithms
+- [x] `pick` — Weighted choice & random tables · added by this project · 3 algorithms
 - [ ] `sdf` — SDFs & implicit surfaces · representation · 7 algorithms
 - [ ] `shader` — Shader-time generation · deployment · 0 algorithms
 - [ ] `sim` — Simulation · category · 10 algorithms
@@ -97,14 +98,18 @@ mattering, because from then on the rotation is driven purely by who is behind.
 - [x] `wavelet-noise` — Wavelet noise · 2005
 - [x] `worley-noise` — Worley / cellular noise · 1996
 
-## algorithm · rand (9)
+## algorithm · pick (3)
 
-- [x] `alea` — Alea · 2010
 - [x] `alias-method` — Alias method · 1977
 - [x] `fisher-yates` — Fisher–Yates shuffle · 1964
+- [x] `shuffle-bag` — Shuffle bags and pity timers · 2000
+
+## algorithm · rand (7)
+
+- [x] `alea` — Alea · 2010
 - [x] `mersenne-twister` — Mersenne Twister · 1998
 - [x] `pcg-random` — PCG · 2014
-- [x] `shuffle-bag` — Shuffle bags and pity timers · 2000
+- [ ] `sine-hash` — Sine hash (shader white noise)
 - [x] `splitmix` — SplitMix · 2014
 - [x] `xorshift` — Xorshift · 2003
 - [x] `xoshiro` — xoshiro / xoroshiro · 2018
