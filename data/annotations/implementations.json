@@ -191,7 +191,7 @@
       "description": "CP-SAT, linear and mixed-integer programming, routing and flow, packaged for .NET. Listed alongside the Python build because Unity is where a great deal of shipped constraint-based generation actually runs.",
       "verified": true,
       "license_registry": "Apache-2.0",
-      "stars": 13909
+      "stars": 13910
     },
     {
       "package": "cvxpy",
@@ -258,7 +258,7 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 2467
+      "stars": 2468
     },
     {
       "package": "python-constraint",
@@ -360,7 +360,7 @@
       ],
       "verified": true,
       "license_registry": "Apache Software License",
-      "stars": 2873
+      "stars": 2874
     },
     {
       "package": "cadquery",
@@ -377,7 +377,7 @@
       ],
       "verified": true,
       "license_registry": "Apache Software License",
-      "stars": 5618
+      "stars": 5619
     },
     {
       "package": "trimesh",
@@ -1097,7 +1097,7 @@
       ],
       "verified": true,
       "license_registry": "Apache Software License",
-      "stars": 34336
+      "stars": 34337
     },
     {
       "package": "scikit-learn",
@@ -1114,7 +1114,7 @@
       ],
       "verified": true,
       "license_registry": "BSD-3-Clause",
-      "stars": 66966
+      "stars": 66968
     },
     {
       "package": "torch",
@@ -1130,7 +1130,7 @@
         "python"
       ],
       "verified": true,
-      "stars": 102452
+      "stars": 102456
     },
     {
       "package": "fastnoise-lite",
@@ -1223,7 +1223,7 @@
       ],
       "description": "Single-file public-domain C libraries. Relevant here for stb_perlin.h — Perlin, ridged, turbulence and fBm in about 150 lines with no dependencies — and stb_image_resize for filtered field resampling.",
       "verified": true,
-      "stars": 34425
+      "stars": 34427
     },
     {
       "package": "stegu/webgl-noise",
