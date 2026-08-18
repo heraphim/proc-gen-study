@@ -333,7 +333,15 @@ function filterablePage({
   input.addEventListener('input', e => { st.q = e.target.value.trim().toLowerCase(); render(); });
 
   render();
-  return { render, state: st };
+  /** Clear the search and every filter, returning the page to its grouped browsing state. */
+  function reset() {
+    st.q = '';
+    input.value = '';
+    for (const set of st.active.values()) set.clear();
+    render();
+  }
+
+  return { render, reset, state: st };
 }
 
 /* ---------------- shared card ----------------
@@ -1292,6 +1300,7 @@ function codeBlock(sample) {
   const box = el('details', 'code-sample');
   const sum = el('summary', 'code-head');
   sum.append(el('span', 'code-chevron', '▸'));
+  sum.append(el('span', 'code-show', 'Show the code'));
   sum.append(el('span', 'code-lang', techById[sample.technology]?.name ?? sample.technology));
   sum.append(el('span', 'code-lines', `${sample.lines} lines`));
   if (sample.note) sum.append(el('span', 'code-note', sample.note));
@@ -1421,7 +1430,7 @@ function implRow(im) {
 const usedTech = new Set(implementations.flatMap(i => i.technologies));
 const usedRoles = [...new Set(implementations.map(i => i.role).filter(Boolean))];
 
-filterablePage({
+const implPage = filterablePage({
   toolbar: '#toolbar-implementations',
   host: '#impl-groups',
   items: implementations,
@@ -1451,12 +1460,6 @@ filterablePage({
       key: 'algo', label: 'Algorithm link', exclusive: true,
       options: [{ id: 'yes', label: 'linked' }, { id: 'no', label: 'orphan' }],
       match: (i, id) => (id === 'yes') === ((i.algorithms ?? []).length > 0),
-    },
-    {
-      key: 'code', label: 'Reference code', exclusive: true,
-      options: [{ id: 'yes', label: 'shown here' }, { id: 'no', label: 'not yet' }],
-      match: (i, id) => (id === 'yes')
-        === (i.algorithms ?? []).some(a => (algoById[a]?.code ?? []).length > 0),
     },
   ],
   /* Two levels, but only while browsing. A package with several algorithms appears under each
@@ -1538,6 +1541,7 @@ filterablePage({
     const samples = a.code ?? [];
     if (!samples.length) return null;
     const box = el('div', 'subgrp-code');
+    box.id = `code-${algoId}`;
     box.append(el('div', 'prov-head', samples.length === 1
       ? 'Reference implementation, the whole mechanism'
       : `Reference implementations (${samples.length})`));
@@ -1546,6 +1550,36 @@ filterablePage({
   },
   renderItem: implRow,
 });
+
+/* An index of the reference code. Without it the samples are findable only by scrolling: the
+   first one sits 7,600 pixels down a 94,000-pixel page, and the filter that used to surface
+   them defeated itself once filtering began flattening the page. Each entry clears the search
+   and filters first, because the code lives on the algorithm headings and a filtered page has
+   none. */
+const codeIndexHost = $('#code-index');
+const withCode = algorithms.filter(a => (a.code ?? []).length)
+  .sort((a, b) => (tagById[a.concept_tag]?.name ?? '').localeCompare(tagById[b.concept_tag]?.name ?? '')
+    || a.name.localeCompare(b.name));
+
+for (const a of withCode) {
+  const chip = el('button', 'code-chip');
+  chip.append(el('span', 'code-chip-name', a.name));
+  chip.append(el('span', 'code-chip-meta',
+    `${a.code[0].lines} lines · ${techById[a.code[0].technology]?.name?.split(' /')[0] ?? a.code[0].technology}`));
+  chip.title = `${tagById[a.concept_tag]?.name ?? a.concept_tag} — ${a.summary ?? ''}`;
+  chip.addEventListener('click', () => {
+    implPage.reset();
+    const box = document.getElementById(`code-${a.id}`);
+    if (!box) return;
+    for (const el2 of [box.closest('.grp'), box.closest('.subgrp')]) el2?.classList.remove('collapsed');
+    const details = box.querySelector('.code-sample');
+    if (details) details.open = true;
+    box.scrollIntoView({ block: 'start' });
+    box.classList.add('code-flash');
+    setTimeout(() => box.classList.remove('code-flash'), 1600);
+  });
+  codeIndexHost.append(chip);
+}
 
 const techListHost = $('#tech-list');
 for (const t of technologies) {
