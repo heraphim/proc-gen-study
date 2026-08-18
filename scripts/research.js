@@ -53,7 +53,10 @@ const PROVIDERS = {
     canBrowse: true,
   },
   groq: {
-    model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+    // Not gpt-oss-120b, which Groq also serves — Cerebras is already running those exact
+    // weights, and the same weights at two providers is one opinion delivered twice. Qwen is a
+    // different lab entirely, which is the only property that matters here.
+    model: process.env.GROQ_MODEL || 'qwen/qwen3.6-27b',
     key: () => process.env.GROQ_API_KEY,
     dailyTokens: Number(process.env.GROQ_DAILY_TOKENS || 100_000),
     canBrowse: false,
@@ -83,6 +86,24 @@ if (available.length < 2) {
   process.exit(1);
 }
 if (available.length === 2) console.error(`warning: only ${available.join(' and ')} have keys — this run is two-way\n`);
+
+// The decorrelation trap, made a hard error because it is invisible when it happens and it
+// silently destroys the entire premise. Groq and Cerebras both serve gpt-oss-120b. Point two
+// providers at the same weights and you get one model's answer twice, which the comparison then
+// reads as two independent models agreeing — the strongest signal it can produce, manufactured
+// out of nothing. Different vendor is not different model.
+const weights = m => String(m).split('/').pop().toLowerCase();
+const seenWeights = new Map();
+for (const k of available) {
+  const w = weights(PROVIDERS[k].model);
+  if (seenWeights.has(w)) {
+    console.error(`${seenWeights.get(w)} and ${k} are both set to "${w}".`);
+    console.error('Those are the same weights, so their answers are not independent and any');
+    console.error('agreement between them is an echo. Set a different model for one of them.');
+    process.exit(1);
+  }
+  seenWeights.set(w, k);
+}
 
 // Model names go stale faster than anything else here -- providers retire them on their own
 // schedule and a wrong one fails as an opaque 400 or 404. This asks each provider what it
