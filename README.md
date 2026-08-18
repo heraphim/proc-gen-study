@@ -2,7 +2,7 @@
 
 A research map of what can be made with procedural generation, and of the machinery that makes
 it. **841 catalogued techniques** across 23 domains, **37 concepts** each with a plain-language
-explanation, **185 algorithms** with checked citations, **26 of them with working code short
+explanation, **195 algorithms** with checked citations, **26 of them with working code short
 enough to read**, **120 registry-verified implementations** across five registries, **38
 research sources** recording what each one settled, and the relations between all of it.
 
@@ -145,7 +145,7 @@ ever using the word "terrain", which is why the same code also weathers a textur
 |---|---|
 | `/` | What procedural generation is, what it buys you, a verified history, how this project structures it |
 | `/basic-blocks` | The 37 concepts, faceted, each with a plain-language explanation, the blocks hiding inside each category named, the nine added ones arguing for themselves, and the candidates that were rejected |
-| `/algorithms` | 185 algorithms, grouped by concept, each with a mechanism description, a plain-language explanation and a checked source |
+| `/algorithms` | 195 algorithms, grouped by concept, each with a mechanism description, a plain-language explanation and a checked source |
 | `/implementations` | 120 packages, grouped by concept and then by the algorithm they implement, with the technologies they run on and, where the whole method fits in under 100 lines, the reference code above the libraries that wrap it |
 | `/catalogue` | The 841 entries. Filters serialise into the query string, so a filtered view is a shareable URL |
 | `/definitions` | The three layers explained, with a worked terrain pipeline |
@@ -210,7 +210,7 @@ a reviewable diff you can argue with line by line:
 | `tier.json` | source/operator/generator per entry, as a default per domain plus exceptions |
 | `facet.json` | the four-way concept split, with the blocks hiding inside each category |
 | `concepts.json` | the plain-language explanation per concept, corrections to the prose carried over from the source HTML, the nine added concepts, and the candidates rejected |
-| `algorithms.json` | 185 algorithms with citations, descriptions, plain-language explanations and source types |
+| `algorithms.json` | 195 algorithms with citations, descriptions, plain-language explanations and source types |
 | `code-samples.json` | 26 working samples, held as arrays of lines so a change reads as a diff |
 | `implementations.json` | registry-verified packages across five registries |
 | `implementation-algorithms.json` | which implementation implements which algorithm |
@@ -253,21 +253,26 @@ Stated plainly so the map doesn't look more finished than it is.
   `deterministic`, `realtime`, `difficulty`, `confidence`, `notes`. `input_class` is the
   consequential one — it splits the catalogue into what a seed-driven engine could serve and
   what it structurally cannot.
-- **95 of 185 algorithms have no implementation recorded**, and 11 of 37 concepts have none at
+- **101 of 195 algorithms have no implementation recorded**, and 11 of 37 concepts have none at
   all. The absolute gap grew — it was 79 of 125 — but only because the denominator did: coverage
-  went from 36.8% of algorithms to 48.6%, and concepts with nothing attached fell from 13 of 28
+  went from 36.8% of algorithms to 48.2%, and concepts with nothing attached fell from 13 of 28
   to 11 of 37. The method blind spot this bullet used to name — registry verification not
   reaching GitHub-hosted C++ — is fixed. What remains is a real gap, and it is concentrated in
   the newest concepts and in anything whose reference implementation is a paper.
 - **Coverage is still lopsided by language.** Python 51 and JavaScript 47 against C++ 16, Rust
   14, C# 6 and GLSL 3. Those four were at zero and are no longer, but a C#-first reader is still
   much worse served than a Python one.
-- **26 of 185 algorithms have code.** The ones without are a mix of genuinely-too-large — marching
+- **26 of 195 algorithms have code.** The ones without are a mix of genuinely-too-large — marching
   cubes' 256-case table, CP-SAT, anything with a trained model — and simply not done yet.
 - **An empty candidate queue is not completeness.** It means nothing currently identified is
   missing. It emptied once and immediately refilled with 44 entries when the concept vocabulary
-  widened, which is the same lesson twice. The largest known hole is coding theory —
-  Reed–Solomon and the QR symbology, which five catalogue entries depend on and no concept covers.
+  widened, and stands at 59 across 13 concepts now. The third refill taught something the first
+  two did not: `rand` had no queue entry at all, and an absent queue reads as complete coverage
+  rather than as unexamined. It was missing the linear congruential generator — the thing behind
+  java.util.Random, glibc's rand() and drand48 — while holding six more sophisticated ones. A
+  concept is most likely to look finished exactly where nobody has looked. The largest known hole
+  is still coding theory — Reed–Solomon and the QR symbology, which five catalogue entries depend
+  on and no concept covers.
 - **The corrections record is not a completeness claim either.** 20 corrections is what has been
   found, not what is there. Six of the nine concept corrections came from reading the concept
   layer against this catalogue's own algorithm layer and finding them contradicting each other,

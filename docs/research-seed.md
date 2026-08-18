@@ -26,7 +26,7 @@ mattering, because from then on the rotation is driven purely by who is behind.
 - [ ] `lsys` — L-systems · block · 3 algorithms
 - [ ] `markov` — Markov chains & n-grams · block · 3 algorithms
 - [x] `noise` — Noise functions · block · 11 algorithms
-- [x] `rand` — Pseudo-random generation · block · 7 algorithms
+- [x] `rand` — Pseudo-random generation · block · 17 algorithms
 - [ ] `rd` — Reaction–diffusion · block · 1 algorithm
 - [ ] `samp` — Sampling & packing · block · 9 algorithms
 - [x] `tile` — Tiling & symmetry · block · 7 algorithms
@@ -104,15 +104,25 @@ mattering, because from then on the rotation is driven purely by who is behind.
 - [x] `fisher-yates` — Fisher–Yates shuffle · 1964
 - [x] `shuffle-bag` — Shuffle bags and pity timers · 2000
 
-## algorithm · rand (7)
+## algorithm · rand (17)
 
 - [x] `alea` — Alea · 2010
+- [ ] `wang-hash` — Integer bit-mix hash (Wang, Jenkins)
+- [ ] `lagged-fibonacci` — Lagged Fibonacci and add-with-carry · 1991
+- [ ] `lcg` — Linear congruential generator · 1951
+- [ ] `lxm` — LXM · 2021
 - [x] `mersenne-twister` — Mersenne Twister · 1998
+- [ ] `middle-square` — Middle-square method · 1949
+- [ ] `murmurhash3` — MurmurHash3 · 2011
 - [x] `pcg-random` — PCG · 2014
+- [ ] `pcg-hash` — PCG hash (pcg2d, pcg3d, pcg4d) · 2020
+- [ ] `philox` — Philox and Threefry (counter-based) · 2011
 - [ ] `sine-hash` — Sine hash (shader white noise)
 - [x] `splitmix` — SplitMix · 2014
+- [ ] `well` — WELL · 2006
 - [x] `xorshift` — Xorshift · 2003
 - [x] `xoshiro` — xoshiro / xoroshiro · 2018
+- [ ] `xxhash` — xxHash · 2012
 
 ## algorithm · tile (7)
 

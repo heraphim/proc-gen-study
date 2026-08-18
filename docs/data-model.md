@@ -41,9 +41,9 @@ leans on.
 
 | Table | Rows | Notes |
 |---|---|---|
-| `algorithm` | 185 | Named methods. `source_type` records how well-sourced |
+| `algorithm` | 195 | Named methods. `source_type` records how well-sourced |
 | `implementation` | 120 | Packages, verified against npm, PyPI, crates.io, NuGet or the GitHub API |
-| `implementation_algorithm` | 262 | Many-to-many. The important link |
+| `implementation_algorithm` | 270 | Many-to-many. The important link |
 | `technology` | 11 | Languages, runtimes, platforms |
 | `implementation_technology` | 172 | Where an implementation can run |
 

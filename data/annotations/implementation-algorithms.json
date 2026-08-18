@@ -76,21 +76,27 @@
     ],
     "npm:pure-rand": [
       "xorshift",
-      "mersenne-twister"
+      "mersenne-twister",
+      "lcg",
+      "xoshiro"
     ],
     "npm:random-js": [
       "mersenne-twister"
     ],
     "pypi:numpy": [
       "mersenne-twister",
-      "pcg-random"
+      "pcg-random",
+      "philox"
     ],
     "pypi:randomgen": [
       "pcg-random",
       "xorshift",
       "xoshiro",
       "splitmix",
-      "mersenne-twister"
+      "mersenne-twister",
+      "philox",
+      "lxm",
+      "lcg"
     ],
     "pypi:markovify": [
       "shannon-ngram"
@@ -383,7 +389,9 @@
       "catmull-rom",
       "de-boor",
       "halton-sequence",
-      "sobol-sequence"
+      "sobol-sequence",
+      "lcg",
+      "lagged-fibonacci"
     ],
     "nuget:QuikGraph": [
       "kruskal",

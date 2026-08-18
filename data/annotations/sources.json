@@ -800,6 +800,12 @@
           "target": "rand",
           "relation": "describes",
           "note": "The concept's WATCH line calls positional hashing the key to streamable worlds; this is the paper that says which hash to use for it."
+        },
+        {
+          "layer": "algorithm",
+          "target": "pcg-hash",
+          "relation": "defines",
+          "note": "The paper's own contribution: the pcg2d/3d/4d family it recommends in place of the sine hash it measures."
         }
       ]
     }
