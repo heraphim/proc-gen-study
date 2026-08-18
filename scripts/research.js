@@ -186,7 +186,7 @@ async function post(url, body, headers) {
 
     // 429 is the whole reason this script has a budget. Treat it as the day being over rather
     // than something to retry into.
-    if (res.status === 429) return { exhausted: true, error: 'rate limited' };
+    if (res.status === 429) return { exhausted: true, error: `rate limited: ${(await res.text()).replace(/\s+/g, ' ').slice(0, 300)}` };
     if (res.status >= 500) { await sleep(1000 * (attempt + 1)); continue; }
     if (!res.ok) return { error: `HTTP ${res.status}: ${(await res.text()).slice(0, 200)}` };
     return { data: await res.json(), headers: res.headers };
@@ -204,6 +204,10 @@ async function askOpenAIShape(provider, base, prompt) {
       { role: 'user', content: prompt },
     ],
     ...(strict ? { response_format: { type: 'json_object' } } : {}),
+    // Qwen thinks out loud. Left alone it spends the whole reply reasoning and returns no JSON,
+    // which reads downstream as a model that abstained rather than one that was cut off.
+    reasoning_format: 'hidden',
+    max_tokens: 1200,
     temperature: 0,
   });
 
@@ -335,14 +339,22 @@ function classifyAttribution(record, answers) {
     return { agreement: 'models-disagree', note: `origins offered: ${kinds.map(a => `${a.provider} ${a.answer.origin_kind}`).join(', ')}` };
   }
 
-  const usable = answers.filter(a => a.answer && !a.answer.unsure && a.answer.year);
-  if (usable.length < 2) return { agreement: 'inconclusive', note: `${answers.length - usable.length} of ${answers.length} models abstained or gave no year` };
+  // A hedged answer is not a useless one. On ridged-multifractal two models gave 1994 and the
+  // second flagged itself unsure, so dropping hedged answers outright turned agreement into a
+  // reported dispute. They can corroborate a confident answer; what they cannot do is form a
+  // consensus between themselves, because two models that both say they are guessing agreeing
+  // is two guesses.
+  const confident = answers.filter(a => a.answer && !a.answer.unsure && a.answer.year);
+  const hedged = answers.filter(a => a.answer && a.answer.unsure && a.answer.year);
+  const usable = [...confident, ...hedged];
+  if (!confident.length || usable.length < 2) {
+    return { agreement: 'inconclusive', note: `${answers.length - confident.length} of ${answers.length} models abstained, hedged or gave no year` };
+  }
 
-  // Do at least two models agree with each other?
+  // Do at least two models agree with each other, at least one of them confidently?
   let consensus = null;
-  for (let i = 0; i < usable.length; i++) {
-    const peers = usable.filter((o, j) => j !== i && o.answer.year === usable[i].answer.year);
-    if (peers.length) { consensus = usable[i].answer; break; }
+  for (const c of confident) {
+    if (usable.some(o => o !== c && o.answer.year === c.answer.year)) { consensus = c.answer; break; }
   }
   if (!consensus) {
     return {
