@@ -40,8 +40,13 @@ function stripSqlConsole(html) {
   return html;
 }
 
+/* Every copy of the shell needs the base tag, including at base `/`. Each route is served
+   from a directory of its own — /algorithms/ — so `href="style.css"` in the copy written
+   there resolves to /algorithms/style.css, and app.js reads its own mount point off
+   document.baseURI, so it would look for /algorithms/api/bootstrap.json to match. Skipping
+   the tag at `/` left the site working only when published under a repo path. */
 const shellFor = (html, base) =>
-  base === '/' ? html : html.replace('<head>', `<head>\n<base href="${base}">`);
+  html.replace('<head>', `<head>\n<base href="${base}">`);
 
 async function main() {
   if (!existsSync(join(root, 'data', 'catalogue.db'))) {
