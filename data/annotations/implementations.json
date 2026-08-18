@@ -172,7 +172,7 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 12565
+      "stars": 12566
     },
     {
       "package": "Google.OrTools",
@@ -191,7 +191,7 @@
       "description": "CP-SAT, linear and mixed-integer programming, routing and flow, packaged for .NET. Listed alongside the Python build because Unity is where a great deal of shipped constraint-based generation actually runs.",
       "verified": true,
       "license_registry": "Apache-2.0",
-      "stars": 13909
+      "stars": 13911
     },
     {
       "package": "cvxpy",
@@ -258,7 +258,7 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 2467
+      "stars": 2468
     },
     {
       "package": "python-constraint",
@@ -292,7 +292,7 @@
       ],
       "verified": true,
       "license_registry": "MIT License",
-      "stars": 12565
+      "stars": 12566
     },
     {
       "package": "@jscad/modeling",
@@ -360,7 +360,7 @@
       ],
       "verified": true,
       "license_registry": "Apache Software License",
-      "stars": 2873
+      "stars": 2874
     },
     {
       "package": "cadquery",
@@ -377,7 +377,7 @@
       ],
       "verified": true,
       "license_registry": "Apache Software License",
-      "stars": 5618
+      "stars": 5619
     },
     {
       "package": "trimesh",
@@ -614,7 +614,7 @@
       "description": "The largest single collection of image-space operators: convolution, Sobel and Laplacian, bilateral filtering, morphology, distance transforms, seamless cloning by Poisson blending, and inpainting. Most of the filter concept, in one import.",
       "verified": true,
       "license_registry": "Apache Software License",
-      "stars": 5355
+      "stars": 5356
     },
     {
       "package": "scikit-image",
@@ -717,7 +717,7 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 3134
+      "stars": 3135
     },
     {
       "package": "QuikGraph",
@@ -1097,7 +1097,7 @@
       ],
       "verified": true,
       "license_registry": "Apache Software License",
-      "stars": 34336
+      "stars": 34339
     },
     {
       "package": "scikit-learn",
@@ -1114,7 +1114,7 @@
       ],
       "verified": true,
       "license_registry": "BSD-3-Clause",
-      "stars": 66966
+      "stars": 66969
     },
     {
       "package": "torch",
@@ -1130,7 +1130,7 @@
         "python"
       ],
       "verified": true,
-      "stars": 102452
+      "stars": 102457
     },
     {
       "package": "fastnoise-lite",
@@ -1223,7 +1223,7 @@
       ],
       "description": "Single-file public-domain C libraries. Relevant here for stb_perlin.h — Perlin, ridged, turbulence and fBm in about 150 lines with no dependencies — and stb_image_resize for filtered field resampling.",
       "verified": true,
-      "stars": 34425
+      "stars": 34427
     },
     {
       "package": "stegu/webgl-noise",
@@ -1326,7 +1326,7 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 1845
+      "stars": 1846
     },
     {
       "package": "noise",
@@ -1548,7 +1548,7 @@
       ],
       "verified": true,
       "license_registry": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0",
-      "stars": 32548
+      "stars": 32549
     },
     {
       "package": "randomgen",
@@ -1684,7 +1684,7 @@
       "description": "Generates multi-channel signed distance fields from vector outlines, which is how text and icons stay sharp at any magnification from one small texture. The multi-channel trick preserves corners that a single-channel SDF rounds off.",
       "verified": true,
       "license_registry": "MIT",
-      "stars": 4905
+      "stars": 4906
     },
     {
       "package": "patriciogonzalezvivo/lygia",
