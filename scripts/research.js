@@ -314,7 +314,7 @@ async function askOpenAIShape(provider, base, prompt) {
   const body = strict => ({
     model: p.model,
     messages: [
-      { role: 'system', content: 'You answer from what you know. If you are not confident, say so by setting unsure to true rather than guessing. Reply with the JSON object only, with no explanation before or after it.' },
+      { role: 'system', content: 'You answer from what you know. If you are not confident, say so by setting unsure to true rather than guessing. Output the JSON object and nothing else: do not restate the schema, do not explain your reasoning, do not write anything before or after it.' },
       { role: 'user', content: prompt },
     ],
     ...(strict ? { response_format: { type: 'json_object' } } : {}),
@@ -368,12 +368,46 @@ async function askGemini(prompt, { grounded = false } = {}) {
 }
 
 // Models wrap JSON in prose or fences often enough that this is not optional.
+//
+// The greedy match this used to do took everything from the first brace to the last, which is
+// right until a model narrates before it answers. Cohere replies "We need to answer with JSON in
+// a specific shape: {"origin_kind": "paper" | "folklore" | ...}" and then gives the real object.
+// The first brace opens the restated schema, which is not valid JSON, so the parse failed and a
+// model that had answered correctly was recorded as having abstained -- after spending 4,234
+// tokens, thirteen times what Mistral spent answering the same question.
+//
+// So: find every balanced object and try them last-first, because narration comes before the
+// answer and a restated schema is never the final object.
 function parseJSON(text) {
   if (!text) return null;
-  const cleaned = String(text).replace(/^```(?:json)?/m, '').replace(/```\s*$/m, '').trim();
-  try { return JSON.parse(cleaned); } catch { /* fall through */ }
-  const m = cleaned.match(/\{[\s\S]*\}/);
-  if (m) { try { return JSON.parse(m[0]); } catch { /* give up */ } }
+  const cleaned = String(text).replace(/```(?:json)?/gi, '').trim();
+  try { return JSON.parse(cleaned); } catch { /* narrated, fenced, or both */ }
+
+  const spans = [];
+  let depth = 0, start = -1, inString = false, escaped = false;
+  for (let i = 0; i < cleaned.length; i++) {
+    const c = cleaned[i];
+    // Braces inside strings are not structure. Titles and venues contain all sorts of things.
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (c === '\\') escaped = true;
+      else if (c === '"') inString = false;
+      continue;
+    }
+    if (c === '"') inString = true;
+    else if (c === '{') { if (depth === 0) start = i; depth++; }
+    else if (c === '}') {
+      depth--;
+      if (depth === 0 && start >= 0) { spans.push(cleaned.slice(start, i + 1)); start = -1; }
+      if (depth < 0) depth = 0;
+    }
+  }
+  for (let i = spans.length - 1; i >= 0; i--) {
+    try {
+      const parsed = JSON.parse(spans[i]);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
+    } catch { /* try the one before */ }
+  }
   return null;
 }
 
