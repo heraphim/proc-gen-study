@@ -17,9 +17,12 @@ on:
         required: false
         default: '10'
       debug:
-        description: 'Print every raw model reply and the raw grounded search response'
+        description: 'Print every raw model reply'
         type: boolean
         default: false
+      providers:
+        description: 'Seats to use, comma separated (google,groq,groq-oss,cerebras)'
+        required: false
       budget_fraction:
         description: 'Share of each daily allowance this run may spend'
         required: false
@@ -97,7 +100,7 @@ jobs:
         run: |
           node scripts/research.js \
             --budget-fraction '${{ github.event.inputs.budget_fraction || 0.5 }}' \
-            --count '${{ github.event.inputs.count || 10 }}' \
+            --count '${{ github.event.inputs.count || 10 }}' \n            ${{ github.event.inputs.providers && format('--providers {0}', github.event.inputs.providers) || '' }} \
             ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }} \
             ${{ github.event.inputs.debug == 'true' && '--debug' || '' }} \
             --markdown research-report.md
