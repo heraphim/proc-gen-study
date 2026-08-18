@@ -71,6 +71,19 @@ function normaliseRepo(url) {
 }
 const ghSlug = url => (normaliseRepo(url) || '').match(/^https:\/\/github\.com\/([^/]+\/[^/]+)/)?.[1] ?? null;
 
+// Where a person would go to look. A report that says a package is gone and makes you work out
+// where it used to live is a report that gets ignored: the whole question is whether it moved,
+// was renamed, or really went away, and that is answered by opening these.
+const REGISTRY_PAGE = {
+  npm: p => `https://www.npmjs.com/package/${p}`,
+  pypi: p => `https://pypi.org/project/${p}/`,
+  cargo: p => `https://crates.io/crates/${p}`,
+  nuget: p => `https://www.nuget.org/packages/${p}`,
+  github: p => `https://github.com/${p}`,
+};
+const wherePackage = row => REGISTRY_PAGE[row.ecosystem]?.(row.package) ?? null;
+const searchFor = row => `https://duckduckgo.com/?q=${encodeURIComponent(`${row.package} ${row.ecosystem} package`)}`;
+
 // PyPI's `license` field is free text, and a good number of projects paste the entire licence
 // into it — scipy ships the full GPL, trimesh the full MIT, both with the copyright headers of
 // every vendored dependency. Anything that long or multi-line is a document, not an identifier.
@@ -276,6 +289,7 @@ if (of('attention').length) {
   for (const f of of('attention')) {
     console.log(`  ${f.key}`);
     if (f.what) console.log(`      ${f.what}`);
+    if (f.what) console.log(`      look: ${wherePackage(f.row) ?? searchFor(f.row)}${f.row.repo ? ` · ${f.row.repo}` : ''}`);
     for (const x of f.flags ?? []) console.log(`      ${x}`);
     for (const c of f.changes ?? []) console.log(`      ${c.field}: ${c.was ?? '—'} -> ${c.now}${c.apply ? '' : '  (not written)'}`);
   }
@@ -323,9 +337,18 @@ if (val('--markdown')) {
   if (of('attention').length) {
     L.push('', '## Needs a look', '');
     for (const f of of('attention')) {
-      L.push(`**\`${f.key}\`**`);
+      L.push(`**\`${f.key}\`** — ${f.row.description ? f.row.description.slice(0, 120) : 'no description'}`);
       for (const x of [f.what, ...(f.flags ?? [])].filter(Boolean)) L.push(`- ${x}`);
       for (const c of f.changes ?? []) L.push(`- \`${c.field}\`: ${c.was ?? '—'} → ${c.now}`);
+
+      const where = wherePackage(f.row);
+      const links = [
+        where ? `[registry page](${where})` : null,
+        f.row.repo ? `[repo](${f.row.repo})` : null,
+        `[search](${searchFor(f.row)})`,
+      ].filter(Boolean);
+      L.push(`- ${links.join(' · ')}`);
+      if (f.row.concept) L.push(`- concept \`${f.row.concept}\`, used by ${f.row.technologies?.join(', ') ?? 'unknown technologies'}`);
       L.push('');
     }
   }

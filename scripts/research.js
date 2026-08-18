@@ -526,9 +526,22 @@ function classifyAttribution(record, answers) {
   if (yearMatches && authorsMatch) {
     return { agreement: 'confirmed', note: `${usable.length} models agree on ${consensus.year}, matching the record` };
   }
+  // Who exactly backs this, by family. Three or more is the bar for proposing an edit rather than
+  // only reporting one: with six seats that is a real majority, and one family agreeing with
+  // itself across two providers cannot reach it.
+  const backing = usable.filter(o => o.answer.year === consensus.year);
+  const families = [...new Set(backing.map(o => seatFamily.get(o.provider)))];
   return {
     agreement: 'against-catalogue',
-    note: `models agree on ${consensus.year} — ${(consensus.authors ?? []).join(', ')} (${consensus.title ?? 'title not given'}); the record says ${record.year} — ${record.authors}`,
+    note: `${families.length} families agree on ${consensus.year} — ${(consensus.authors ?? []).join(', ')} (${consensus.title ?? 'title not given'}); the record says ${record.year} — ${record.authors}`,
+    proposal: {
+      year: consensus.year,
+      authors: consensus.authors ?? [],
+      title: consensus.title ?? null,
+      venue: consensus.venue ?? null,
+      families,
+      backedBy: backing.map(o => `${o.provider} (${seatFamily.get(o.provider)})`),
+    },
   };
 }
 
@@ -638,8 +651,9 @@ async function research(subject) {
       } else {
         console.error(`      ${provider} failed: ${r.error}`);
       }
+      // Counted, not stored. A seat that never answered is not a model that had nothing to say,
+      // and keeping it as an empty verdict makes a two-seat answer look like a six-seat one.
       failures.push({ provider, error: r.error });
-      models.push({ provider, model: p.model, verdict: null, unsure: true, tokens: 0 });
       continue;
     }
     const answer = r.answer ?? null;
@@ -752,6 +766,7 @@ if (val('--subject')) {
 }
 
 const disabled = new Set();
+const applied = [];
 const done = [];
 const unanswered = [];
 const allLinks = [];
@@ -811,14 +826,49 @@ if (done.length && used.length) {
 if (val('--markdown')) {
   const L = [];
   const order = ['against-catalogue', 'models-disagree', 'inconclusive', 'confirmed'];
+  const describe = v => {
+    if (!v) return 'no usable answer';
+    if (v.methods) return v.methods.slice(0, 10).join(', ');
+    if (v.origin_kind && v.origin_kind !== 'paper') return `${v.origin_kind} — no single publication`;
+    if (v.year) return `${v.year} — ${(v.authors ?? []).join(', ') || 'authors not given'}${v.title ? `, *${v.title}*` : ''}`;
+    return 'no usable answer';
+  };
   const group = a => done.filter(d => d.review.agreement === a);
+
+  const counts = Object.fromEntries(order.map(a => [a, group(a).length]));
+  const answered = done.reduce((n, d) => n + d.review.models.length, 0);
 
   L.push(`Round ${subjects[0]?.round ?? 1} · ${done.length} subjects · ${today}`);
   L.push('');
-  L.push(`Asked ${available.join(', ')}. Each model was asked what it knows, never whether this`);
-  L.push('catalogue is right — showing it the existing answer would turn agreement into an echo.');
-  L.push('The comparison below is a diff, not a verdict: no model judged another.');
-  if (stopped) L.push('', `Stopped early: ${stopped}`);
+  L.push(`Seats: ${available.map(k => `${k} (${seatFamily.get(k)})`).join(', ')} — ${new Set(available.map(k => seatFamily.get(k))).size} distinct model families.`);
+  L.push('Each was asked what it knows, never whether this catalogue is right: showing a model the');
+  L.push('existing answer turns agreement into an echo. The comparison is a diff, not a verdict —');
+  L.push('no model judged another, and seats that failed to answer are not recorded at all.');
+  if (stopped) L.push('', `**Stopped early:** ${stopped}`);
+
+  // What actually changed, first, because it is the only part of this that alters the catalogue.
+  L.push('', '## What this changes', '');
+  if (applied.length) {
+    L.push(`${applied.length} record${applied.length === 1 ? '' : 's'} edited, each because three or more independent`);
+    L.push('model families agreed against it. Every previous value is kept as a correction row, so');
+    L.push('nothing here is a silent edit — see the diff on `corrections.json`.');
+    L.push('', '| record | was | now | families agreeing |', '| --- | --- | --- | --- |');
+    for (const a of applied) L.push(`| \`${a.target}\` | ${a.was} | **${a.now}** | ${a.families.join(', ')} |`);
+  } else {
+    L.push('Nothing. No finding reached three agreeing families, so only reviews were recorded and');
+    L.push('the catalogue is unchanged. Findings below are reported for you rather than applied.');
+  }
+
+  L.push('', '## How the run went', '');
+  L.push('| outcome | subjects | what it means |');
+  L.push('| --- | --- | --- |');
+  L.push(`| confirmed | ${counts.confirmed ?? 0} | the models agree with the record |`);
+  L.push(`| against-catalogue | ${counts['against-catalogue'] ?? 0} | they agree with each other and not with it |`);
+  L.push(`| models-disagree | ${counts['models-disagree'] ?? 0} | they do not agree; the subject is not settleable from recall |`);
+  L.push(`| inconclusive | ${counts.inconclusive ?? 0} | too few usable answers |`);
+  L.push('');
+  L.push(`${answered} model answers across ${done.length} subjects, ${(answered / Math.max(1, done.length)).toFixed(1)} per subject out of ${available.length} seats.`);
+  if (unanswered.length) L.push(`${unanswered.length} subjects were skipped entirely — fewer than two seats answered, so their round was not consumed.`);
 
   for (const a of order) {
     const g = group(a);
@@ -831,7 +881,13 @@ if (val('--markdown')) {
     }[a];
     if (a === 'confirmed') {
       L.push('', `## ${heading} (${g.length})`, '');
-      L.push(g.map(d => `\`${d.review.layer}:${d.review.target}\``).join(', '));
+      L.push('<details>', '<summary>What each model said</summary>', '');
+      for (const d of g) {
+        L.push(`**\`${d.review.layer}:${d.review.target}\`** — ${d.displayName}`, '');
+        for (const m of d.review.models) L.push(`- ${m.provider}: ${describe(m.verdict)}${m.unsure ? ' *(unsure)*' : ''}`);
+        L.push('');
+      }
+      L.push('</details>');
       continue;
     }
     L.push('', `## ${heading} (${g.length})`, '');
@@ -841,9 +897,10 @@ if (val('--markdown')) {
       L.push(d.review.note);
       L.push('');
       for (const m of d.review.models) {
-        const v = m.verdict;
-        const said = v?.year ? `${v.year} — ${(v.authors ?? []).join(', ')}` : v?.methods ? v.methods.slice(0, 8).join(', ') : 'no usable answer';
-        L.push(`- ${m.provider} (\`${m.model}\`)${m.unsure ? ', unsure' : ''}: ${said}`);
+        L.push(`- **${m.provider}** \`${m.model}\` · ${seatFamily.get(m.provider) ?? '?'}${m.unsure ? ' · unsure' : ''}: ${describe(m.verdict)}`);
+      }
+      if (d.verdict.proposal && d.verdict.proposal.families.length < 3) {
+        L.push('', `Not applied: ${d.verdict.proposal.families.length} famil${d.verdict.proposal.families.length === 1 ? 'y' : 'ies'} agreed, three are needed.`);
       }
       L.push('');
     }
@@ -888,7 +945,50 @@ if (writes && done.length) {
   reading.reading = [...(reading.reading ?? []), ...allLinks.map(({ detail, ...l }) => l)];
   writeFileSync(annPath('further-reading'), `${JSON.stringify(reading, null, 2)}\n`);
 
+  // Where three or more families back the same answer against the record, edit the record and
+  // log what it used to say. Fewer than three is reported and left alone.
+  //
+  // The correction row is not bookkeeping around the edit -- it is the point of it. This project
+  // already refuses to change an assertion quietly, and an automated editor is exactly the case
+  // that rule was written for: every value a run overwrites stays readable, with who said
+  // otherwise and on what day, so a wrong edit is findable rather than merely regrettable.
+  const algorithms = ann('algorithms');
+  const corrections = ann('corrections');
+  for (const d of done) {
+    const p = d.verdict.proposal;
+    if (!p || p.families.length < 3 || d.review.layer !== 'algorithm') continue;
+    const record = algorithms.algorithms.find(a => a.id === d.review.target);
+    if (!record) continue;
+
+    const was = `${record.year} — ${record.authors}`;
+    const now = `${p.year} — ${p.authors.join(', ')}`;
+    if (was === now) continue;
+
+    record.year = p.year;
+    record.authors = p.authors.join(', ');
+    corrections.corrections.push({
+      layer: 'algorithm',
+      target: d.review.target,
+      field: 'year / authors',
+      was,
+      now,
+      why: `${p.families.length} independent model families agreed on this attribution and none supported the recorded one`
+        + `${p.title ? `, naming "${p.title}"${p.venue ? ` in ${p.venue}` : ''}` : ''}`
+        + `. Asked blind on ${today} by ${p.backedBy.join(', ')}. Not checked against the publication itself.`,
+    });
+    applied.push({ target: d.review.target, was, now, families: p.families });
+  }
+
+  if (applied.length) {
+    writeFileSync(annPath('algorithms'), `${JSON.stringify(algorithms, null, 2)}\n`);
+    writeFileSync(annPath('corrections'), `${JSON.stringify(corrections, null, 2)}\n`);
+  }
+
   console.log(`\nrecorded ${done.length} reviews and ${allLinks.length} links`);
+  console.log(applied.length
+    ? `applied ${applied.length} edits, each with a correction row keeping the previous value`
+    : 'no edit reached three agreeing families, so nothing was changed');
+  for (const a of applied) console.log(`  ${a.target}: ${a.was}  ->  ${a.now}   (${a.families.join(', ')})`);
 } else if (done.length) {
   console.log(`\nnothing written (${measuring ? '--measure' : '--dry-run'})`);
 }
