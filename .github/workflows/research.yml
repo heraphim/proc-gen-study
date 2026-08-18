@@ -100,7 +100,8 @@ jobs:
         run: |
           node scripts/research.js \
             --budget-fraction '${{ github.event.inputs.budget_fraction || 0.5 }}' \
-            --count '${{ github.event.inputs.count || 10 }}' \n            ${{ github.event.inputs.providers && format('--providers {0}', github.event.inputs.providers) || '' }} \
+            --count '${{ github.event.inputs.count || 10 }}' \
+            ${{ github.event.inputs.providers && format('--providers {0}', github.event.inputs.providers) || '' }} \
             ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }} \
             ${{ github.event.inputs.debug == 'true' && '--debug' || '' }} \
             --markdown research-report.md
