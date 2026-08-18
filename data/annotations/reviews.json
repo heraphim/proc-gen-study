@@ -13,5 +13,720 @@
     "rounds": "Round numbers are contiguous per subject, starting at 1. A gap means a run recorded a result it should not have.",
     "fairness": "No subject may be more than one round ahead of the least-reviewed subject. Everything reaches 1 before anything reaches 2. The migration enforces this, because the rotation depends on data nobody looks at and a silent breach would never surface."
   },
-  "reviews": []
+  "reviews": [
+    {
+      "layer": "algorithm",
+      "target": "ridged-multifractal",
+      "round": 1,
+      "reviewed": "2026-08-18",
+      "agreement": "models-disagree",
+      "note": "years offered: mistral 1995, groq-oss 1994. Nothing here settles the record, and the same is probably true of however it was first written.",
+      "models": [
+        {
+          "provider": "groq-oss",
+          "model": "openai/gpt-oss-120b",
+          "verdict": {
+            "origin_kind": "paper",
+            "year": 1994,
+            "authors": [
+              "Musgrave",
+              "Kolb"
+            ],
+            "title": "Multifractal Brownian Motion",
+            "venue": "Proceedings of SIGGRAPH '94",
+            "unsure": true
+          },
+          "unsure": true,
+          "tokens": 1309
+        },
+        {
+          "provider": "mistral",
+          "model": "mistral-small-latest",
+          "verdict": {
+            "origin_kind": "paper",
+            "year": 1995,
+            "authors": [
+              "Chhabra",
+              "Jensen"
+            ],
+            "title": "Direct determination of the multifractal spectrum of strange attractors",
+            "venue": "Physical Review Letters",
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 321
+        },
+        {
+          "provider": "cohere",
+          "model": "command-a-plus-05-2026",
+          "verdict": {
+            "origin_kind": "unknown",
+            "year": null,
+            "authors": [],
+            "title": null,
+            "venue": null,
+            "unsure": true
+          },
+          "unsure": true,
+          "tokens": 1189
+        },
+        {
+          "provider": "openrouter",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "verdict": {
+            "origin_kind": "unknown",
+            "year": null,
+            "authors": [],
+            "title": null,
+            "venue": null,
+            "unsure": true
+          },
+          "unsure": true,
+          "tokens": 2087
+        }
+      ]
+    },
+    {
+      "layer": "algorithm",
+      "target": "recursive-backtracker",
+      "round": 1,
+      "reviewed": "2026-08-18",
+      "agreement": "confirmed",
+      "note": "3 models agree this has no single publication, matching the record's folklore",
+      "models": [
+        {
+          "provider": "groq-oss",
+          "model": "openai/gpt-oss-120b",
+          "verdict": {
+            "origin_kind": "folklore",
+            "year": null,
+            "authors": [],
+            "title": null,
+            "venue": null,
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 820
+        },
+        {
+          "provider": "mistral",
+          "model": "mistral-small-latest",
+          "verdict": {
+            "origin_kind": "folklore",
+            "year": null,
+            "authors": [],
+            "title": null,
+            "venue": null,
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 295
+        },
+        {
+          "provider": "cohere",
+          "model": "command-a-plus-05-2026",
+          "verdict": null,
+          "unsure": true,
+          "tokens": 4248
+        },
+        {
+          "provider": "openrouter",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "verdict": {
+            "origin_kind": "folklore",
+            "year": null,
+            "authors": [],
+            "title": null,
+            "venue": null,
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 1508
+        }
+      ]
+    },
+    {
+      "layer": "algorithm",
+      "target": "gabor-noise",
+      "round": 1,
+      "reviewed": "2026-08-18",
+      "agreement": "models-disagree",
+      "note": "years offered: mistral 2009, groq-oss 2002. Nothing here settles the record, and the same is probably true of however it was first written.",
+      "models": [
+        {
+          "provider": "groq-oss",
+          "model": "openai/gpt-oss-120b",
+          "verdict": {
+            "origin_kind": "paper",
+            "year": 2002,
+            "authors": [
+              "Perlin"
+            ],
+            "title": "Gabor Noise",
+            "venue": "Proceedings of ACM SIGGRAPH",
+            "unsure": true
+          },
+          "unsure": true,
+          "tokens": 1423
+        },
+        {
+          "provider": "mistral",
+          "model": "mistral-small-latest",
+          "verdict": {
+            "origin_kind": "paper",
+            "year": 2009,
+            "authors": [
+              "Lagae",
+              "Drettakis",
+              "Reinert",
+              "Dutré"
+            ],
+            "title": "Procedural Modeling of Buildings",
+            "venue": "ACM Transactions on Graphics (TOG)",
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 328
+        },
+        {
+          "provider": "cohere",
+          "model": "command-a-plus-05-2026",
+          "verdict": null,
+          "unsure": true,
+          "tokens": 4248
+        },
+        {
+          "provider": "openrouter",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "verdict": {
+            "origin_kind": "unknown",
+            "year": null,
+            "authors": [],
+            "title": null,
+            "venue": null,
+            "unsure": true
+          },
+          "unsure": true,
+          "tokens": 2010
+        }
+      ]
+    },
+    {
+      "layer": "algorithm",
+      "target": "falling-sand",
+      "round": 1,
+      "reviewed": "2026-08-18",
+      "agreement": "inconclusive",
+      "note": "fewer than two models would say what kind of origin this has",
+      "models": [
+        {
+          "provider": "groq-oss",
+          "model": "openai/gpt-oss-120b",
+          "verdict": {
+            "origin_kind": "unknown",
+            "year": null,
+            "authors": [],
+            "title": null,
+            "venue": null,
+            "unsure": true
+          },
+          "unsure": true,
+          "tokens": 788
+        },
+        {
+          "provider": "mistral",
+          "model": "mistral-small-latest",
+          "verdict": {
+            "origin_kind": "folklore",
+            "year": null,
+            "authors": null,
+            "title": null,
+            "venue": null,
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 297
+        },
+        {
+          "provider": "cohere",
+          "model": "command-a-plus-05-2026",
+          "verdict": {
+            "origin_kind": "unknown",
+            "year": null,
+            "authors": [],
+            "title": null,
+            "venue": null,
+            "unsure": true
+          },
+          "unsure": true,
+          "tokens": 997
+        },
+        {
+          "provider": "openrouter",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "verdict": {
+            "origin_kind": "unknown",
+            "year": null,
+            "authors": [],
+            "title": null,
+            "venue": null,
+            "unsure": true
+          },
+          "unsure": true,
+          "tokens": 2624
+        }
+      ]
+    },
+    {
+      "layer": "concept",
+      "target": "fractal",
+      "round": 1,
+      "reviewed": "2026-08-18",
+      "agreement": "against-catalogue",
+      "note": "named by two or more models and absent here: Diamond-square algorithm, Midpoint displacement, Perlin noise, Simplex noise, Julia set, Iterated Function System, L-system, Fractional Brownian motion",
+      "models": [
+        {
+          "provider": "groq-oss",
+          "model": "openai/gpt-oss-120b",
+          "verdict": {
+            "methods": [
+              "Diamond-square algorithm",
+              "Midpoint displacement",
+              "Fractal Brownian Motion",
+              "Perlin noise",
+              "Simplex noise",
+              "Plasma fractal",
+              "Ridged multifractal",
+              "Hybrid multifractal",
+              "Mandelbrot set",
+              "Julia set",
+              "Barnsley fern",
+              "Iterated Function System"
+            ],
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 1033
+        },
+        {
+          "provider": "mistral",
+          "model": "mistral-small-latest",
+          "verdict": {
+            "methods": [
+              "Mandelbrot Set",
+              "Julia Set",
+              "Perlin Noise",
+              "Simplex Noise",
+              "Worley Noise",
+              "Diamond-Square Algorithm",
+              "Midpoint Displacement",
+              "Iterated Function Systems (IFS)",
+              "L-Systems",
+              "Fractal Brownian Motion (fBm)",
+              "Noise-based Terrain Generation",
+              "Recursive Subdivision"
+            ],
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 222
+        },
+        {
+          "provider": "cohere",
+          "model": "command-a-plus-05-2026",
+          "verdict": {
+            "methods": [
+              "Mandelbrot set",
+              "Julia set",
+              "Iterated Function System",
+              "Chaos Game",
+              "L-system",
+              "Perlin noise",
+              "Fractional Brownian motion",
+              "Diamond-square algorithm",
+              "Midpoint displacement algorithm",
+              "Spectral synthesis"
+            ],
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 3316
+        },
+        {
+          "provider": "openrouter",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "verdict": {
+            "methods": [
+              "Iterated Function System",
+              "Mandelbrot set",
+              "Julia set",
+              "Koch snowflake curve",
+              "Sierpinski triangle",
+              "L-system",
+              "Diamond-square algorithm",
+              "Fractional Brownian Motion",
+              "Mandelbulb",
+              "Mandelbox",
+              "Mandelbrot coastline algorithm"
+            ],
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 3802
+        }
+      ]
+    },
+    {
+      "layer": "algorithm",
+      "target": "ellers-algorithm",
+      "round": 1,
+      "reviewed": "2026-08-18",
+      "agreement": "inconclusive",
+      "note": "fewer than two models would say what kind of origin this has",
+      "models": [
+        {
+          "provider": "groq-oss",
+          "model": "openai/gpt-oss-120b",
+          "verdict": {
+            "origin_kind": "unknown",
+            "year": null,
+            "authors": [],
+            "title": null,
+            "venue": null,
+            "unsure": true
+          },
+          "unsure": true,
+          "tokens": 981
+        },
+        {
+          "provider": "mistral",
+          "model": "mistral-small-latest",
+          "verdict": {
+            "origin_kind": "paper",
+            "year": 1982,
+            "authors": [
+              "Eller"
+            ],
+            "title": "A fast algorithm for the random walk method for generating mazes",
+            "venue": "Byte",
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 312
+        },
+        {
+          "provider": "cohere",
+          "model": "command-a-plus-05-2026",
+          "verdict": null,
+          "unsure": true,
+          "tokens": 4248
+        },
+        {
+          "provider": "openrouter",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "verdict": {
+            "origin_kind": "unknown",
+            "year": null,
+            "authors": [],
+            "title": null,
+            "venue": null,
+            "unsure": true
+          },
+          "unsure": true,
+          "tokens": 2415
+        }
+      ]
+    },
+    {
+      "layer": "algorithm",
+      "target": "fisher-yates",
+      "round": 1,
+      "reviewed": "2026-08-18",
+      "agreement": "against-catalogue",
+      "note": "4 families agree on 1938 — Fisher, Yates (Statistical tables for biological, agricultural and medical research); the record says 1964 — Ronald Fisher and Frank Yates; in-place form by Richard Durstenfeld",
+      "models": [
+        {
+          "provider": "groq-oss",
+          "model": "openai/gpt-oss-120b",
+          "verdict": {
+            "origin_kind": "paper",
+            "year": 1938,
+            "authors": [
+              "Fisher",
+              "Yates"
+            ],
+            "title": "Statistical tables for biological, agricultural and medical research",
+            "venue": "Oxford University Press",
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 722
+        },
+        {
+          "provider": "mistral",
+          "model": "mistral-small-latest",
+          "verdict": {
+            "origin_kind": "paper",
+            "year": 1938,
+            "authors": [
+              "Fisher",
+              "Yates"
+            ],
+            "title": "Statistical tables for biological, agricultural and medical research",
+            "venue": "Oliver and Boyd",
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 315
+        },
+        {
+          "provider": "cohere",
+          "model": "command-a-plus-05-2026",
+          "verdict": {
+            "origin_kind": "paper",
+            "year": 1938,
+            "authors": [
+              "Fisher",
+              "Yates"
+            ],
+            "title": "Statistical methods for research workers",
+            "venue": null,
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 1606
+        },
+        {
+          "provider": "openrouter",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "verdict": {
+            "origin_kind": "paper",
+            "year": 1938,
+            "authors": [
+              "Fisher",
+              "Yates"
+            ],
+            "title": "Statistical Tables for Agricultural Workers",
+            "venue": "Oliver & Boyd",
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 2760
+        }
+      ]
+    },
+    {
+      "layer": "algorithm",
+      "target": "xorshift",
+      "round": 1,
+      "reviewed": "2026-08-18",
+      "agreement": "confirmed",
+      "note": "3 models agree on 2003, matching the record",
+      "models": [
+        {
+          "provider": "groq-oss",
+          "model": "openai/gpt-oss-120b",
+          "verdict": {
+            "origin_kind": "paper",
+            "year": 2003,
+            "authors": [
+              "Marsaglia"
+            ],
+            "title": "Xorshift RNGs",
+            "venue": "Journal of Statistical Software",
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 583
+        },
+        {
+          "provider": "mistral",
+          "model": "mistral-small-latest",
+          "verdict": {
+            "origin_kind": "paper",
+            "year": 2003,
+            "authors": [
+              "Marsaglia"
+            ],
+            "title": "Xorshift RNGs",
+            "venue": "Journal of Statistical Software",
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 308
+        },
+        {
+          "provider": "cohere",
+          "model": "command-a-plus-05-2026",
+          "verdict": null,
+          "unsure": true,
+          "tokens": 4248
+        },
+        {
+          "provider": "openrouter",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "verdict": {
+            "origin_kind": "paper",
+            "year": 2003,
+            "authors": [
+              "Marsaglia"
+            ],
+            "title": "Xorshift RNGs",
+            "venue": "Journal of Statistical Software",
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 1676
+        }
+      ]
+    },
+    {
+      "layer": "algorithm",
+      "target": "prim",
+      "round": 1,
+      "reviewed": "2026-08-18",
+      "agreement": "confirmed",
+      "note": "4 models agree on 1957, matching the record",
+      "models": [
+        {
+          "provider": "groq-oss",
+          "model": "openai/gpt-oss-120b",
+          "verdict": {
+            "origin_kind": "paper",
+            "year": 1930,
+            "authors": [
+              "Jarník"
+            ],
+            "title": null,
+            "venue": null,
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 857
+        },
+        {
+          "provider": "mistral",
+          "model": "mistral-small-latest",
+          "verdict": {
+            "origin_kind": "paper",
+            "year": 1957,
+            "authors": [
+              "Prim"
+            ],
+            "title": "Shortest connection networks and some generalizations",
+            "venue": "Bell System Technical Journal",
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 309
+        },
+        {
+          "provider": "cohere",
+          "model": "command-a-plus-05-2026",
+          "verdict": {
+            "origin_kind": "paper",
+            "year": 1957,
+            "authors": [
+              "Prim"
+            ],
+            "title": "Shortest connection networks",
+            "venue": "Bell System Technical Journal",
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 859
+        },
+        {
+          "provider": "openrouter",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "verdict": {
+            "origin_kind": "paper",
+            "year": 1957,
+            "authors": [
+              "Prim"
+            ],
+            "title": "Shortest connection networks And some generalizations",
+            "venue": "Bell System Technical Journal",
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 2033
+        }
+      ]
+    },
+    {
+      "layer": "algorithm",
+      "target": "perlin-noise",
+      "round": 1,
+      "reviewed": "2026-08-18",
+      "agreement": "confirmed",
+      "note": "4 models agree on 1985, matching the record",
+      "models": [
+        {
+          "provider": "groq-oss",
+          "model": "openai/gpt-oss-120b",
+          "verdict": {
+            "origin_kind": "paper",
+            "year": 1985,
+            "authors": [
+              "Perlin"
+            ],
+            "title": "An image synthesizer",
+            "venue": "Proceedings of the 12th Annual Conference on Computer Graphics and Interactive Techniques (SIGGRAPH)",
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 619
+        },
+        {
+          "provider": "mistral",
+          "model": "mistral-small-latest",
+          "verdict": {
+            "origin_kind": "paper",
+            "year": 1985,
+            "authors": [
+              "Perlin"
+            ],
+            "title": "An Image Synthesizer",
+            "venue": "SIGGRAPH '85 Conference Proceedings",
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 313
+        },
+        {
+          "provider": "cohere",
+          "model": "command-a-plus-05-2026",
+          "verdict": {
+            "origin_kind": "paper",
+            "year": 1985,
+            "authors": [
+              "Perlin"
+            ],
+            "title": "An image synthesizer",
+            "venue": "SIGGRAPH",
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 875
+        },
+        {
+          "provider": "openrouter",
+          "model": "nvidia/nemotron-3.5-lightning:free",
+          "verdict": {
+            "origin_kind": "paper",
+            "year": 1985,
+            "authors": [
+              "Perlin"
+            ],
+            "title": "An Image Synthesizing Technique",
+            "venue": "SIGGRAPH",
+            "unsure": false
+          },
+          "unsure": false,
+          "tokens": 1709
+        }
+      ]
+    }
+  ]
 }

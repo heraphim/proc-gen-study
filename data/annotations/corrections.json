@@ -100,6 +100,14 @@
       "now": "The absolute gap grew because the denominator did. Coverage rose from 46 of 125 algorithms (36.8%) to 90 of 184 (48.9%), and concepts with no implementation fell from 13 of 28 to 10 of 36.",
       "why": "Written during the same pass that added the rows, and wrong. The uncovered *count* rose from 79 to 94, which is unavoidable when 59 algorithms are added, but the *ratio* improved in both directions. Worth keeping as a row rather than quietly fixing, because of where it was: the section of the README whose entire job is to stop the map looking more finished than it is. A claim of self-criticism that turns out to be arithmetically false is a worse failure there than an overclaim would be somewhere else — it buys credibility it has not earned. The tell was the phrase \"grew faster than its coverage\", which sounds like a measurement and is not one; nobody had divided.",
       "source_url": null
+    },
+    {
+      "layer": "algorithm",
+      "target": "fisher-yates",
+      "field": "year / authors",
+      "was": "1964 — Ronald Fisher and Frank Yates; in-place form by Richard Durstenfeld",
+      "now": "1938 — Fisher, Yates",
+      "why": "4 independent model families agreed on this attribution and none supported the recorded one, naming \"Statistical tables for biological, agricultural and medical research\" in Oxford University Press. Asked blind on 2026-08-18 by groq-oss (gpt-oss), mistral (mistral), cohere (command), openrouter (nemotron). Not checked against the publication itself."
     }
   ]
 }
