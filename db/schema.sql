@@ -313,6 +313,10 @@ CREATE TABLE review_model (
   provider  TEXT NOT NULL,        -- google | groq | cerebras
   verdict   TEXT,                 -- the structured answer, as the model returned it
   unsure    INTEGER NOT NULL DEFAULT 0,
+  -- Total tokens this one answer cost. Recorded per answer rather than per run so the average
+  -- cost of a subject is measured from history instead of estimated, which is what lets a run
+  -- know how many subjects it can still afford before it starts them.
+  tokens    INTEGER,
   PRIMARY KEY (review_id, model)
 );
 

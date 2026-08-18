@@ -16,6 +16,9 @@ domain ──< grp ──< entry ──< entry_tag >── tag
 
 source ──< source_link ──▶ (concept | algorithm | implementation | technology)
 correction ──▶ (concept | algorithm | implementation | source-data | readme)
+review ──< review_model
+review ──▶ (concept | algorithm)
+further_reading ──▶ (concept | algorithm)
 ```
 
 ### The catalogue side
@@ -57,6 +60,9 @@ cases have been found this way.
 | `source` | Every URL consulted while checking a claim, with the question it answered |
 | `source_link` | What each source bears on: `layer` + `target_id` + a relation (`defines`, `verifies`, `corrects`, `disputes`, …) |
 | `correction` | What this catalogue asserted, what it now says, and why. A row, not a quiet edit |
+| `review` | What the scheduled audit found, one row per subject per round. History is kept: a later round contradicting an earlier one is the models being unstable, which is a third finding and only exists while both are here |
+| `review_model` | Each model's answer separately, with what it cost in tokens. Two models agreeing against this catalogue and two disagreeing with each other mean opposite things, and a merged verdict cannot tell them apart |
+| `further_reading` | Articles and write-ups for a concept or algorithm. Not sources — a source settled a question, this is worth reading. Rejected candidates stay, with a reason: the share of URLs a model invents is the measure of how far to trust it |
 
 `tag.eli5` and `algorithm.eli5` hold a jargon-free explanation. This is not decoration: a
 concept that cannot be explained without its own vocabulary has not been pinned down, and
@@ -116,6 +122,13 @@ The migration aborts and rolls back on any of:
 - an added concept's `applies_to` naming an entry that does not exist
 - a code sample over 100 lines, empty, or attached to an unknown algorithm or technology
 - a source with no description, a duplicate URL, or a link to a target that does not exist
+- a review of a concept or algorithm that does not exist, an unknown agreement value, an unknown
+  provider, or a review recording no model answers at all
+- review rounds that skip or repeat, rather than running 1, 2, 3 for a subject
+- **a rotation that has starved a subject**: no subject may be more than one round ahead of the
+  least-reviewed one. Everything reaches 1 before anything reaches 2
+- an accepted reading link that was never fetched, did not answer 200, or has no title to have
+  been matched against; a rejected one with no reason
 
 This is not defensive decoration. It has caught a phantom npm package, a stale coverage claim,
 an id that did not match its content, and several typos that would otherwise have shipped as

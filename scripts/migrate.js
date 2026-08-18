@@ -496,7 +496,7 @@ if (existsSync(REVIEW_ANNOTATIONS)) {
   const insReview = db.prepare(`
     INSERT INTO review (layer, target_id, round, reviewed, agreement, note) VALUES (?, ?, ?, ?, ?, ?)`);
   const insModel = db.prepare(`
-    INSERT INTO review_model (review_id, model, provider, verdict, unsure) VALUES (?, ?, ?, ?, ?)`);
+    INSERT INTO review_model (review_id, model, provider, verdict, unsure, tokens) VALUES (?, ?, ?, ?, ?, ?)`);
 
   const TARGET = {
     concept: db.prepare(`SELECT 1 FROM tag WHERE id = ?`),
@@ -522,7 +522,7 @@ if (existsSync(REVIEW_ANNOTATIONS)) {
     for (const m of r.models) {
       if (!PROVIDERS.has(m.provider)) { layerProblems.push(`review of "${key}" names unknown provider "${m.provider}"`); continue; }
       if (!m.model) { layerProblems.push(`review of "${key}" has a ${m.provider} answer with no model id`); continue; }
-      insModel.run(id, m.model, m.provider, m.verdict == null ? null : JSON.stringify(m.verdict), m.unsure ? 1 : 0);
+      insModel.run(id, m.model, m.provider, m.verdict == null ? null : JSON.stringify(m.verdict), m.unsure ? 1 : 0, m.tokens ?? null);
       reviewStats.verdicts++;
     }
 

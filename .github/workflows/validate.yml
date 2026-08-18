@@ -1,0 +1,52 @@
+name: Validate
+
+# The migration is this project's test suite: it refuses to build on an unsourced algorithm, an
+# unverified package, a correction whose `was` no longer matches, a sample over 100 lines, or a
+# review rotation that has starved a subject. Until now it only ran on push to main, so a pull
+# request could sit green and still be rejected the moment it merged.
+#
+# Both automations here open pull requests. This is what stops them proposing something the
+# build would reject.
+
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Rebuild the database from source
+        run: npm run migrate
+
+      - name: Run every code sample
+        run: npm run check-samples
+
+      # Not in the Pages workflow, because a drifting explanation does not break a build -- it
+      # just quietly undoes the rewrite. That is exactly the thing to catch on a pull request.
+      - name: Check the explanations stay plain
+        run: npm run check-register
+
+      # These guards are the only ones whose failure is invisible: nothing renders the review
+      # tables, and the rotation reads its next subject from them. A broken fairness check
+      # starves a subject silently, so the check itself gets checked.
+      - name: Check the review guards still reject what they claim to
+        run: npm run check-guards
+
+      - name: Build the static site
+        run: npm run build

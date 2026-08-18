@@ -13,7 +13,10 @@
     "dev": "node --watch server.js",
     "check-register": "node scripts/check-register.js",
     "poll": "node scripts/poll-registries.js",
-    "check-guards": "node scripts/check-guards.js"
+    "check-guards": "node scripts/check-guards.js",
+    "seed": "node scripts/research-seed.js",
+    "pick": "node scripts/pick-subject.js",
+    "research": "node scripts/research.js"
   },
   "engines": {
     "node": ">=22.5"
