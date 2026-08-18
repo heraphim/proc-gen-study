@@ -1196,6 +1196,20 @@ const FACET_TITLE = {
   deployment: 'Deployment — not concepts',
 };
 
+/* Concepts sort the same way wherever they are grouped: substrate first, then how much of the
+   catalogue leans on the concept. Sorting by the size of the group instead ranks how much
+   research a concept has had rather than how much it carries — it put `rand`, which every
+   entry here ultimately depends on, eighth on the algorithms page, below four categories that
+   are not blocks at all. */
+const facetRank = id => {
+  const i = FACET_ORDER.indexOf(tagById[id]?.facet);
+  return i === -1 ? FACET_ORDER.length : i;
+};
+const conceptOrder = (a, b) =>
+  facetRank(a) - facetRank(b)
+  || (tagById[b]?.count ?? 0) - (tagById[a]?.count ?? 0)
+  || a.localeCompare(b);
+
 /* The plain-language explanation. Deliberately the first thing in the body: if this and the
    technical prose disagree, one of them is wrong, and putting them adjacent makes that visible.
    The heading used to read "Explain like I'm five", which was inviting the register that had to
@@ -1469,7 +1483,7 @@ filterablePage({
     }
     return box;
   },
-  groupOrder: (a, b, groups) => groups.get(b).length - groups.get(a).length || a.localeCompare(b),
+  groupOrder: conceptOrder,
   renderItem: algoCard,
 });
 
