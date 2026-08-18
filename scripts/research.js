@@ -1,11 +1,14 @@
 // Asks three models about one subject at a time, compares their answers mechanically, and
 // records what came of it.
 //
-// The catalogue's algorithm records were largely written by one model. Checking them with that
-// same model repeats its blind spots instead of catching them, so the seats here hold weights
-// from three different labs. Which vendor serves them does not matter and one vendor may hold
-// two seats; what matters is that no two seats run the same model, because that is one opinion
-// delivered twice and the comparison would read it as corroboration.
+// The catalogue's algorithm records were largely written by Claude. Checking them with Claude
+// repeats its blind spots instead of catching them, so no seat here may run it -- that is
+// enforced, not just intended -- and the seats hold models from as many different labs as there
+// are keys for.
+//
+// What must differ between seats is the model family, not the vendor. One vendor may hold two
+// seats; two vendors re-hosting the same weights may not, because that is one opinion delivered
+// twice and the comparison would read it as corroboration.
 //
 // Two rules do the real work.
 //
@@ -27,8 +30,9 @@
 //   node scripts/research.js --links             also gather links -- see the note in research()
 //                                                before using this; it currently finds nothing
 //
-// Needs GEMINI_API_KEY and GROQ_API_KEY. Cerebras is on hold -- every plan including free
-// reports its quota unavailable -- so --providers leaves it out by default.
+// Every seat with a key is used. Known: GEMINI_API_KEY, GROQ_API_KEY, MISTRAL_API_KEY,
+// COHERE_API_KEY, OPENROUTER_API_KEY, CEREBRAS_API_KEY. Two seats from two families is the
+// minimum; a seat whose provider refuses is dropped for the run rather than ending it.
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
@@ -46,19 +50,18 @@ const val = f => { const i = argv.indexOf(f); return i === -1 ? null : argv[i + 
 const today = process.env.RESEARCH_DATE || new Date().toISOString().slice(0, 10);
 const UA = 'procgen-catalogue research (https://github.com/heraphim/proc-gen-study)';
 
-// Seats, not vendors. What has to differ between them is the weights: two seats running the same
-// model are one opinion delivered twice, and the comparison would read that as two independent
-// models agreeing — the strongest signal it can emit, manufactured out of nothing. Which company
-// serves them is irrelevant, so one provider can hold two seats as long as the models differ.
+// Every seat this can use. Which are active is decided below by which have keys.
 //
-// Cerebras is on hold: every plan including free reports quota unavailable, and it answers 402.
-// Groq carries the seat it vacated with a different lineage, which keeps three.
+// dailyRequests is what a run budgets against, because requests are what these providers
+// actually ration -- the earlier token budget was never once the thing that stopped a run. The
+// numbers are conservative starting points; a 429 disables the seat regardless, so being wrong
+// here costs one request rather than a bad run.
 const SEATS = {
   google: {
     transport: 'google',
     model: process.env.GEMINI_MODEL || 'gemini-3.6-flash',
     key: () => process.env.GEMINI_API_KEY,
-    dailyTokens: Number(process.env.GEMINI_DAILY_TOKENS || 1_000_000),
+    dailyRequests: Number(process.env.GEMINI_DAILY_REQUESTS || 50),
     canBrowse: true,
   },
   groq: {
@@ -66,7 +69,7 @@ const SEATS = {
     base: 'https://api.groq.com/openai/v1',
     model: process.env.GROQ_MODEL || 'qwen/qwen3.6-27b',
     key: () => process.env.GROQ_API_KEY,
-    dailyTokens: Number(process.env.GROQ_DAILY_TOKENS || 100_000),
+    dailyRequests: Number(process.env.GROQ_DAILY_REQUESTS || 100),
     canBrowse: false,
   },
   'groq-oss': {
@@ -74,7 +77,7 @@ const SEATS = {
     base: 'https://api.groq.com/openai/v1',
     model: process.env.GROQ_OSS_MODEL || 'openai/gpt-oss-120b',
     key: () => process.env.GROQ_API_KEY,
-    dailyTokens: Number(process.env.GROQ_OSS_DAILY_TOKENS || 100_000),
+    dailyRequests: Number(process.env.GROQ_OSS_DAILY_REQUESTS || 100),
     canBrowse: false,
   },
   cerebras: {
@@ -82,14 +85,76 @@ const SEATS = {
     base: 'https://api.cerebras.ai/v1',
     model: process.env.CEREBRAS_MODEL || 'gpt-oss-120b',
     key: () => process.env.CEREBRAS_API_KEY,
-    dailyTokens: Number(process.env.CEREBRAS_DAILY_TOKENS || 1_000_000),
+    dailyRequests: Number(process.env.CEREBRAS_DAILY_REQUESTS || 100),
+    canBrowse: false,
+  },
+  mistral: {
+    transport: 'openai',
+    base: 'https://api.mistral.ai/v1',
+    model: process.env.MISTRAL_MODEL || 'mistral-small-latest',
+    key: () => process.env.MISTRAL_API_KEY,
+    dailyRequests: Number(process.env.MISTRAL_DAILY_REQUESTS || 100),
+    canBrowse: false,
+  },
+  cohere: {
+    transport: 'openai',
+    base: 'https://api.cohere.ai/compatibility/v1',
+    model: process.env.COHERE_MODEL || 'command-r-08-2024',
+    key: () => process.env.COHERE_API_KEY,
+    dailyRequests: Number(process.env.COHERE_DAILY_REQUESTS || 100),
+    canBrowse: false,
+  },
+  // The rotating slot. Reaches whatever is currently free without another secret, at the cost of
+  // a catalogue that changes underneath us -- DeepSeek and Mistral both had free variants that
+  // have since gone.
+  openrouter: {
+    transport: 'openai',
+    base: 'https://openrouter.ai/api/v1',
+    model: process.env.OPENROUTER_MODEL || 'deepseek/deepseek-chat:free',
+    key: () => process.env.OPENROUTER_API_KEY,
+    dailyRequests: Number(process.env.OPENROUTER_DAILY_REQUESTS || 50),
     canBrowse: false,
   },
 };
 
-// Which seats this run uses. Cerebras is out of the default until its quota returns; naming it
-// explicitly puts it back.
-const ACTIVE = String(val('--providers') || process.env.RESEARCH_PROVIDERS || 'google,groq,groq-oss')
+// What actually has to differ between seats.
+//
+// The guard used to compare model strings, which caught gpt-oss-120b against gpt-oss-120b and
+// would have sailed straight past meta-llama/llama-3.3-70b on one provider against
+// meta-llama/llama-3.3-70b-instruct:free on another. Same weights, different string, and the
+// comparison would have read one model agreeing with itself as two models agreeing.
+//
+// There are perhaps eight or ten real families in reach. Everything else is a fine-tune or a
+// re-host, so that number -- not the number of API keys -- is the ceiling on how many
+// independent opinions this can gather.
+const FAMILIES = [
+  [/claude/i, 'claude', 'anthropic'],
+  [/gemini/i, 'gemini', 'google'],
+  [/gemma/i, 'gemma', 'google'],
+  [/llama/i, 'llama', 'meta'],
+  [/qwen/i, 'qwen', 'alibaba'],
+  [/deepseek/i, 'deepseek', 'deepseek'],
+  [/mistral|mixtral|ministral|magistral|codestral/i, 'mistral', 'mistral'],
+  [/command|cohere|aya/i, 'command', 'cohere'],
+  [/gpt-oss/i, 'gpt-oss', 'openai'],
+  [/\bgpt-|^o[1-9]\b/i, 'gpt', 'openai'],
+  [/phi-/i, 'phi', 'microsoft'],
+  [/nemotron/i, 'nemotron', 'nvidia'],
+  [/glm-/i, 'glm', 'zhipu'],
+  [/kimi/i, 'kimi', 'moonshot'],
+];
+// An unrecognised model is treated as its own family rather than lumped in with anything else:
+// wrongly calling two models the same is the failure that matters, and wrongly calling them
+// different only costs a seat.
+const familyOf = model => FAMILIES.find(([re]) => re.test(String(model)))
+  ?? [null, String(model).split('/').pop().toLowerCase(), 'unknown'];
+
+// Which seats this run uses. By default, every seat that has a key -- so adding a provider means
+// adding a secret and nothing else. A seat whose provider refuses is dropped for the run rather
+// than ending it, which is what makes that default safe: Cerebras still has a key and still
+// answers 402, and it now costs one failed request instead of the whole run.
+const ACTIVE = String(val('--providers') || process.env.RESEARCH_PROVIDERS
+  || Object.entries(SEATS).filter(([, p]) => p.key()).map(([k]) => k).join(','))
   .split(',').map(s => s.trim()).filter(Boolean);
 const PROVIDERS = Object.fromEntries(Object.entries(SEATS).filter(([k]) => ACTIVE.includes(k)));
 for (const k of ACTIVE) if (!SEATS[k]) { console.error(`unknown seat "${k}" — known: ${Object.keys(SEATS).join(', ')}`); process.exit(1); }
@@ -113,21 +178,36 @@ if (available.length < 2) {
 if (available.length === 2) console.error(`warning: only ${available.join(' and ')} have keys — this run is two-way\n`);
 
 // The decorrelation trap, a hard error because it is invisible while it happens and destroys the
-// premise rather than degrading it. Groq and Cerebras both serve gpt-oss-120b, and Groq holds
-// two seats here. Point two seats at the same weights and you get one model's answer twice,
+// premise rather than degrading it. Two seats on one family produce one model's answer twice,
 // which the comparison then reads as two independent models agreeing -- the strongest signal it
-// can produce, manufactured out of nothing.
-const weights = m => String(m).split('/').pop().toLowerCase();
-const seenWeights = new Map();
+// can emit, manufactured out of nothing.
+const seatFamily = new Map();
+const seenFamily = new Map(), seenLab = new Map();
 for (const k of available) {
-  const w = weights(PROVIDERS[k].model);
-  if (seenWeights.has(w)) {
-    console.error(`${seenWeights.get(w)} and ${k} are both set to "${w}".`);
-    console.error('Those are the same weights, so their answers are not independent and any');
-    console.error('agreement between them is an echo. Set a different model for one of them.');
+  const [, family, lab] = familyOf(PROVIDERS[k].model);
+  seatFamily.set(k, family);
+
+  if (lab === 'anthropic') {
+    console.error(`${k} is set to a Claude model.`);
+    console.error('This catalogue was largely written by Claude, and checking it with Claude');
+    console.error('repeats those blind spots rather than catching them. That is the whole reason');
+    console.error('this script exists, so the one model it must never ask is that one.');
     process.exit(1);
   }
-  seenWeights.set(w, k);
+  if (seenFamily.has(family)) {
+    console.error(`${seenFamily.get(family)} and ${k} both run the ${family} family.`);
+    console.error('Their answers are not independent, so any agreement between them is an echo.');
+    console.error('Point one of them at a different family.');
+    process.exit(1);
+  }
+  seenFamily.set(family, k);
+
+  // Not fatal. Gemma and Gemini are different models trained by the same people on overlapping
+  // data, so they are less independent than their names suggest without being duplicates.
+  if (lab !== 'unknown' && seenLab.has(lab)) {
+    console.error(`note: ${seenLab.get(lab)} and ${k} are both ${lab} models — different families, correlated training`);
+  }
+  seenLab.set(lab, k);
 }
 
 // Model names go stale faster than anything else here -- providers retire them on their own
@@ -167,9 +247,14 @@ if (has('--list-models')) {
   process.exit(0);
 }
 
+// Budget requests, not tokens. Every run so far has died on requests per day while the token
+// budget sat almost untouched -- Gemini stopped after using 0.6% of its tokens, and OpenRouter's
+// free tier does not meter tokens at all. Tokens are still counted, because the cost per subject
+// is worth knowing; they are just not what runs out.
 const spent = Object.fromEntries(Object.keys(PROVIDERS).map(k => [k, 0]));
+const calls = Object.fromEntries(Object.keys(PROVIDERS).map(k => [k, 0]));
 const budget = Object.fromEntries(
-  Object.entries(PROVIDERS).map(([k, p]) => [k, Math.floor(p.dailyTokens * FRACTION)]));
+  Object.entries(PROVIDERS).map(([k, p]) => [k, Math.max(1, Math.floor((p.dailyRequests ?? 100) * FRACTION))]));
 
 // ---- transport --------------------------------------------------------------
 
@@ -228,6 +313,7 @@ async function askOpenAIShape(provider, base, prompt) {
   if (!r.data) return r;
   const tokens = r.data.usage?.total_tokens ?? 0;
   spent[provider] += tokens;
+  calls[provider]++;
   const raw = r.data.choices?.[0]?.message?.content ?? '';
   return { answer: parseJSON(raw), tokens, raw };
 }
@@ -248,6 +334,7 @@ async function askGemini(prompt, { grounded = false } = {}) {
   if (!r.data) return r;
   const tokens = r.data.usageMetadata?.totalTokenCount ?? 0;
   spent.google += tokens;
+  calls.google++;
   const text = (r.data.candidates?.[0]?.content?.parts ?? []).map(x => x.text ?? '').join('');
   return { answer: parseJSON(text), tokens, raw: text };
 }
@@ -355,10 +442,15 @@ function classifyAttribution(record, answers) {
     return { agreement: 'inconclusive', note: `${answers.length - confident.length} of ${answers.length} models abstained, hedged or gave no year` };
   }
 
-  // Do at least two models agree with each other, at least one of them confidently?
+  // Two seats agreeing is only two opinions if they are two families. Three Llama re-hosts
+  // agreeing is one model agreeing with itself three times, and with more providers that stops
+  // being hypothetical.
   let consensus = null;
   for (const c of confident) {
-    if (usable.some(o => o !== c && o.answer.year === c.answer.year)) { consensus = c.answer; break; }
+    const peer = usable.find(o => o !== c
+      && o.answer.year === c.answer.year
+      && seatFamily.get(o.provider) !== seatFamily.get(c.provider));
+    if (peer) { consensus = c.answer; break; }
   }
   if (!consensus) {
     return {
@@ -393,7 +485,9 @@ function classifyMembership(known, answers) {
     }
   }
   // One model naming something is a suggestion. Two independently naming the same thing is a gap.
-  const agreed = [...proposals.values()].filter(p => p.by.length >= 2);
+  // Same rule: named by two families, not two seats.
+  const agreed = [...proposals.values()]
+    .filter(p => new Set(p.by.map(prov => seatFamily.get(prov))).size >= 2);
   if (!agreed.length) return { agreement: 'confirmed', note: `no method was named by two models that the catalogue does not already have`, missing: [] };
   return {
     agreement: 'against-catalogue',
@@ -454,10 +548,21 @@ async function research(subject) {
   for (const [provider, p] of Object.entries(PROVIDERS)) {
     if (!p.key()) { models.push({ provider, model: p.model, verdict: null, unsure: true, tokens: 0, skipped: 'no key' }); continue; }
     if (disabled.has(provider)) continue;
+    if (calls[provider] >= budget[provider]) {
+      disabled.add(provider);
+      console.error(`      ${provider} has used its ${budget[provider]}-request share for this run`);
+      continue;
+    }
     const r = p.transport === 'google'
       ? await askGemini(prompt)
       : await askOpenAIShape(provider, p.base, prompt);
-    if (r.exhausted) return { exhausted: provider };
+    // One seat hitting its provider's daily limit is not the run ending. With several seats the
+    // others carry on, and the subject is only skipped if fewer than two of them answered.
+    if (r.exhausted) {
+      disabled.add(provider);
+      console.error(`      ${provider} disabled: ${String(r.error).replace(/\s+/g, ' ').slice(0, 120)}`);
+      continue;
+    }
     if (r.error) {
       // Loud, and counted. A failed call is not a model declining to answer, and the difference
       // matters: abstention is a finding, a broken request is a bug wearing its costume.
@@ -572,32 +677,16 @@ if (val('--subject')) {
   planned = 1;
   var subjects = [{ key: val('--subject'), layer, id, round: 1 }];
 } else {
-  // Without an explicit count, take the budget's worth. The first run has no measured cost yet,
-  // so it starts small and the number below gets real once there is history.
-  const measured = measuredCostPerSubject();
+  // Without an explicit count, take the budget's worth. One request per seat per subject, so the
+  // seat with the smallest request allowance sets how far a run can go. No history needed for
+  // this, which is the point of budgeting requests rather than tokens: the cost of a subject is
+  // known before it is asked.
   if (!planned) {
-    planned = measured
-      ? Math.max(1, Math.min(...Object.entries(budget).map(([k, b]) => Math.floor(b / Math.max(1, measured[k] ?? 1)))))
-      : 5;
-    console.log(measured
-      ? `budget allows ${planned} subjects at the measured cost (${FRACTION * 100}% of the daily allowance)`
-      : `no measured cost yet — starting with ${planned} subjects to establish one`);
+    planned = Math.max(1, Math.min(...Object.values(budget)));
+    console.log(`budget allows ${planned} subjects — ${FRACTION * 100}% of the tightest seat's daily requests`);
   }
   var subjects = pick(planned);
   if (!Array.isArray(subjects)) subjects = [subjects];
-}
-
-function measuredCostPerSubject() {
-  const reviews = ann('reviews').reviews ?? [];
-  if (reviews.length < 3) return null;
-  const totals = {}, counts = {};
-  for (const r of reviews) for (const m of r.models ?? []) {
-    if (!m.tokens) continue;
-    totals[m.provider] = (totals[m.provider] ?? 0) + m.tokens;
-    counts[m.provider] = (counts[m.provider] ?? 0) + 1;
-  }
-  if (!Object.keys(totals).length) return null;
-  return Object.fromEntries(Object.entries(totals).map(([k, t]) => [k, Math.ceil(t / counts[k])]));
 }
 
 const disabled = new Set();
@@ -633,18 +722,17 @@ console.log(`${done.length} subjects researched: ${Object.entries(byAgreement).m
 console.log(`links: ${allLinks.filter(l => !l.rejected).length} verified, ${allLinks.filter(l => l.rejected).length} rejected and kept as evidence`);
 if (stopped) console.log(`stopped early: ${stopped}`);
 
-console.log('\ntokens spent, against a budget of ' + `${FRACTION * 100}% of each daily allowance:`);
-for (const [k, v] of Object.entries(spent)) {
-  const per = done.length ? Math.round(v / done.length) : 0;
-  console.log(`  ${k.padEnd(10)} ${String(v).padStart(8)} / ${String(budget[k]).padStart(8)}   ${String(per).padStart(6)} per subject`);
+console.log(`\nrequests used, against ${FRACTION * 100}% of each seat's daily allowance:`);
+for (const k of Object.keys(PROVIDERS)) {
+  const per = done.length ? Math.round(spent[k] / done.length) : 0;
+  console.log(`  ${k.padEnd(12)} ${String(calls[k]).padStart(4)} / ${String(budget[k]).padStart(4)} requests`
+    + `   ${String(spent[k]).padStart(7)} tokens (${per}/subject)   ${seatFamily.get(k) ?? '—'}`);
 }
 // Only meaningful once something was actually spent; otherwise the arithmetic divides by a
 // cost of zero and reports that the budget affords everything.
-const anySpend = Object.values(spent).some(v => v > 0);
-if (done.length && anySpend) {
-  const affordable = Math.min(...Object.entries(budget)
-    .filter(([k]) => spent[k] > 0)
-    .map(([k, b]) => Math.floor(b / (spent[k] / done.length))));
+const used = Object.keys(PROVIDERS).filter(k => calls[k] > 0);
+if (done.length && used.length) {
+  const affordable = Math.min(...used.map(k => Math.floor(budget[k] / (calls[k] / done.length))));
   console.log(`\nat this rate a run affords ${affordable} subjects, so ${Math.ceil(220 / Math.max(1, affordable))} runs complete a round of all 220.`);
 }
 

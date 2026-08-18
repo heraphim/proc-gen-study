@@ -1,6 +1,6 @@
 name: Research the next subjects
 
-# Asks three models from three labs about whichever subjects are furthest behind, compares their
+# Asks every model there is a key for about whichever subjects are furthest behind, compares their
 # answers mechanically, and proposes the result as a pull request.
 #
 # Nightly, because the constraint is not how fast findings can be produced but how fast a person
@@ -21,7 +21,7 @@ on:
         type: boolean
         default: false
       providers:
-        description: 'Seats to use, comma separated (google,groq,groq-oss,cerebras)'
+        description: 'Seats to use, comma separated (default: every seat with a key)'
         required: false
       budget_fraction:
         description: 'Share of each daily allowance this run may spend'
@@ -89,14 +89,20 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: node scripts/research.js --list-models
 
-      - name: Ask the three models
+      - name: Ask the models
         if: steps.backlog.outputs.skip == 'false' && github.event.inputs.list_models != 'true'
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
           node scripts/research.js \
             --budget-fraction '${{ github.event.inputs.budget_fraction || 0.5 }}' \
