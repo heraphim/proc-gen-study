@@ -1,0 +1,83 @@
+name: Poll the registries
+
+# Re-resolves all 120 implementations against npm, PyPI, crates.io, NuGet and the GitHub API,
+# and opens a pull request with whatever moved. No language model anywhere in it: the registry
+# owns the answer, so there is nothing to infer and nothing to get creatively wrong.
+#
+# Weekly rather than nightly. Some of these packages publish often, and a daily pull request of
+# patch bumps is a pull request nobody reads.
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: registry-poll
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      # Always branch from main, so the diff is this week's registry movement and nothing else.
+      - name: Start from main
+        run: git checkout -B registry/poll origin/main
+
+      - name: Re-resolve every implementation
+        env:
+          # Star counts need this: GitHub allows 60 requests an hour unauthenticated and this
+          # makes about 115 of them.
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/poll-registries.js --write --markdown poll-report.md
+
+      # The migration is the gate. If a refreshed row breaks a rule, the run fails here rather
+      # than proposing it.
+      - name: Validate
+        run: |
+          npm run migrate
+          npm run check-samples
+          npm run check-register
+
+      - name: Anything to propose?
+        id: check
+        run: |
+          if git diff --quiet -- data/annotations/implementations.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No registry movement this week."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open or update the pull request
+        if: steps.check.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/annotations/implementations.json
+          git commit -m 'Refresh registry state: versions, release dates, stars and archived flags'
+          git push --force-with-lease origin registry/poll
+
+          # One long-lived branch and one pull request. A force-push updates the existing one,
+          # so the review surface stays a single always-current diff instead of a queue.
+          if [ -z "$(gh pr list --head registry/poll --state open --json number --jq '.[].number')" ]; then
+            gh pr create --base main --head registry/poll \
+              --title 'Refresh registry state for the 120 implementations' \
+              --body-file poll-report.md
+          else
+            gh pr edit registry/poll --body-file poll-report.md
+          fi

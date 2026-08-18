@@ -185,6 +185,11 @@ CREATE TABLE implementation (
   description  TEXT,
   repo         TEXT,
   license      TEXT,
+  -- Refreshed weekly by scripts/poll-registries.js, not hand-maintained. `stars` is null where
+  -- the project has no GitHub repository -- 12 of them, mostly PyPI packages living on GitLab
+  -- or their own domain -- so a null means "not applicable", not "zero".
+  stars        INTEGER,
+  archived     INTEGER NOT NULL DEFAULT 0,
   verified     INTEGER NOT NULL DEFAULT 0,
   UNIQUE (ecosystem, package)
 );

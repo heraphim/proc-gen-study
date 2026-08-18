@@ -325,8 +325,8 @@ if (existsSync(IMPL_ANNOTATIONS)) {
   const ann = JSON.parse(readFileSync(IMPL_ANNOTATIONS, 'utf8'));
   const ins = db.prepare(`
     INSERT INTO implementation
-      (package, ecosystem, concept_tag, role, version, last_release, description, repo, license, verified)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+      (package, ecosystem, concept_tag, role, version, last_release, description, repo, license, stars, archived, verified)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
   const link = db.prepare(
     `INSERT OR IGNORE INTO implementation_technology (implementation_id, technology_id) VALUES (?, ?)`);
   const tagExists = db.prepare(`SELECT 1 FROM tag WHERE id = ?`);
@@ -343,7 +343,8 @@ if (existsSync(IMPL_ANNOTATIONS)) {
     }
     const id = ins.run(im.package, im.ecosystem ?? null, im.concept ?? null, im.role ?? null,
       im.version ?? null, im.last_release ?? null, im.description ?? null,
-      im.repo ?? null, im.license ?? null, 1).lastInsertRowid;
+      im.repo ?? null, im.license ?? null,
+      im.stars ?? null, im.archived ? 1 : 0, 1).lastInsertRowid;
     layerStats.implementations++;
 
     for (const t of im.technologies ?? []) {

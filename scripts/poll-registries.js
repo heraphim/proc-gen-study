@@ -1,0 +1,362 @@
+// Re-checks every implementation against the registry it came from.
+//
+// `implementations.json` records a version, a release date, a licence and a repo for 120
+// packages. Each was true on the day it was checked and has been decaying since. Nothing
+// re-checked them, so the catalogue has been quietly claiming a freshness it stopped having.
+// This is the standing version of the pass described in docs/data-model.md.
+//
+// There is no language model here and there should not be: the registry returns the answer, so
+// there is nothing to infer and nothing to get creatively wrong.
+//
+//   node scripts/poll-registries.js                    check and report, change nothing
+//   node scripts/poll-registries.js --write            apply the updates
+//   node scripts/poll-registries.js --json out.json    machine-readable report for a workflow
+//   node scripts/poll-registries.js --only noise       just the rows whose key matches
+//
+// GitHub's API allows 60 requests an hour unauthenticated and 5000 with a token, and this makes
+// about 115 of them. Set GITHUB_TOKEN, or run somewhere `gh auth token` works.
+
+import { readFileSync, writeFileSync } from 'node:fs';
+import { execSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+
+const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const IMPL = join(root, 'data', 'annotations', 'implementations.json');
+
+const argv = process.argv.slice(2);
+const has = f => argv.includes(f);
+const val = f => { const i = argv.indexOf(f); return i === -1 ? null : argv[i + 1]; };
+
+const today = process.env.POLL_DATE || new Date().toISOString().slice(0, 10);
+const STALE_DAYS = 730;
+
+// crates.io asks for a User-Agent identifying the caller, and npm and PyPI prefer one too.
+const UA = 'procgen-catalogue registry poller (https://github.com/heraphim/proc-gen-study)';
+
+function githubToken() {
+  if (process.env.GITHUB_TOKEN) return process.env.GITHUB_TOKEN;
+  if (process.env.GH_TOKEN) return process.env.GH_TOKEN;
+  try { return execSync('gh auth token', { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim(); }
+  catch { return null; }
+}
+const TOKEN = githubToken();
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const date = s => (s ? String(s).slice(0, 10) : null);
+
+async function getJSON(url, extraHeaders = {}) {
+  const headers = { accept: 'application/json', 'user-agent': UA, ...extraHeaders };
+  for (let attempt = 0; attempt < 3; attempt++) {
+    let res;
+    try { res = await fetch(url, { headers }); }
+    catch (e) { if (attempt === 2) return { error: e.message }; await sleep(500 * (attempt + 1)); continue; }
+    if (res.status === 404) return { missing: true };
+    // 429 and 5xx are worth waiting out. Anything else is the answer, right or wrong.
+    if (res.status === 429 || res.status >= 500) { await sleep(1000 * (attempt + 1)); continue; }
+    if (!res.ok) return { error: `HTTP ${res.status}` };
+    try { return { data: await res.json() }; } catch (e) { return { error: `bad JSON: ${e.message}` }; }
+  }
+  return { error: 'gave up after 3 attempts' };
+}
+
+// Registries hand back git+ssh://, git://, and .git suffixes. The catalogue stores the page a
+// person would actually open.
+function normaliseRepo(url) {
+  if (!url) return null;
+  const u = String(url).trim()
+    .replace(/^git\+/, '').replace(/^git:\/\//, 'https://').replace(/^ssh:\/\/git@/, 'https://')
+    .replace(/^git@([^:]+):/, 'https://$1/').replace(/\.git$/, '').replace(/\/+$/, '');
+  return /^https?:\/\//.test(u) ? u : null;
+}
+const ghSlug = url => (normaliseRepo(url) || '').match(/^https:\/\/github\.com\/([^/]+\/[^/]+)/)?.[1] ?? null;
+
+// PyPI's `license` field is free text, and a good number of projects paste the entire licence
+// into it — scipy ships the full GPL, trimesh the full MIT, both with the copyright headers of
+// every vendored dependency. Anything that long or multi-line is a document, not an identifier.
+const licenceId = s => {
+  if (!s) return null;
+  const t = String(s).trim();
+  return t.length <= 60 && !t.includes('\n') ? t : null;
+};
+
+const ghHeaders = () => (TOKEN ? { authorization: `Bearer ${TOKEN}`, 'x-github-api-version': '2022-11-28' } : {});
+const ghRepo = slug => getJSON(`https://api.github.com/repos/${slug}`, ghHeaders());
+
+// ---- one resolver per registry ---------------------------------------------
+
+const resolvers = {
+  async npm(pkg) {
+    const r = await getJSON(`https://registry.npmjs.org/${pkg.replace('/', '%2F')}`);
+    if (!r.data) return r;
+    const d = r.data;
+    const latest = d['dist-tags']?.latest ?? null;
+    return {
+      version: latest,
+      last_release: date(d.time?.[latest]),
+      license: licenceId(typeof d.license === 'string' ? d.license : d.license?.type),
+      repo: normaliseRepo(d.repository?.url),
+      deprecated: Boolean(latest && d.versions?.[latest]?.deprecated),
+    };
+  },
+
+  async pypi(pkg) {
+    const r = await getJSON(`https://pypi.org/pypi/${pkg}/json`);
+    if (!r.data) return r;
+    const info = r.data.info ?? {};
+    // `license` is frequently null on modern metadata; the expression field or a classifier
+    // carries it instead. numpy is the row that made this necessary.
+    const fromClassifier = (info.classifiers ?? [])
+      .find(c => c.startsWith('License :: '))?.split(' :: ').pop() ?? null;
+    // project_urls keys are lowercased by PyPI and the naming varies by project.
+    const urls = Object.fromEntries(Object.entries(info.project_urls ?? {}).map(([k, v]) => [k.toLowerCase(), v]));
+    return {
+      version: info.version ?? null,
+      last_release: date(r.data.urls?.[0]?.upload_time_iso_8601),
+      // Prefer the SPDX expression, then the classifier, and only fall back to the free-text
+      // field when it is short enough to actually be an identifier.
+      license: licenceId(info.license_expression) || fromClassifier || licenceId(info.license),
+      repo: normaliseRepo(urls.source ?? urls.repository ?? urls['source code'] ?? urls.homepage ?? null),
+      deprecated: Boolean(info.yanked),
+    };
+  },
+
+  async cargo(pkg) {
+    const r = await getJSON(`https://crates.io/api/v1/crates/${pkg}`);
+    if (!r.data) return r;
+    const latest = r.data.crate?.max_stable_version ?? null;
+    const v = (r.data.versions ?? []).find(x => x.num === latest);
+    return {
+      version: latest,
+      last_release: date(v?.created_at ?? r.data.crate?.updated_at),
+      license: licenceId(v?.license),
+      repo: normaliseRepo(r.data.crate?.repository),
+      deprecated: Boolean(v?.yanked),
+    };
+  },
+
+  async nuget(pkg) {
+    const r = await getJSON(`https://api.nuget.org/v3/registration5-gz-semver2/${pkg.toLowerCase()}/index.json`);
+    if (!r.data) return r;
+    // The index is paged, and a leaf page sometimes inlines its items and sometimes only links
+    // them.
+    let page = r.data.items?.[r.data.items.length - 1];
+    if (page && !page.items) {
+      const p = await getJSON(page['@id']);
+      if (!p.data) return p;
+      page = p.data;
+    }
+    // Prereleases are published like anything else; the catalogue records stable versions.
+    const entries = (page?.items ?? []).map(i => i.catalogEntry).filter(Boolean)
+      .filter(e => !String(e.version).includes('-'));
+    const latest = entries[entries.length - 1];
+    return {
+      version: latest?.version ?? null,
+      last_release: date(latest?.published),
+      license: licenceId(latest?.licenseExpression),
+      repo: normaliseRepo(latest?.projectUrl),
+      deprecated: latest?.listed === false,
+    };
+  },
+
+  // Libraries that ship only as a repository. The release, where there is one, is the version.
+  async github(pkg) {
+    const repo = await ghRepo(pkg);
+    if (!repo.data) return repo;
+    const rel = await getJSON(`https://api.github.com/repos/${pkg}/releases/latest`, ghHeaders());
+    const spdx = repo.data.license?.spdx_id;
+    return {
+      // Tags are written `v2.6.0` about as often as `2.6.0`; the catalogue records the number.
+      version: rel.data?.tag_name ? String(rel.data.tag_name).replace(/^v(?=\d)/, '') : null,
+      // Only an actual release sets last_release. Several of these repos publish no releases at
+      // all, and standing `pushed_at` in for one would rewrite the row every week on any repo
+      // that is merely alive — and would call a commit a release, which it is not.
+      last_release: date(rel.data?.published_at),
+      last_commit: date(repo.data.pushed_at),
+      license: spdx === 'NOASSERTION' ? null : spdx ?? null,
+      repo: repo.data.html_url,
+      deprecated: false,
+    };
+  },
+};
+
+// ---- run --------------------------------------------------------------------
+
+const file = JSON.parse(readFileSync(IMPL, 'utf8').replace(/\r\n/g, '\n'));
+const rows = file.implementations ?? [];
+const only = val('--only');
+const targets = only ? rows.filter(r => `${r.ecosystem}:${r.package}`.includes(only)) : rows;
+
+const daysSince = d => (d ? Math.round((Date.parse(today) - Date.parse(d)) / 86400000) : null);
+const findings = [];
+const dormant = [];
+
+async function pool(items, n, fn) {
+  let i = 0;
+  await Promise.all(Array.from({ length: Math.min(n, items.length) }, async () => {
+    while (i < items.length) await fn(items[i++]);
+  }));
+}
+
+if (!TOKEN) console.error('warning: no GitHub token found — star counts will fail after ~60 requests\n');
+
+await pool(targets, Number(val('--concurrency')) || 6, async row => {
+  const key = `${row.ecosystem}:${row.package}`;
+  const resolve = resolvers[row.ecosystem];
+  if (!resolve) { findings.push({ key, row, kind: 'attention', what: `no resolver for ecosystem "${row.ecosystem}"` }); return; }
+
+  const res = await resolve(row.package);
+  if (res.missing) { findings.push({ key, row, kind: 'attention', what: 'gone from its registry (404)' }); return; }
+  if (res.error) { findings.push({ key, row, kind: 'error', what: res.error }); return; }
+
+  const changes = [];
+  const set = (field, next, apply = true) => {
+    if (next == null || next === row[field]) return;
+    changes.push({ field, was: row[field] ?? null, now: next, apply });
+  };
+  set('version', res.version);
+  set('last_release', res.last_release);
+  if (!row.repo && res.repo) set('repo', res.repo);
+
+  // `license` is the catalogue's judgement and is never overwritten: a registry reporting
+  // "(BSD-3-Clause AND Apache-2.0)" against a row that says "BSD-3-Clause" is not a disagreement
+  // worth acting on. What is worth knowing is when the registry's own answer *changes*, so the
+  // raw string is recorded separately and compared against itself. The first run records it
+  // quietly; only a later change raises anything.
+  const licenceMoved = row.license_registry != null && res.license != null && row.license_registry !== res.license;
+  set('license_registry', res.license);
+
+  // Stars come from the repository, whatever registry the package itself lives in.
+  const slug = ghSlug(row.repo ?? res.repo);
+  let stars = null, archived = false;
+  if (slug) {
+    const gh = await ghRepo(slug);
+    if (gh.data) {
+      stars = gh.data.stargazers_count;
+      archived = Boolean(gh.data.archived);
+      set('stars', stars);
+    } else if (gh.missing) {
+      findings.push({ key, row, kind: 'attention', what: `repo ${slug} is gone (404)` });
+    }
+  }
+
+  const flags = [];
+  if (archived && !row.archived) flags.push('repo is now archived');
+  if (res.deprecated) flags.push('marked deprecated or yanked by its registry');
+  // Staleness is a standing property, not news. A package that was already dormant last week is
+  // still dormant, and reporting all of them every run buries the handful that just crossed the
+  // line. The first run is the exception and will be loud, because it is correcting release
+  // dates that were never right.
+  const age = daysSince(res.last_release ?? row.last_release ?? res.last_commit);
+  const wasStale = (daysSince(row.last_release) ?? 0) > STALE_DAYS;
+  const isStale = age != null && age > STALE_DAYS;
+  if (isStale && !wasStale) flags.push(`no release in ${Math.floor(age / 365)} years`);
+  if (isStale && wasStale) dormant.push(key);
+  if (licenceMoved) flags.push(`registry licence changed: ${row.license_registry} -> ${res.license} (recorded: ${row.license ?? '—'})`);
+
+  findings.push({
+    key, row, changes, stars, archived, flags,
+    kind: flags.length ? 'attention' : changes.length ? 'routine' : 'unchanged',
+  });
+});
+
+findings.sort((a, b) => a.key.localeCompare(b.key));
+const of = k => findings.filter(f => f.kind === k);
+const routine = of('routine');
+
+// ---- report -----------------------------------------------------------------
+
+console.log(`${targets.length} implementations checked against their registries on ${today}\n`);
+
+for (const f of of('error')) console.log(`  ERROR  ${f.key.padEnd(34)} ${f.what}`);
+if (of('error').length) console.log('');
+
+if (of('attention').length) {
+  console.log(`NEEDS A LOOK (${of('attention').length})\n`);
+  for (const f of of('attention')) {
+    console.log(`  ${f.key}`);
+    if (f.what) console.log(`      ${f.what}`);
+    for (const x of f.flags ?? []) console.log(`      ${x}`);
+    for (const c of f.changes ?? []) console.log(`      ${c.field}: ${c.was ?? '—'} -> ${c.now}${c.apply ? '' : '  (not written)'}`);
+  }
+  console.log('');
+}
+
+if (routine.length) {
+  console.log(`ROUTINE UPDATES (${routine.length})\n`);
+  for (const f of routine) {
+    console.log(`  ${f.key.padEnd(34)} ${f.changes.map(c => `${c.field} ${c.was ?? '—'}->${c.now}`).join(', ')}`);
+  }
+  console.log('');
+}
+
+const starred = findings.filter(f => f.stars != null);
+console.log(`unchanged ${of('unchanged').length} · routine ${routine.length} · needs a look ${of('attention').length} · errors ${of('error').length}`);
+if (dormant.length) console.log(`${dormant.length} already-dormant packages not re-reported (--dormant lists them)`);
+if (has('--dormant')) for (const k of dormant.sort()) console.log(`  dormant  ${k}`);
+console.log(`stars resolved for ${starred.length} of ${targets.length} (${starred.reduce((s, f) => s + f.stars, 0).toLocaleString('en-GB')} total)`);
+
+// ---- write ------------------------------------------------------------------
+
+if (has('--write')) {
+  let touched = 0;
+  for (const f of findings) {
+    const apply = (f.changes ?? []).filter(c => c.apply);
+    if (!apply.length && !(f.archived && !f.row.archived)) continue;
+    for (const c of apply) f.row[c.field] = c.now;
+    if (f.archived) f.row.archived = true;
+    touched++;
+  }
+  file._polled = `Registry state as of ${today}, refreshed by scripts/poll-registries.js. Do not hand-edit version, last_release, stars or archived — the next run overwrites them. Licence differences are reported by the poller but never written, because the registry's answer and the catalogue's are not always disagreeing.`;
+  writeFileSync(IMPL, JSON.stringify(file, null, 2) + '\n');
+  console.log(`\nwrote ${touched} updated rows to data/annotations/implementations.json`);
+}
+
+if (val('--markdown')) {
+  const L = [];
+  L.push(`Registry state as of ${today}. Checked ${targets.length} implementations against npm, PyPI, crates.io, NuGet and the GitHub API.`);
+  L.push('');
+  L.push(`**${of('attention').length} need a look · ${routine.length} routine · ${of('unchanged').length} unchanged · ${of('error').length} errors** · stars resolved for ${starred.length} of ${targets.length}`);
+  if (dormant.length) L.push('');
+  if (dormant.length) L.push(`${dormant.length} packages were already dormant before this run and are not re-listed.`);
+
+  if (of('attention').length) {
+    L.push('', '## Needs a look', '');
+    for (const f of of('attention')) {
+      L.push(`**\`${f.key}\`**`);
+      for (const x of [f.what, ...(f.flags ?? [])].filter(Boolean)) L.push(`- ${x}`);
+      for (const c of f.changes ?? []) L.push(`- \`${c.field}\`: ${c.was ?? '—'} → ${c.now}`);
+      L.push('');
+    }
+  }
+  if (of('error').length) {
+    L.push('## Could not be checked', '');
+    for (const f of of('error')) L.push(`- \`${f.key}\` — ${f.what}`);
+    L.push('');
+  }
+  if (routine.length) {
+    L.push('<details>', `<summary>${routine.length} routine updates</summary>`, '', '| package | change |', '| --- | --- |');
+    for (const f of routine) L.push(`| \`${f.key}\` | ${f.changes.map(c => `${c.field} ${c.was ?? '—'} → ${c.now}`).join('<br>')} |`);
+    L.push('', '</details>', '');
+  }
+  L.push('', 'Produced by `scripts/poll-registries.js`. No language model is involved: every value here came from the registry that owns it.');
+  writeFileSync(val('--markdown'), L.join('\n') + '\n');
+}
+
+if (val('--json')) {
+  writeFileSync(val('--json'), JSON.stringify({
+    date: today,
+    counts: {
+      checked: targets.length, unchanged: of('unchanged').length,
+      routine: routine.length, attention: of('attention').length, errors: of('error').length,
+      stars_resolved: starred.length,
+    },
+    attention: of('attention').map(f => ({ key: f.key, what: f.what ?? null, flags: f.flags ?? [], changes: f.changes ?? [] })),
+    routine: routine.map(f => ({ key: f.key, changes: f.changes })),
+    errors: of('error').map(f => ({ key: f.key, what: f.what })),
+  }, null, 2) + '\n');
+}
+
+// A handful of transient failures is normal across five registries; a wall of them means
+// something is wrong with the run rather than with the data.
+process.exitCode = of('error').length > 5 ? 1 : 0;
