@@ -1086,18 +1086,14 @@ button.rel-chip:hover { border-color: var(--accent); color: var(--accent); }
   color: var(--ink-3);
 }
 
-/* ---------- reference-code index ----------
-   The samples sit far down a very long page, so the page needs a way in. */
-
-.code-index { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 6px; }
-.code-chip {
-  display: flex; flex-direction: column; gap: 1px; align-items: flex-start;
-  background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
-  padding: 5px 10px; cursor: pointer; font: inherit; text-align: left; color: var(--ink);
+/* Reference code pulled into the flat list by its own filter, because the flat list has no
+   algorithm heading for it to sit under. */
+.flat-code { margin: 12px 0 20px; }
+.flat-code-head {
+  margin: 0 0 8px;
+  font-size: 11px; font-weight: 650; letter-spacing: 0.07em;
+  text-transform: uppercase; color: var(--accent);
 }
-.code-chip:hover { border-color: var(--accent); background: var(--panel-2); }
-.code-chip-name { font-size: 12px; font-weight: 600; }
-.code-chip-meta { font-family: var(--mono); font-size: 10px; color: var(--ink-3); }
 
 /* A closed sample used to read as a caption. Make it read as a control. */
 .code-show {
@@ -1107,6 +1103,3 @@ button.rel-chip:hover { border-color: var(--accent); color: var(--accent); }
 .code-sample[open] .code-show { color: var(--ink-3); }
 .code-sample { border-left: 2px solid var(--accent); }
 
-/* Brief highlight when the index jumps to a sample, so the target is obvious. */
-.code-flash .code-sample { box-shadow: 0 0 0 2px var(--accent); }
-.subgrp-code { scroll-margin-top: 64px; }

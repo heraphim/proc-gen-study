@@ -38,7 +38,7 @@ const NO_SUBGROUP = '(no algorithm)';
 function filterablePage({
   toolbar, host, items, searchIn, filters = [], groupBy, groupHeader,
   subGroupBy, subGroupHeader, subGroupOrder, subGroupIntro, extraSubGroups, extraGroups,
-  flattenWhenFiltered, flattenNote,
+  flattenWhenFiltered, flattenNote, flatExtras,
   renderItem, noun, groupOrder, emptyText = 'Nothing matches those filters.',
 }) {
   const st = { q: '', active: new Map(filters.map(f => [f.key, new Set()])), collapsed: new Set(), cardsCollapsed: false };
@@ -186,6 +186,15 @@ function filterablePage({
        to algorithms rather than to any of the matches. The count said 14. */
     if (flattenWhenFiltered && !unfiltered) {
       if (flattenNote) listHost.append(el('p', 'flat-note', flattenNote(visible.length)));
+      const extras = flatExtras?.(st);
+      if (extras) {
+        if (st.cardsCollapsed) {
+          for (const c of extras.querySelectorAll('.ent-card')) {
+            if (c.querySelector('.card-body')) c.classList.add('collapsed');
+          }
+        }
+        listHost.append(extras);
+      }
       const flat = el('div', 'grp-body');
       for (const it of visible) {
         const node = renderItem(it);
@@ -1451,7 +1460,7 @@ function implRow(im) {
 const usedTech = new Set(implementations.flatMap(i => i.technologies));
 const usedRoles = [...new Set(implementations.map(i => i.role).filter(Boolean))];
 
-const implPage = filterablePage({
+filterablePage({
   toolbar: '#toolbar-implementations',
   host: '#impl-groups',
   items: implementations,
@@ -1482,12 +1491,45 @@ const implPage = filterablePage({
       options: [{ id: 'yes', label: 'linked' }, { id: 'no', label: 'orphan' }],
       match: (i, id) => (id === 'yes') === ((i.algorithms ?? []).length > 0),
     },
+    {
+      key: 'code', label: 'Reference code', exclusive: true,
+      options: [{ id: 'yes', label: 'shown here' }, { id: 'no', label: 'not yet' }],
+      match: (i, id) => (id === 'yes')
+        === (i.algorithms ?? []).some(a => (algoById[a]?.code ?? []).length > 0),
+    },
   ],
   /* Two levels, but only while browsing. A package with several algorithms appears under each
      of them, which is what makes the inner heading answer "what implements Delaunay?" rather
      than "what is about Voronoi?" — and which would make any filtered count a lie, since one
      match can produce seven cards. Filtering therefore drops to a flat list of the matches. */
   flattenWhenFiltered: true,
+  /* The code belongs to an algorithm, not to a package, so it hangs off the algorithm headings
+     — which the flat list does not have. Asking for it therefore has to bring it along, or the
+     filter named after it would return everything except it. Technology and search still narrow
+     the samples; registry, role and algorithm link are properties of a package and say nothing
+     about a block of code. */
+  flatExtras: st => {
+    if (!st.active.get('code')?.has('yes')) return null;
+    const tech = st.active.get('tech');
+    const terms = st.q ? st.q.split(/\s+/) : [];
+    const samples = algorithms
+      .filter(a => (a.code ?? []).length)
+      .flatMap(a => a.code.map(s => ({ a, s })))
+      .filter(({ s }) => !tech.size || tech.has(s.technology))
+      .filter(({ a, s }) => {
+        const hay = `${a.name} ${s.note ?? ''} ${s.code}`.toLowerCase();
+        return terms.every(t => hay.includes(t));
+      })
+      .sort((x, y) => (tagById[x.a.concept_tag]?.name ?? '').localeCompare(tagById[y.a.concept_tag]?.name ?? '')
+        || x.a.name.localeCompare(y.a.name));
+    if (!samples.length) return null;
+    const box = el('div', 'flat-code');
+    box.append(el('h3', 'flat-code-head', `Reference code (${samples.length})`));
+    const body = el('div', 'grp-body');
+    for (const { a, s } of samples) body.append(codeCard(a, s));
+    box.append(body);
+    return box;
+  },
   groupBy: i => i.concept_tag,
   groupHeader: (concept, rows) => {
     const box = el('span', 'grp-title');
@@ -1559,42 +1601,11 @@ const implPage = filterablePage({
     const samples = a.code ?? [];
     if (!samples.length) return null;
     const box = el('div', 'subgrp-code');
-    box.id = `code-${algoId}`;
     for (const s of samples) box.append(codeCard(a, s));
     return box;
   },
   renderItem: implRow,
 });
-
-/* An index of the reference code. Without it the samples are findable only by scrolling: the
-   first one sits 7,600 pixels down a 94,000-pixel page, and the filter that used to surface
-   them defeated itself once filtering began flattening the page. Each entry clears the search
-   and filters first, because the code lives on the algorithm headings and a filtered page has
-   none. */
-const codeIndexHost = $('#code-index');
-const withCode = algorithms.filter(a => (a.code ?? []).length)
-  .sort((a, b) => (tagById[a.concept_tag]?.name ?? '').localeCompare(tagById[b.concept_tag]?.name ?? '')
-    || a.name.localeCompare(b.name));
-
-for (const a of withCode) {
-  const chip = el('button', 'code-chip');
-  chip.append(el('span', 'code-chip-name', a.name));
-  chip.append(el('span', 'code-chip-meta',
-    `${a.code[0].lines} lines · ${techById[a.code[0].technology]?.name?.split(' /')[0] ?? a.code[0].technology}`));
-  chip.title = `${tagById[a.concept_tag]?.name ?? a.concept_tag} — ${a.summary ?? ''}`;
-  chip.addEventListener('click', () => {
-    implPage.reset();
-    const box = document.getElementById(`code-${a.id}`);
-    if (!box) return;
-    for (const el2 of [box.closest('.grp'), box.closest('.subgrp')]) el2?.classList.remove('collapsed');
-    const details = box.querySelector('.code-sample');
-    if (details) details.open = true;
-    box.scrollIntoView({ block: 'start' });
-    box.classList.add('code-flash');
-    setTimeout(() => box.classList.remove('code-flash'), 1600);
-  });
-  codeIndexHost.append(chip);
-}
 
 const techListHost = $('#tech-list');
 for (const t of technologies) {
