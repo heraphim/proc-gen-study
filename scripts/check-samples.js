@@ -22,29 +22,31 @@ const dir = mkdtempSync(join(tmpdir(), 'procgen-samples-'));
 const failures = [];
 let ran = 0, skipped = 0;
 
-for (const [algoId, samples] of Object.entries(ann.samples ?? {})) {
-  for (const s of samples) {
-    const runner = RUNNER[s.technology];
-    if (!runner) { skipped++; console.log(`  skip  ${algoId} (${s.technology}: no runner)`); continue; }
+try {
+  for (const [algoId, samples] of Object.entries(ann.samples ?? {})) {
+    for (const s of samples) {
+      const runner = RUNNER[s.technology];
+      if (!runner) { skipped++; console.log(`  skip  ${algoId} (${s.technology}: no runner)`); continue; }
 
-    const file = join(dir, `${algoId}.${runner.ext}`);
-    const code = Array.isArray(s.code) ? s.code.join('\n') : String(s.code);
-    writeFileSync(file, code);
+      const file = join(dir, `${algoId}.${runner.ext}`);
+      const code = Array.isArray(s.code) ? s.code.join('\n') : String(s.code);
+      writeFileSync(file, code);
 
-    const started = Date.now();
-    try {
-      execFileSync(runner.cmd, [file], { cwd: dir, stdio: 'pipe', timeout: 180000 });
-      ran++;
-      console.log(`  ok    ${algoId} (${s.technology}, ${code.split('\n').length} lines, ${Date.now() - started} ms)`);
-    } catch (e) {
-      const detail = String(e.stderr ?? e.stdout ?? e.message).trim().split('\n').slice(0, 4).join(' / ');
-      failures.push(`${algoId} (${s.technology}): ${detail}`);
-      console.log(`  FAIL  ${algoId} (${s.technology})`);
+      const started = Date.now();
+      try {
+        execFileSync(runner.cmd, [file], { cwd: dir, stdio: 'pipe', timeout: 180000 });
+        ran++;
+        console.log(`  ok    ${algoId} (${s.technology}, ${code.split('\n').length} lines, ${Date.now() - started} ms)`);
+      } catch (e) {
+        const detail = String(e.stderr ?? e.stdout ?? e.message).trim().split('\n').slice(0, 4).join(' / ');
+        failures.push(`${algoId} (${s.technology}): ${detail}`);
+        console.log(`  FAIL  ${algoId} (${s.technology})`);
+      }
     }
   }
+} finally {
+  rmSync(dir, { recursive: true, force: true });
 }
-
-rmSync(dir, { recursive: true, force: true });
 
 console.log(`\n${ran} samples ran, ${skipped} skipped, ${failures.length} failed`);
 if (failures.length) {

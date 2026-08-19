@@ -18,7 +18,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { readSeed } from './research-seed.js';
+import { readSeed, conceptName } from './research-seed.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ann = name => JSON.parse(readFileSync(join(root, 'data', 'annotations', `${name}.json`), 'utf8'));
@@ -31,9 +31,10 @@ const argv = process.argv.slice(2);
 const has = f => argv.includes(f);
 const val = f => { const i = argv.indexOf(f); return i === -1 ? null : argv[i + 1]; };
 
+// Concepts carry a display name too — a prompt asking about the slug `vor` researches nothing.
 const subjects = [
   ...new Set([...Object.keys(concepts.eli5), ...concepts.additions.map(a => a.id)]),
-].map(id => ({ key: `concept:${id}`, layer: 'concept', id }))
+].map(id => ({ key: `concept:${id}`, layer: 'concept', id, name: conceptName(id) }))
   .concat(algorithms.map(a => ({ key: `algorithm:${a.id}`, layer: 'algorithm', id: a.id, name: a.name, concept: a.concept })));
 
 const counts = new Map(subjects.map(s => [s.key, 0]));
@@ -54,7 +55,9 @@ function hash(str) {
 }
 
 const eligible = subjects.filter(s => !excluded.has(s.key));
-const lowest = Math.min(...eligible.map(s => counts.get(s.key)));
+// 0, not Infinity, when --exclude has emptied the pool — the queue below is empty either way,
+// but --stats would otherwise print "current round: Infinity".
+const lowest = eligible.length ? Math.min(...eligible.map(s => counts.get(s.key))) : 0;
 
 const queue = eligible
   .filter(s => counts.get(s.key) === lowest)

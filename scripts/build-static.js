@@ -9,7 +9,7 @@
 //
 // Usage: node scripts/build-static.js [--base=/repo/]   (or BASE_PATH=/repo/)
 
-import { mkdir, rm, copyFile, writeFile, readFile, readdir } from 'node:fs/promises';
+import { mkdir, rm, cp, copyFile, writeFile, readFile, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -59,9 +59,11 @@ async function main() {
   await rm(DIST, { recursive: true, force: true });
   await mkdir(join(DIST, 'api'), { recursive: true });
 
-  // Assets, verbatim. index.html is handled separately, below.
-  for (const name of await readdir(PUBLIC)) {
-    if (name !== 'index.html') await copyFile(join(PUBLIC, name), join(DIST, name));
+  // Assets, verbatim — subdirectories included. index.html is handled separately, below.
+  for (const ent of await readdir(PUBLIC, { withFileTypes: true })) {
+    if (ent.name === 'index.html') continue;
+    if (ent.isDirectory()) await cp(join(PUBLIC, ent.name), join(DIST, ent.name), { recursive: true });
+    else await copyFile(join(PUBLIC, ent.name), join(DIST, ent.name));
   }
 
   await writeFile(join(DIST, 'api', 'bootstrap.json'), JSON.stringify(bootstrap()));

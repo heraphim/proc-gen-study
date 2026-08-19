@@ -35,9 +35,10 @@
 // minimum; a seat whose provider refuses is dropped for the run rather than ending it.
 
 import { readFileSync, writeFileSync } from 'node:fs';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { conceptName } from './research-seed.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const annPath = name => join(root, 'data', 'annotations', `${name}.json`);
@@ -168,8 +169,13 @@ const PROVIDERS = Object.fromEntries(Object.entries(SEATS).filter(([k]) => ACTIV
 for (const k of ACTIVE) if (!SEATS[k]) { console.error(`unknown seat "${k}" — known: ${Object.keys(SEATS).join(', ')}`); process.exit(1); }
 
 // Half by default, so a day's research does not consume the whole free allowance and leave
-// nothing for anything else.
+// nothing for anything else. Validated hard: NaN here would make every budget comparison
+// false and silently spend the entire allowance.
 const FRACTION = Number(val('--budget-fraction') ?? 0.5);
+if (!Number.isFinite(FRACTION) || FRACTION <= 0 || FRACTION > 1) {
+  console.error(`--budget-fraction must be a number in (0, 1], got "${val('--budget-fraction')}"`);
+  process.exit(1);
+}
 
 // Diagnostics run before the guards below, because their whole purpose is telling you what to
 // configure so those guards pass. Refusing to list models until the models are right is a
@@ -507,10 +513,12 @@ function classifyAttribution(record, answers) {
   // Two seats agreeing is only two opinions if they are two families. Three Llama re-hosts
   // agreeing is one model agreeing with itself three times, and with more providers that stops
   // being hypothetical.
+  // Number() on both sides everywhere a year is compared: models return "1985" and 1985
+  // interchangeably, and a string-vs-number miss here files a real agreement as a dispute.
   let consensus = null;
   for (const c of confident) {
     const peer = usable.find(o => o !== c
-      && o.answer.year === c.answer.year
+      && Number(o.answer.year) === Number(c.answer.year)
       && seatFamily.get(o.provider) !== seatFamily.get(c.provider));
     if (peer) { consensus = c.answer; break; }
   }
@@ -522,18 +530,21 @@ function classifyAttribution(record, answers) {
   }
 
   const yearMatches = Number(record.year) === Number(consensus.year);
-  const authorsMatch = sameAuthors(record.authors?.split(/[,;]| and /), consensus.authors);
+  // A record with no authors cannot be contradicted on authors — the year is its whole claim.
+  const authorsMatch = record.authors == null
+    ? true
+    : sameAuthors(record.authors.split(/[,;]| and /), consensus.authors);
   if (yearMatches && authorsMatch) {
     return { agreement: 'confirmed', note: `${usable.length} models agree on ${consensus.year}, matching the record` };
   }
   // Who exactly backs this, by family. Three or more is the bar for proposing an edit rather than
   // only reporting one: with six seats that is a real majority, and one family agreeing with
   // itself across two providers cannot reach it.
-  const backing = usable.filter(o => o.answer.year === consensus.year);
+  const backing = usable.filter(o => Number(o.answer.year) === Number(consensus.year));
   const families = [...new Set(backing.map(o => seatFamily.get(o.provider)))];
   return {
     agreement: 'against-catalogue',
-    note: `${families.length} families agree on ${consensus.year} — ${(consensus.authors ?? []).join(', ')} (${consensus.title ?? 'title not given'}); the record says ${record.year} — ${record.authors}`,
+    note: `${families.length} families agree on ${consensus.year} — ${(consensus.authors ?? []).join(', ')} (${consensus.title ?? 'title not given'}); the record says ${record.year} — ${record.authors ?? 'no authors recorded'}`,
     proposal: {
       year: consensus.year,
       authors: consensus.authors ?? [],
@@ -613,6 +624,10 @@ const concepts = ann('concepts');
 async function research(subject) {
   const isAlgorithm = subject.layer === 'algorithm';
   const record = isAlgorithm ? algorithms.find(a => a.id === subject.id) : null;
+  if (isAlgorithm && !record) {
+    console.error(`no algorithm with id "${subject.id}" — check the --subject value against algorithms.json`);
+    process.exit(1);
+  }
   const displayName = isAlgorithm ? record.name : (subject.name ?? subject.id);
   const known = isAlgorithm ? [] : algorithms.filter(a => a.concept === subject.id).map(a => a.name);
   const prompt = isAlgorithm ? attributionPrompt(displayName) : membershipPrompt(displayName);
@@ -621,7 +636,9 @@ async function research(subject) {
   const answers = [];
   const failures = [];
   for (const [provider, p] of Object.entries(PROVIDERS)) {
-    if (!p.key()) { models.push({ provider, model: p.model, verdict: null, unsure: true, tokens: 0, skipped: 'no key' }); continue; }
+    // Not recorded. A seat with no key never answered, and the rule at the bottom of this loop
+    // applies to it too: keeping it as an empty verdict makes a two-seat answer look bigger.
+    if (!p.key()) continue;
     if (disabled.has(provider)) continue;
     if (calls[provider] >= budget[provider]) {
       disabled.add(provider);
@@ -731,7 +748,7 @@ async function research(subject) {
     review: {
       layer: subject.layer, target: subject.id, round: subject.round,
       reviewed: today, agreement: verdict.agreement, note: verdict.note,
-      models: models.map(({ skipped, error, ...m }) => m),
+      models,
     },
     links, verdict, displayName,
   };
@@ -739,9 +756,17 @@ async function research(subject) {
 
 // ---- run --------------------------------------------------------------------
 
-const pick = n => JSON.parse(execSync(
-  `node scripts/pick-subject.js --count ${n}${val('--exclude') ? ` --exclude ${val('--exclude')}` : ''}`,
-  { cwd: root, encoding: 'utf8' }));
+// execFileSync with an argument array, not a shell string — --exclude arrives from a workflow
+// input and must never be interpreted by a shell.
+const pick = n => {
+  const args = ['scripts/pick-subject.js', '--count', String(n)];
+  if (val('--exclude')) args.push('--exclude', val('--exclude'));
+  const raw = execFileSync('node', args, { cwd: root, encoding: 'utf8' });
+  try { return JSON.parse(raw); } catch {
+    console.error(`pick-subject.js did not return JSON:\n${raw.slice(0, 400)}`);
+    process.exit(1);
+  }
+};
 
 const measuring = has('--measure');
 const writes = !measuring && !has('--dry-run');
@@ -751,7 +776,13 @@ if (val('--subject')) {
   const [layer, ...rest] = val('--subject').split(':');
   const id = rest.join(':');
   planned = 1;
-  var subjects = [{ key: val('--subject'), layer, id, round: 1 }];
+  // The round continues from what reviews.json already holds — a hardcoded 1 wrote a duplicate
+  // round-1 row on the second run, which the migration then rejected.
+  const prior = (ann('reviews').reviews ?? []).filter(r => r.layer === layer && r.target === id).length;
+  var subjects = [{
+    key: val('--subject'), layer, id, round: prior + 1,
+    name: layer === 'concept' ? conceptName(id) : undefined,
+  }];
 } else {
   // Without an explicit count, take the budget's worth. One request per seat per subject, so the
   // seat with the smallest request allowance sets how far a run can go. No history needed for
@@ -763,6 +794,12 @@ if (val('--subject')) {
   }
   var subjects = pick(planned);
   if (!Array.isArray(subjects)) subjects = [subjects];
+  // An emptied queue comes back as null (single pick) or [] — not something to iterate into.
+  subjects = subjects.filter(Boolean);
+  if (!subjects.length) {
+    console.log('the queue is empty — nothing to research');
+    process.exit(0);
+  }
 }
 
 const disabled = new Set();
@@ -778,9 +815,10 @@ for (const s of subjects) {
   // run after one, because 1,262 tokens read as far past a budget of 25 requests. A leftover
   // from moving the budget off tokens, and one that looks like a working stop condition.
   //
-  // Every seat being out is what ends a run. One seat being out only means the others carry it,
-  // and a subject is skipped by the two-answer rule if too few remain -- so a run does not stop
-  // because its most limited seat did.
+  // All but one seat being out is what ends a run — one leftover seat has nothing to compare
+  // against. Below that threshold a seat going out only means the others carry it, and a subject
+  // is skipped by the two-answer rule if too few remain. (With the two-seat minimum line-up,
+  // one seat going out therefore does end the run.)
   const spentOut = Object.keys(PROVIDERS).filter(k => calls[k] >= budget[k] || disabled.has(k));
   if (spentOut.length >= Object.keys(PROVIDERS).length - 1) {
     stopped = `only ${Object.keys(PROVIDERS).length - spentOut.length} seat left with budget (${spentOut.join(', ')} spent or disabled)`;
@@ -788,7 +826,6 @@ for (const s of subjects) {
   }
 
   const out = await research(s);
-  if (out.exhausted) { stopped = `${out.exhausted} is rate limited — the day's allowance is gone`; break; }
   if (out.unanswered) {
     unanswered.push(out);
     console.error(`  SKIPPED            ${s.key.padEnd(42)} fewer than two models answered — not recorded, round not consumed`);
@@ -821,7 +858,10 @@ for (const k of Object.keys(PROVIDERS)) {
 const used = Object.keys(PROVIDERS).filter(k => calls[k] > 0);
 if (done.length && used.length) {
   const affordable = Math.min(...used.map(k => Math.floor(budget[k] / (calls[k] / done.length))));
-  console.log(`\nat this rate a run affords ${affordable} subjects, so ${Math.ceil(220 / Math.max(1, affordable))} runs complete a round of all 220.`);
+  // Counted, not hardcoded — the same enumeration pick-subject.js rotates over.
+  const totalSubjects = new Set([...Object.keys(concepts.eli5), ...concepts.additions.map(a => a.id)]).size
+    + algorithms.length;
+  console.log(`\nat this rate a run affords ${affordable} subjects, so ${Math.ceil(totalSubjects / Math.max(1, affordable))} runs complete a round of all ${totalSubjects}.`);
 }
 
 if (writes && done.length) {
@@ -829,9 +869,13 @@ if (writes && done.length) {
   reviews.reviews = [...(reviews.reviews ?? []), ...done.map(d => d.review)];
   writeFileSync(annPath('reviews'), `${JSON.stringify(reviews, null, 2)}\n`);
 
-  const reading = ann('further-reading');
-  reading.reading = [...(reading.reading ?? []), ...allLinks.map(({ detail, ...l }) => l)];
-  writeFileSync(annPath('further-reading'), `${JSON.stringify(reading, null, 2)}\n`);
+  // Only touched when there is something to add — an empty rewrite still reserialises the file,
+  // and any formatting drift from the committed version becomes a phantom diff in the nightly PR.
+  if (allLinks.length) {
+    const reading = ann('further-reading');
+    reading.reading = [...(reading.reading ?? []), ...allLinks.map(({ detail, ...l }) => l)];
+    writeFileSync(annPath('further-reading'), `${JSON.stringify(reading, null, 2)}\n`);
+  }
 
   // Where three or more families back the same answer against the record, edit the record and
   // log what it used to say. Fewer than three is reported and left alone.
@@ -1011,19 +1055,21 @@ if (val('--markdown')) {
   L.push('', `## Further reading`, '');
   L.push(`${kept.length} links verified, ${binned.length} rejected. A link is kept only if it answered 200 and its title matched what it was described as; a live page that is not the page described fails the same way a dead one does.`);
   if (binned.length) {
-    L.push('', `Rejected candidates are kept as rows. Two of the three models cannot browse, so the share of URLs they invent is the measure of how far to trust them — and that number is the argument for asking three.`, '');
+    L.push('', `Rejected candidates are kept as rows. No seat here can browse, so the share of URLs a model invents is the measure of how far to trust it — and that number is the argument for asking several.`, '');
     const why = {};
     for (const l of binned) why[l.reason] = (why[l.reason] ?? 0) + 1;
     for (const [r, n] of Object.entries(why)) L.push(`- ${n} × ${r}`);
   }
 
-  L.push('', '## Tokens', '');
-  L.push('| provider | spent | budget | per subject |');
-  L.push('| --- | --- | --- | --- |');
+  // Requests against the request budget, tokens as their own column — the budget is measured
+  // in requests, and printing tokens next to it read as a budget blown fifty times over.
+  L.push('', '## Spend', '');
+  L.push('| provider | requests | request budget | tokens | tokens per subject |');
+  L.push('| --- | --- | --- | --- | --- |');
   for (const [k, v] of Object.entries(spent)) {
-    L.push(`| ${k} | ${v} | ${budget[k]} | ${done.length ? Math.round(v / done.length) : 0} |`);
+    L.push(`| ${k} | ${calls[k]} | ${budget[k]} | ${v} | ${done.length ? Math.round(v / done.length) : 0} |`);
   }
-  L.push('', `Budget is ${FRACTION * 100}% of each provider's daily free allowance, so a run leaves the rest of the day's quota alone.`);
+  L.push('', `The request budget is ${FRACTION * 100}% of each provider's daily free allowance, so a run leaves the rest of the day's quota alone.`);
 
   writeFileSync(val('--markdown'), `${L.join('\n')}\n`);
 }

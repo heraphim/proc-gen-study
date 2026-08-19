@@ -4,7 +4,7 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { dirname, join, normalize, extname } from 'node:path';
+import { dirname, join, normalize, extname, sep } from 'node:path';
 import { openCatalogue, ROUTES } from './lib/catalogue.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)));
@@ -20,6 +20,11 @@ const MIME = {
   '.js': 'text/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
   '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.ico': 'image/x-icon',
+  '.woff2': 'font/woff2',
+  '.txt': 'text/plain; charset=utf-8',
+  '.map': 'application/json; charset=utf-8',
 };
 
 function send(res, status, body, type = 'application/json; charset=utf-8') {
@@ -31,7 +36,7 @@ async function serveStatic(res, urlPath) {
   const isAsset = extname(urlPath) !== '';
   const rel = normalize(isAsset ? urlPath : '/index.html').replace(/^(\.\.[/\\])+/, '');
   const file = join(PUBLIC, rel);
-  if (!file.startsWith(PUBLIC)) return send(res, 403, { error: 'forbidden' });
+  if (!file.startsWith(PUBLIC + sep)) return send(res, 403, { error: 'forbidden' });
 
   // Unknown non-asset paths get index.html too, but with a 404 status, so a typo in the
   // address bar is visible to tooling without breaking the page for a human.

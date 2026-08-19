@@ -88,6 +88,12 @@ with a concept but no algorithm link is a **signal**, not an omission. Either th
 implements has no row yet, or the package is not a generation library and was mis-roled. Both
 cases have been found this way.
 
+Rows in `implementations.json` additionally carry `license_registry`: the registry's raw
+licence string, recorded by `scripts/poll-registries.js` so that a change in the registry's own
+answer is detectable against itself. It is poller-owned like `version`, `last_release`, `stars`
+and `archived`, lives only in the annotation file, and has no column in the schema — the
+migration ignores it.
+
 ### The evidence side
 
 | Table | Notes |

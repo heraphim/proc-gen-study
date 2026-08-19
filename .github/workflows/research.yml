@@ -64,6 +64,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           pending=$(gh pr view research/nightly --json commits --jq '.commits | length' 2>/dev/null || echo 0)
+          # gh can also exit 0 with empty output; [ "" -ge 7 ] would abort the whole run.
+          case "$pending" in (''|*[!0-9]*) pending=0;; esac
           echo "pending=$pending" >> "$GITHUB_OUTPUT"
           if [ "$pending" -ge 7 ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
@@ -93,6 +95,12 @@ jobs:
             git diff --cached --quiet || echo "carried forward unmerged findings from research/nightly"
           fi
 
+      # The database is derived and not committed, and concept display names resolve through it
+      # (tag names live in the source HTML). Without this the prompts would ask about slugs.
+      - name: Build the database
+        if: steps.backlog.outputs.skip == 'false' && github.event.inputs.list_models != 'true'
+        run: npm run migrate
+
       - name: Which models does each provider actually serve?
         if: github.event.inputs.list_models == 'true'
         env:
@@ -113,11 +121,14 @@ jobs:
           MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
           COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          # Via env, not ${{ }} inside the script — expansion happens before the shell sees the
+          # text, so an interpolated dispatch input would be spliced into the command verbatim.
+          PROVIDERS_INPUT: ${{ github.event.inputs.providers }}
         run: |
           node scripts/research.js \
             --budget-fraction '${{ github.event.inputs.budget_fraction || 0.5 }}' \
             --count '${{ github.event.inputs.count || 10 }}' \
-            ${{ github.event.inputs.providers && format('--providers {0}', github.event.inputs.providers) || '' }} \
+            ${PROVIDERS_INPUT:+--providers "$PROVIDERS_INPUT"} \
             ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }} \
             ${{ github.event.inputs.debug == 'true' && '--debug' || '' }} \
             --markdown research-report.md
@@ -135,6 +146,8 @@ jobs:
 
       # The gate. A run that produced something the migration rejects proposes nothing: the
       # fairness invariant, the round contiguity and the link rules all fail here first.
+      # The build runs too — a bot PR never triggers validate.yml (events created with the
+      # workflow's own GITHUB_TOKEN start no further workflows), so this is its only build check.
       - name: Validate
         if: steps.backlog.outputs.skip == 'false' && github.event.inputs.list_models != 'true'
         run: |
@@ -142,6 +155,7 @@ jobs:
           npm run check-samples
           npm run check-register
           npm run check-guards
+          npm run build
 
       - name: Anything to propose?
         if: steps.backlog.outputs.skip == 'false' && github.event.inputs.list_models != 'true'
@@ -164,7 +178,8 @@ jobs:
           # Everything a run may touch. Listing only the review files silently dropped the
           # catalogue edits and their correction rows -- the run made them, the migration passed
           # them, and the commit left them behind.
-          git add data/annotations/reviews.json data/annotations/further-reading.json                   data/annotations/algorithms.json data/annotations/corrections.json
+          git add data/annotations/reviews.json data/annotations/further-reading.json \
+                  data/annotations/algorithms.json data/annotations/corrections.json
           git commit -m "Research round: $(date -u +%Y-%m-%d)"
           git push --force-with-lease origin research/nightly
 

@@ -1,13 +1,14 @@
 {
   "_about": "Implementations, each resolved against its registry before being written down. Five registries are used, because restricting the check to npm and PyPI restricted the catalogue to JavaScript and Python.",
   "_method": "Every row resolved with a 200 from its registry: registry.npmjs.org, pypi.org/pypi/<name>/json, crates.io/api/v1/crates, api.nuget.org/v3-flatcontainer, or api.github.com/repos for the C++ and shader libraries that live only on GitHub. Six original candidates 404ed and were dropped; five more resolved to unrelated projects sharing a name — PyPI `sdf` is Scientific Data Format, `wfc` is WebForms Core — and were dropped too. The same trap caught two more during the expansion pass: PyPI `pymo` is MongoClient instrumentation, not motion capture, and PyPI `meep` is a task runner, not the MIT photonics solver. All 71 original rows were then re-resolved in full: none had disappeared and no version had moved.",
-  "_caveat": "Version, licence and release date are the registry's answer, not a judgement. Two caveats worth carrying:\n\nFirst, four GitHub-hosted rows have no SPDX licence identifier — OpenSubdiv, CGAL, mxgmn's WaveFunctionCollapse and lygia all carry terms that GitHub cannot classify automatically. Read the repository before shipping any of them.\n\nSecond, one row is listed despite being unmaintained: Accord.Math has had no release since 2017, and is here because a large amount of existing C# generation code depends on it. That is recorded rather than hidden.",
+  "_caveat": "Version, licence and release date are the registry's answer, not a judgement. Two caveats worth carrying:\n\nFirst, five GitHub-hosted rows have no SPDX licence identifier — OpenSubdiv, CGAL, mxgmn's WaveFunctionCollapse, lygia and nothings/stb all carry terms that GitHub cannot classify automatically. Read the repository before shipping any of them.\n\nSecond, one row is listed despite being unmaintained: Accord.Math has had no release since 2017, and is here because a large amount of existing C# generation code depends on it. That is recorded rather than hidden.",
   "_roles": {
     "generation-library": "Produces content.",
     "output-surface": "Turns generated data into something perceivable.",
     "solver": "Searches for something satisfying constraints.",
     "model": "A learned model, called rather than run.",
-    "authoring-app": "A human opens it. Cannot be called from a server.",
+    "reference-implementation": "The algorithm author's own code — kept as the definition of the method rather than as a dependency to install.",
+    "authoring-app": "A human opens it. Cannot be called from a server. No row currently carries it.",
     "analysis": "Analyses existing content. Feeds generation but does not generate.",
     "infrastructure": "Numerical or runtime substrate. Implements no generative algorithm itself.",
     "post-processing": "Transforms already-generated output."

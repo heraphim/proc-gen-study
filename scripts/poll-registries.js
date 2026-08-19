@@ -327,7 +327,7 @@ if (has('--write')) {
     if (f.archived) f.row.archived = true;
     touched++;
   }
-  file._polled = `Registry state as of ${today}, refreshed by scripts/poll-registries.js. Do not hand-edit version, last_release, stars or archived — the next run overwrites them. Licence differences are reported by the poller but never written, because the registry's answer and the catalogue's are not always disagreeing.`;
+  file._polled = `Registry state as of ${today}, refreshed by scripts/poll-registries.js. Do not hand-edit version, last_release, stars, archived or license_registry — the next run overwrites them. license_registry is the registry's raw licence string, kept so a change in the registry's own answer is detectable; the curated license field is reported against but never written, because the registry's answer and the catalogue's are not always disagreeing.`;
   writeFileSync(IMPL, JSON.stringify(file, null, 2) + '\n');
   console.log(`\nwrote ${touched} updated rows to data/annotations/implementations.json`);
 }

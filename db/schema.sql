@@ -107,7 +107,8 @@ CREATE TABLE entry_tag (
   PRIMARY KEY (entry_id, tag_id)
 );
 
--- Which sources/operators a generator is built from. Empty until the clustering pass.
+-- Which sources/operators a generator is built from. Planned: no pass writes it and nothing
+-- reads it yet — the clustering pass it waits for has not been scheduled.
 CREATE TABLE entry_uses (
   entry_id      INTEGER NOT NULL REFERENCES entry(id) ON DELETE CASCADE,
   uses_entry_id INTEGER NOT NULL REFERENCES entry(id) ON DELETE CASCADE,
@@ -195,7 +196,10 @@ CREATE TABLE implementation (
   -- against api.github.com rather than a package registry.
   ecosystem    TEXT,
   concept_tag  TEXT REFERENCES tag(id),
-  role         TEXT,        -- generation-library | output-surface | solver | model | authoring-app
+  -- generation-library | solver | output-surface | model | reference-implementation |
+  -- analysis | infrastructure | post-processing. The legend lives in `_roles` in
+  -- data/annotations/implementations.json.
+  role         TEXT,
   version      TEXT,
   last_release TEXT,
   description  TEXT,
@@ -210,8 +214,8 @@ CREATE TABLE implementation (
   UNIQUE (ecosystem, package)
 );
 
--- Which algorithms an implementation actually implements. Many-to-many: `scipy` covers
--- Voronoi, Halton, Sobol and B-splines; simplex noise has nine implementations.
+-- Which algorithms an implementation actually implements. Many-to-many: `scipy` covers six
+-- algorithms across four concepts; simplex noise has a dozen implementations.
 -- An implementation with no row here is a signal — either the algorithm is missing from
 -- the algorithm layer, or the thing is not a generation library and was mis-roled.
 CREATE TABLE implementation_algorithm (
@@ -323,14 +327,19 @@ CREATE TABLE review (
 CREATE TABLE review_model (
   review_id INTEGER NOT NULL REFERENCES review(id) ON DELETE CASCADE,
   model     TEXT NOT NULL,
-  provider  TEXT NOT NULL,        -- google | groq | cerebras
+  -- One of the seats in scripts/research.js: google | groq | groq-oss | cerebras | mistral |
+  -- cohere | openrouter. scripts/migrate.js gates on the same list.
+  provider  TEXT NOT NULL,
   verdict   TEXT,                 -- the structured answer, as the model returned it
   unsure    INTEGER NOT NULL DEFAULT 0,
   -- Total tokens this one answer cost. Recorded per answer rather than per run so the average
   -- cost of a subject is measured from history instead of estimated, which is what lets a run
   -- know how many subjects it can still afford before it starts them.
   tokens    INTEGER,
-  PRIMARY KEY (review_id, model)
+  -- A seat is a (provider, model) pair — one provider may hold two seats on different models,
+  -- and two providers may in principle serve the same model id, so neither column alone is
+  -- unique within a review.
+  PRIMARY KEY (review_id, provider, model)
 );
 
 -- ---------------------------------------------------------------------------

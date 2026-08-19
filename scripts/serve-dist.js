@@ -6,7 +6,7 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname, join, normalize, extname } from 'node:path';
+import { dirname, join, normalize, extname, sep } from 'node:path';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(root, 'dist');
@@ -21,6 +21,11 @@ const MIME = {
   '.js': 'text/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
   '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.ico': 'image/x-icon',
+  '.woff2': 'font/woff2',
+  '.txt': 'text/plain; charset=utf-8',
+  '.map': 'application/json; charset=utf-8',
 };
 
 createServer(async (req, res) => {
@@ -36,7 +41,8 @@ createServer(async (req, res) => {
 
   for (const [file, status] of [[candidate, 200], ['/404.html', 404]]) {
     const abs = join(DIST, file);
-    if (!abs.startsWith(DIST)) break;
+    // `continue`, not `break`: a path that escapes dist/ still deserves the 404 page.
+    if (!abs.startsWith(DIST + sep)) continue;
     try {
       const body = await readFile(abs);
       res.writeHead(status, { 'content-type': MIME[extname(abs)] ?? 'application/octet-stream' });

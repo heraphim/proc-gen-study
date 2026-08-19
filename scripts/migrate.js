@@ -552,6 +552,7 @@ if (existsSync(SOURCE_ANNOTATIONS)) {
 
   (ann.sources ?? []).forEach((s, i) => {
     if (!s.url) { layerProblems.push(`source "${s.id}" has no url`); return; }
+    if (!s.title) { layerProblems.push(`source "${s.id}" has no title`); return; }
     if (!s.description) { layerProblems.push(`source "${s.id}" has no description of what it settles`); return; }
     if (seenUrl.has(s.url)) { layerProblems.push(`source "${s.id}" repeats the url of "${seenUrl.get(s.url)}"`); return; }
     seenUrl.set(s.url, s.id);
@@ -582,14 +583,16 @@ if (existsSync(CORRECTION_ANNOTATIONS)) {
   const ins = db.prepare(`
     INSERT INTO correction (layer, target_id, field, was, now, why, source_url, position)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`);
-  const LAYERS = new Set(['concept', 'algorithm', 'implementation', 'source-data', 'readme']);
+  // No 'concept' here: concept corrections live in concepts.json, which applies them as well as
+  // recording them, and the table's rows for that layer are written by the concept pass above.
+  const LAYERS = new Set(['algorithm', 'implementation', 'source-data', 'readme']);
 
   (ann.corrections ?? []).forEach((c, i) => {
-    if (!LAYERS.has(c.layer)) { layerProblems.push(`correction ${i} has unknown layer "${c.layer}"`); return; }
     if (c.layer === 'concept') {
       layerProblems.push(`correction on "${c.target}" belongs in concepts.json, which applies it as well as recording it`);
       return;
     }
+    if (!LAYERS.has(c.layer)) { layerProblems.push(`correction ${i} has unknown layer "${c.layer}"`); return; }
     if (!c.why) { layerProblems.push(`correction on "${c.target}" has no reason`); return; }
     ins.run(c.layer, c.target, c.field ?? null, c.was ?? null, c.now ?? null, c.why,
       c.source_url ?? null, 1000 + i);

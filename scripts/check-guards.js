@@ -27,7 +27,7 @@ try {
   const baseRev = JSON.parse(readFileSync(`${REV}.bak`, 'utf8'));
   const baseFur = JSON.parse(readFileSync(`${FUR}.bak`, 'utf8'));
 
-  const model = { model: 'gemini-2.5-flash', provider: 'google', verdict: { year: 1985 }, unsure: false };
+  const model = { model: 'gemini-3.6-flash', provider: 'google', verdict: { year: 1985 }, unsure: false };
   const review = (target, round, agreement = 'confirmed') =>
     ({ layer: 'algorithm', target, round, reviewed: '2026-08-18', agreement, models: [model] });
   const link = {
@@ -71,8 +71,11 @@ try {
   for (const f of [REV, FUR]) {
     if (existsSync(`${f}.bak`)) { copyFileSync(`${f}.bak`, f); rmSync(`${f}.bak`); }
   }
-  // Leave the database matching the restored annotations rather than the last fixture.
-  try { execSync('node scripts/migrate.js', { cwd: root, stdio: 'ignore' }); } catch { /* reported below */ }
+  // Leave the database matching the restored annotations rather than the last fixture. If this
+  // fails the database is still holding fixture data, which is exactly what this script exists
+  // to prevent — so it is a failure of the whole check, not something to swallow.
+  try { execSync('node scripts/migrate.js', { cwd: root, stdio: 'ignore' }); }
+  catch { results.push({ ok: false, label: 'restore migration (database may hold fixture data)' }); }
 }
 
 const failed = results.filter(r => !r.ok);

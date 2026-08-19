@@ -538,10 +538,17 @@ function provenanceBlock(layer, id) {
   return box;
 }
 
-const goToCatalogueTag = tag => () => {
-  state.tiers.clear(); state.domains.clear(); state.search = '';
+/* Every jump into the catalogue starts from a clean slate — a leftover axis filter from an
+   earlier visit would land the reader on "Nothing matches those filters". */
+function resetFilters() {
+  state.tiers.clear(); state.domains.clear(); state.tags.clear(); state.search = '';
   $('#search').value = '';
-  state.tags.clear(); state.tags.add(tag);
+  for (const set of state.axes.values()) set.clear();
+}
+
+const goToCatalogueTag = tag => () => {
+  resetFilters();
+  state.tags.add(tag);
   showView('catalogue'); renderAll(); window.scrollTo(0, 0);
 };
 const goToPage = page => () => { showView(page); window.scrollTo(0, 0); };
@@ -549,9 +556,7 @@ const goToPage = page => () => { showView(page); window.scrollTo(0, 0); };
 /* An axis value is only worth naming if you can see what carries it, so every value on every
    axis card is a link into the catalogue filtered to exactly that value. */
 const goToCatalogueAxis = (axisId, value) => () => {
-  state.tiers.clear(); state.domains.clear(); state.tags.clear(); state.search = '';
-  $('#search').value = '';
-  for (const set of state.axes.values()) set.clear();
+  resetFilters();
   state.axes.get(axisId)?.add(value);
   showView('catalogue'); renderAll(); window.scrollTo(0, 0);
 };
@@ -566,7 +571,7 @@ $('#headline').textContent =
   `${data.entries.length} entries · ${data.domains.length} domains · ${data.tags.length} tags`;
 
 $('#classified-note').textContent = tiered === data.entries.length
-  ? `Layer: all ${tiered} classified. Output type, input class, cost, difficulty and confidence are still empty.`
+  ? `Layer: all ${tiered} classified. Output type, cost, difficulty and confidence are still empty.`
   : `Layer: ${tiered} of ${data.entries.length} classified.`;
 
 $('#tier-hint').textContent = data.tierMeta?.test ?? '';
@@ -621,12 +626,16 @@ document.addEventListener('click', e => {
 
 /* ---------------- catalogue filtering ---------------- */
 
-function matches(entry) {
-  if (state.tiers.size && !state.tiers.has(entry.tier)) return false;
-  if (state.domains.size && !state.domains.has(entry.domain_id)) return false;
+/* `skip` names one facet ('tier', 'domain' or an axis id) to leave out of the test. Facet
+   counts need that: tier, domain and axis values are alternatives (OR within the facet), so
+   an option's count must ignore the facet's own current selection or every sibling of a
+   selected value would read as zero. */
+function matchesOtherFacets(entry, skip) {
+  if (skip !== 'tier' && state.tiers.size && !state.tiers.has(entry.tier)) return false;
+  if (skip !== 'domain' && state.domains.size && !state.domains.has(entry.domain_id)) return false;
   for (const t of state.tags) if (!entry.tags.includes(t)) return false;
   for (const [axisId, chosen] of state.axes) {
-    if (!chosen.size) continue;
+    if (axisId === skip || !chosen.size) continue;
     const col = axisColumn.get(axisId);
     if (!chosen.has(entry[col])) return false;
   }
@@ -635,6 +644,10 @@ function matches(entry) {
     if (!state.search.split(/\s+/).every(term => hay.includes(term))) return false;
   }
   return true;
+}
+
+function matches(entry) {
+  return matchesOtherFacets(entry, null);
 }
 
 function highlight(text) {
@@ -759,13 +772,17 @@ function renderActiveFilters() {
     $(`[data-clear="axis:${axisId}"]`)?.classList.toggle('on', chosen.size > 0);
 }
 
-/** Counts shown in the sidebar reflect what would remain if you added that filter. */
+/** Counts shown in the sidebar reflect what would remain if you added that filter. Tags are
+    cumulative (AND), so their counts come from the visible set; tier, domain and axis values
+    are alternatives (OR), so their counts ignore the facet's own current selection. */
 function renderFacetCounts(visible) {
   const domainCounts = {}, tagCounts = {}, tierCounts = {};
   for (const e of visible) {
-    domainCounts[e.domain_id] = (domainCounts[e.domain_id] ?? 0) + 1;
-    if (e.tier) tierCounts[e.tier] = (tierCounts[e.tier] ?? 0) + 1;
     for (const t of e.tags) tagCounts[t] = (tagCounts[t] ?? 0) + 1;
+  }
+  for (const e of state.data.entries) {
+    if (matchesOtherFacets(e, 'domain')) domainCounts[e.domain_id] = (domainCounts[e.domain_id] ?? 0) + 1;
+    if (e.tier && matchesOtherFacets(e, 'tier')) tierCounts[e.tier] = (tierCounts[e.tier] ?? 0) + 1;
   }
   for (const btn of document.querySelectorAll('#tier-list button')) {
     const n = tierCounts[btn.dataset.id] ?? 0;
@@ -785,7 +802,9 @@ function renderFacetCounts(visible) {
   for (const list of document.querySelectorAll('.axis-pills')) {
     const col = axisColumn.get(list.dataset.axis);
     const counts = {};
-    for (const e of visible) counts[e[col]] = (counts[e[col]] ?? 0) + 1;
+    for (const e of state.data.entries) {
+      if (matchesOtherFacets(e, list.dataset.axis)) counts[e[col]] = (counts[e[col]] ?? 0) + 1;
+    }
     for (const btn of list.querySelectorAll('button')) {
       const n = counts[btn.dataset.id] ?? 0;
       btn.querySelector('.n').textContent = n;
@@ -860,7 +879,7 @@ for (const ax of axisMeta.axes) {
   clear.dataset.clear = `axis:${ax.id}`;
   h.append(clear);
   box.append(h);
-  box.append(el('p', 'hint', ax.question));
+  box.append(el('p', 'hint', `${ax.question} Multiple values = entries matching any of them.`));
   const list = el('ul', 'pills axis-pills');
   list.dataset.axis = ax.id;
   for (const v of ax.values) {
@@ -896,9 +915,11 @@ filterDrawer.append(filterSummary);
   syncDrawer();
 }
 
-/** How many facet filters are on, so the closed drawer still says what it is hiding. */
+/** How many facet filters are on, so the closed drawer still says what it is hiding.
+    The axis facets live in the same drawer, so they count too. */
 function renderFilterSummary() {
-  const n = state.tiers.size + state.domains.size + state.tags.size;
+  let n = state.tiers.size + state.domains.size + state.tags.size;
+  for (const chosen of state.axes.values()) n += chosen.size;
   filterSummary.replaceChildren(
     el('span', null, 'Filters'),
     el('span', 'pt-n', n ? `${n} on` : 'none'),
@@ -911,13 +932,15 @@ $('#search').addEventListener('input', e => {
   writeUrl(true);
 });
 
-const CLEAR_TARGETS = { domain: state.domains, tag: state.tags, tier: state.tiers };
+// Getters, not the sets themselves: readUrl() replaces every set with a fresh one, so a
+// reference captured here would be an orphan by the time a clear button is clicked.
+const CLEAR_TARGETS = { domain: () => state.domains, tag: () => state.tags, tier: () => state.tiers };
 // Axis blocks are built from data, so their clear buttons register themselves rather than
 // being listed above alongside the three the markup hard-codes.
-for (const [axisId, chosen] of state.axes) CLEAR_TARGETS[`axis:${axisId}`] = chosen;
+for (const axisId of state.axes.keys()) CLEAR_TARGETS[`axis:${axisId}`] = () => state.axes.get(axisId);
 for (const btn of document.querySelectorAll('.clear')) {
   btn.addEventListener('click', () => {
-    CLEAR_TARGETS[btn.dataset.clear]?.clear();
+    CLEAR_TARGETS[btn.dataset.clear]?.()?.clear();
     renderAll();
   });
 }
@@ -1019,7 +1042,7 @@ for (const item of TIMELINE) {
 
 $('#hero-stats').textContent =
   `${data.entries.length} catalogued techniques · ${data.domains.length} domains · `
-  + `${data.caseStudies.length} shipped case studies · research phase, nothing built`;
+  + `${(data.caseStudies ?? []).length} shipped case studies · research phase, nothing built`;
 
 // domain spread strip, widest first
 const spreadHost = $('#domain-spread');
@@ -1034,9 +1057,8 @@ for (const d of [...data.domains].sort((a, b) => b.count - a.count)) {
   row.append(barWrap, el('div', 'ds-n', String(d.count)));
   row.title = d.blurb ?? '';
   row.addEventListener('click', () => {
-    state.tiers.clear(); state.tags.clear(); state.search = '';
-    $('#search').value = '';
-    state.domains.clear(); state.domains.add(d.id);
+    resetFilters();
+    state.domains.add(d.id);
     showView('catalogue'); renderAll(); window.scrollTo(0, 0);
   });
   spreadHost.append(row);
@@ -1107,7 +1129,8 @@ function writeUrl(replace = false) {
 function readUrl() {
   const view = ROUTES[urlToRoute()] ?? 'overview';
   const q = new URLSearchParams(location.search);
-  state.search = q.get('q') ?? '';
+  // Lowercased like every other writer of state.search — matches() only lowercases the haystack.
+  state.search = (q.get('q') ?? '').toLowerCase();
   $('#search').value = state.search;
   state.tiers = new Set(q.getAll('tier'));
   state.domains = new Set(q.getAll('domain'));
@@ -1124,7 +1147,7 @@ function entryRef(entry, label) {
   const b = el('button', 'entry-ref', label ?? entry.name);
   b.title = entry.description ?? '';
   b.addEventListener('click', () => {
-    state.tiers.clear(); state.domains.clear(); state.tags.clear();
+    resetFilters();
     state.search = entry.name.toLowerCase();
     $('#search').value = entry.name;
     showView('catalogue');
@@ -1228,9 +1251,8 @@ for (const [tier, question] of [
   head.append(tierBadge(tier), el('span', 'layer-n', `${tierCounts[tier] ?? 0}`));
   card.append(head, el('p', null, question));
   card.addEventListener('click', () => {
-    state.domains.clear(); state.tags.clear(); state.search = '';
-    $('#search').value = '';
-    state.tiers.clear(); state.tiers.add(tier);
+    resetFilters();
+    state.tiers.add(tier);
     showView('catalogue'); renderAll(); window.scrollTo(0, 0);
   });
   layerHost.append(card);
@@ -1583,7 +1605,8 @@ function codeBlock(sample) {
   const pre = el('pre', 'code-body');
   pre.append(el('code', null, sample.code));
   box.append(pre);
-  // The card header toggles on click; a click inside the code must not also collapse it.
+  // Belt and braces: the collapse listener sits on the card header, a sibling, so this
+  // click should never reach it — kept in case the toggle ever moves back to the card.
   box.addEventListener('click', ev => ev.stopPropagation());
   return box;
 }
@@ -1847,8 +1870,9 @@ filterablePage({
   },
   // Most-implemented algorithm first inside each concept; then oldest first, since the
   // order things were invented in is usually the order they build on each other.
+  // Undated last, not first — same rule as the bootstrap query in lib/catalogue.js.
   subGroupOrder: (a, b, subs) => subs.get(b).length - subs.get(a).length
-    || (algoById[a]?.year ?? 0) - (algoById[b]?.year ?? 0)
+    || (algoById[a]?.year ?? Infinity) - (algoById[b]?.year ?? Infinity)
     || a.localeCompare(b),
   /* Reference code sits above the packages that implement the same algorithm, because that is
      the comparison it exists for: this is the mechanism, and these are the libraries that wrap
@@ -1896,12 +1920,12 @@ for (const t of technologies) {
 filterablePage({
   toolbar: '#toolbar-cases',
   host: '#cases',
-  items: data.caseStudies,
+  items: data.caseStudies ?? [],
   noun: 'case studies',
   searchIn: c => [c.name, c.description, ...(c.tags ?? [])].join(' '),
   filters: [{
     key: 'tag', label: 'Concept',
-    options: [...new Set(data.caseStudies.flatMap(c => c.tags ?? []))].sort()
+    options: [...new Set((data.caseStudies ?? []).flatMap(c => c.tags ?? []))].sort()
       .map(t => ({ id: t, label: t })),
     match: (c, id) => (c.tags ?? []).includes(id),
   }],
@@ -1920,7 +1944,7 @@ filterablePage({
 filterablePage({
   toolbar: '#toolbar-pitfalls',
   host: '#pitfalls',
-  items: data.pitfalls,
+  items: data.pitfalls ?? [],
   noun: 'pitfalls',
   searchIn: p => `${p.name} ${p.description ?? ''}`,
   renderItem: p => entityCard({
@@ -1930,8 +1954,8 @@ filterablePage({
 });
 
 const refs = [
-  ...data.tools.map(t => ({ ...t, kind: 'tool' })),
-  ...data.reading.map(r => ({ ...r, kind: 'reading' })),
+  ...(data.tools ?? []).map(t => ({ ...t, kind: 'tool' })),
+  ...(data.reading ?? []).map(r => ({ ...r, kind: 'reading' })),
 ];
 
 filterablePage({
@@ -2177,11 +2201,17 @@ if (sqlEnabled) {
 async function runSql() {
   const host = $('#sql-result');
   host.textContent = '';
-  const res = await fetch(`${BASE}api/query`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ sql: $('#sql-input').value }),
-  }).then(r => r.json());
+  let res;
+  try {
+    res = await fetch(`${BASE}api/query`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ sql: $('#sql-input').value }),
+    }).then(r => r.json());
+  } catch (err) {
+    host.append(el('div', 'sql-error', `request failed: ${err.message}`));
+    return;
+  }
 
   if (res.error) {
     host.append(el('div', 'sql-error', res.error));
@@ -2222,31 +2252,49 @@ if (sqlEnabled) {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') runSql();
   });
 
-  $('#schema-text').textContent = `entry(id, group_id, name, description, position,
-      tier, output_type, input_class, compute_cost,
-      deterministic, realtime, difficulty, confidence, notes)
+  // Kept in step with db/schema.sql by hand — when a column moves there, it moves here.
+  $('#schema-text').textContent = `entry(id, group_id, name, description, position, tier,
+      output_type, input_class, compute_cost, addressing, runs_at,
+      realtime, difficulty, confidence, notes)
 grp(id, domain_id, name, position)
 domain(id, name, blurb, position)
-tag(id, name, facet, what, good, bad, watch, position)
+tag(id, name, facet, what, good, bad, watch, eli5, origin, position)
 entry_tag(entry_id, tag_id)
-entry_uses(entry_id, uses_entry_id)
+algorithm(id, name, concept_tag, year, authors, summary, description,
+      eli5, tier, source_type, citation, url, position)
+implementation(id, package, ecosystem, concept_tag, role, version,
+      last_release, description, repo, license, stars, archived, verified)
+implementation_algorithm(implementation_id, algorithm_id)
+implementation_technology(implementation_id, technology_id)
+technology(id, name, kind, note, position)
+code_sample(id, algorithm_id, technology, lines, note, code, position)
+source(id, url, title, kind, publisher, year, description, retrieved, position)
+source_link(source_id, layer, target_id, relation, note)
+correction(id, layer, target_id, field, was, now, why, source_url, position)
+review(id, layer, target_id, round, reviewed, agreement, note)
+review_model(review_id, model, provider, verdict, unsure, tokens)
+further_reading(id, layer, target_id, url, title, kind, found_by,
+      http_status, verified, rejected, reason)
 case_study(id, name, description, position)
 case_study_tag(case_study_id, tag_id)
 pitfall(id, name, description, position)
 tool(id, name, description, category, position)
 reading(id, name, description, category, position)
+entry_uses(entry_id, uses_entry_id)   -- planned, still empty
 
-Empty until the classification passes run:
-  entry.tier            source | operator | generator
-  entry.output_type     image | vector | mesh | audio | text | data | schedule | plan | field
-  entry.input_class     seed | seed+library | external-data
-  entry.compute_cost    trivial | moderate | heavy | offline-only
-  entry.deterministic   yes | no | conditional
-  entry.realtime        yes | no | with-caveats
-  entry.difficulty      wrap-a-library | weekend | month | research | unsolved
-  entry.confidence      attested | plausible | unverified
-  tag.facet             mechanism | representation | deployment
-  entry_uses            which sources/operators a generator is built from`;
+Filled classifications:
+  entry.tier          source | operator | generator
+  entry.input_class   seed | seed+library | external-data
+  entry.addressing    positional | replayable | accumulating
+  entry.runs_at       shader-time | ahead-of-time
+  tag.facet           block | representation | category | deployment
+
+Still NULL (see _still_empty in axes.json):
+  entry.output_type   image | vector | mesh | audio | text | data | schedule | plan | field
+  entry.compute_cost  trivial | moderate | heavy | offline-only
+  entry.realtime      yes | no | with-caveats
+  entry.difficulty    wrap-a-library | weekend | month | research | unsolved
+  entry.confidence    attested | plausible | unverified`;
 }
 
 readUrl();

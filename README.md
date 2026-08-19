@@ -125,8 +125,8 @@ plain-language explanation too. 26 of them also have the whole method as **worki
 the same algorithm, because that juxtaposition is what the code is for.
 
 **Implementations** — runnable code. Linked to algorithms, not concepts, and many-to-many:
-`scipy` implements six algorithms across four concepts; simplex noise has nine implementations
-in seven languages.
+`scipy` implements six algorithms across four concepts; simplex noise has a dozen
+implementations in six languages.
 
 **Technologies** — languages and runtimes. A separate axis: a property of where code can run,
 not of the idea it implements.
@@ -231,8 +231,9 @@ a reviewable diff you can argue with line by line:
 | `reviews.json` | what the scheduled audit found, one entry per subject per round, with each model's answer kept separately. Written by the audit and read by the rotation, so it is data the automation depends on rather than a log of it |
 | `further-reading.json` | write-ups and talks for a concept or algorithm, each URL fetched and title-matched before it is accepted. Rejected candidates stay, with the reason |
 
-Each file carries `_contested`, `_rejected` or `_orphan_reason` notes recording calls that could
-reasonably go the other way.
+Where a call could reasonably go the other way, the file records it — `tier.json`,
+`facet.json`, `concepts.json` and `implementation-algorithms.json` carry `_contested`,
+`_rejected` or `_orphan_reason` notes today.
 
 A concept correction has to quote the text it replaces. If the source HTML changes underneath
 it, the build fails rather than applying a stale fix.
@@ -395,7 +396,8 @@ and the pages show the corrected value.
 
 ## Errors this project made and has since fixed
 
-The full ledger is on `/sources`; the pattern is worth stating here. The most productive check
+The full ledger lives in the `correction` table (fed by `data/annotations/corrections.json`
+and the concept corrections in `concepts.json`); the pattern is worth stating here. The most productive check
 was not reading further into the literature — it was reading the catalogue against itself.
 
 - Two concept cards contradicted the algorithm layer of this same catalogue. `ero` said erosion

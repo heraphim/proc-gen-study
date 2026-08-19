@@ -19,6 +19,6 @@
     "research": "node scripts/research.js"
   },
   "engines": {
-    "node": ">=22.5"
+    "node": ">=24"
   }
 }

@@ -5,8 +5,9 @@ name: Validate
 # review rotation that has starved a subject. Until now it only ran on push to main, so a pull
 # request could sit green and still be rejected the moment it merged.
 #
-# Both automations here open pull requests. This is what stops them proposing something the
-# build would reject.
+# This covers human branches and pull requests. The two automations' PRs never trigger it —
+# events created with a workflow's own GITHUB_TOKEN start no further workflows — so
+# research.yml and registry-poll.yml each run the same checks inline before proposing anything.
 
 on:
   pull_request:

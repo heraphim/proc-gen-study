@@ -44,12 +44,14 @@ jobs:
         run: node scripts/poll-registries.js --write --markdown poll-report.md
 
       # The migration is the gate. If a refreshed row breaks a rule, the run fails here rather
-      # than proposing it.
+      # than proposing it. The build runs too — this PR never triggers validate.yml (events
+      # created with the workflow's own GITHUB_TOKEN start no further workflows).
       - name: Validate
         run: |
           npm run migrate
           npm run check-samples
           npm run check-register
+          npm run build
 
       - name: Anything to propose?
         id: check

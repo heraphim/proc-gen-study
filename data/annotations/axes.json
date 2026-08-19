@@ -202,6 +202,7 @@
     "compute_cost": "trivial · moderate · heavy · offline-only. Duplicates `realtime` at finer grain; one of the two should be dropped before either is filled.",
     "realtime": "yes · no · with-caveats. Wanted, and not the same question as `runs_at` — plenty of ahead-of-time work still has to finish inside a frame.",
     "difficulty": "wrap-a-library · weekend · month · research · unsolved. Judgement rather than fact, and 841 rows of it. Its own project.",
-    "confidence": "attested · plausible · unverified. This is about the catalogue rather than the technique, so it belongs with `source_type`, not on an axis card."
+    "confidence": "attested · plausible · unverified. This is about the catalogue rather than the technique, so it belongs with `source_type`, not on an axis card.",
+    "notes": "Free text. A landing place, not a classification — nothing is planned for it."
   }
 }

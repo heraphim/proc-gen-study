@@ -39,7 +39,9 @@ try {
   for (const r of db.prepare('SELECT id, name FROM tag').all()) tagNames.set(r.id, r.name);
   db.close();
 } catch { /* not built yet; ids will do */ }
-const conceptName = id => concepts.additions.find(a => a.id === id)?.name ?? tagNames.get(id) ?? id;
+// Exported: pick-subject.js names concept subjects with this too, so the research prompts ask
+// about "Voronoi methods" rather than the slug `vor`.
+export const conceptName = id => concepts.additions.find(a => a.id === id)?.name ?? tagNames.get(id) ?? id;
 const byConcept = new Map();
 for (const a of algorithms) {
   if (!byConcept.has(a.concept)) byConcept.set(a.concept, []);

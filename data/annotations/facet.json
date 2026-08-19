@@ -1,5 +1,5 @@
 {
-  "_about": "Splits the 37 concept tags into four kinds. Applied to tag.facet by scripts/migrate.js.",
+  "_about": "Splits the 28 source concept tags into four kinds; the nine concepts this project added carry their facet inline in concepts.json. Applied to tag.facet by scripts/migrate.js.",
   "_tests": {
     "irreducible": "Cannot be decomposed into other concepts in the catalogue.",
     "widespread": "Many unrelated domains point at it.",
