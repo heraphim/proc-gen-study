@@ -31,7 +31,7 @@
       "description": "Colour conversion, scales, interpolation and contrast. The most widely used palette-generation library in JavaScript, and the one that made \"interpolate in Lab, not RGB\" common practice.",
       "verified": true,
       "license_registry": "(BSD-3-Clause AND Apache-2.0)",
-      "stars": 10575
+      "stars": 10585
     },
     {
       "package": "colorjs.io",
@@ -50,7 +50,7 @@
       "description": "Written by two editors of the CSS Color specification, which makes it the reference for what the spec means in practice: every space, CIEDE2000 and other difference formulas, gamut mapping, and both WCAG 2 and APCA contrast.",
       "verified": true,
       "license_registry": "MIT",
-      "stars": 2290
+      "stars": 2304
     },
     {
       "package": "culori",
@@ -69,7 +69,7 @@
       "description": "A tree-shakeable colour library covering every CSS Color 4 space including Oklab and Oklch, with difference metrics, gamut mapping and interpolation. The most complete implementation of the specification outside a browser engine.",
       "verified": true,
       "license_registry": "MIT",
-      "stars": 1223
+      "stars": 1233
     },
     {
       "package": "wcag-contrast",
@@ -95,8 +95,8 @@
       "ecosystem": "pypi",
       "concept": "colour",
       "role": "generation-library",
-      "version": "8.11.1",
-      "last_release": "2026-08-10",
+      "version": "8.12.1",
+      "last_release": "2026-08-23",
       "license": "MIT",
       "repo": "https://github.com/facelessuser/coloraide",
       "technologies": [
@@ -105,7 +105,7 @@
       "description": "A CSS Color 4-aligned Python library: Oklab and Oklch, gamut mapping, interpolation with the specification's hue-handling rules, and both contrast algorithms. The Python counterpart to colorjs.io.",
       "verified": true,
       "license_registry": "MIT",
-      "stars": 351
+      "stars": 358
     },
     {
       "package": "colour-science",
@@ -122,7 +122,7 @@
       "description": "Colour science in the full sense: every standard space and transform, all the CIE difference formulas, appearance models including CAM16, spectral computation and chromatic adaptation. Where you go when a library-level approximation is not enough.",
       "verified": true,
       "license_registry": "OSI Approved",
-      "stars": 2635
+      "stars": 2653
     },
     {
       "package": "javascript-lp-solver",
@@ -163,8 +163,8 @@
       "ecosystem": "npm",
       "concept": "cons",
       "role": "solver",
-      "version": "5.1.0",
-      "last_release": "2026-08-16",
+      "version": "5.2.0",
+      "last_release": "2026-08-21",
       "description": "This project provides high-level and low-level TypeScript bindings for the [Z3 theorem prover](",
       "repo": "https://github.com/Z3Prover/z3",
       "license": "MIT",
@@ -173,7 +173,7 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 12565
+      "stars": 12704
     },
     {
       "package": "Google.OrTools",
@@ -192,15 +192,15 @@
       "description": "CP-SAT, linear and mixed-integer programming, routing and flow, packaged for .NET. Listed alongside the Python build because Unity is where a great deal of shipped constraint-based generation actually runs.",
       "verified": true,
       "license_registry": "Apache-2.0",
-      "stars": 13909
+      "stars": 14078
     },
     {
       "package": "cvxpy",
       "ecosystem": "pypi",
       "concept": "cons",
       "role": "solver",
-      "version": "1.9.2",
-      "last_release": "2026-06-22",
+      "version": "1.9.3",
+      "last_release": "2026-09-19",
       "description": "A domain-specific language for modeling convex optimization problems in Python.",
       "repo": "https://github.com/cvxpy/cvxpy",
       "license": "Apache-2.0",
@@ -209,7 +209,7 @@
       ],
       "verified": true,
       "license_registry": "Apache-2.0",
-      "stars": 6303
+      "stars": 6342
     },
     {
       "package": "minizinc",
@@ -226,7 +226,7 @@
       ],
       "verified": true,
       "license_registry": "Mozilla Public License 2.0 (MPL 2.0)",
-      "stars": 211
+      "stars": 212
     },
     {
       "package": "ortools",
@@ -259,7 +259,7 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 2467
+      "stars": 2484
     },
     {
       "package": "python-constraint",
@@ -276,7 +276,7 @@
       ],
       "verified": true,
       "license_registry": "BSD License",
-      "stars": 518
+      "stars": 520
     },
     {
       "package": "z3-solver",
@@ -293,7 +293,7 @@
       ],
       "verified": true,
       "license_registry": "MIT License",
-      "stars": 12565
+      "stars": 12704
     },
     {
       "package": "@jscad/modeling",
@@ -310,7 +310,7 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 3226
+      "stars": 3243
     },
     {
       "package": "csg",
@@ -344,15 +344,15 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 939
+      "stars": 946
     },
     {
       "package": "build123d",
       "ecosystem": "pypi",
       "concept": "csg",
       "role": "generation-library",
-      "version": "0.11.1",
-      "last_release": "2026-07-02",
+      "version": "0.12.0",
+      "last_release": "2026-09-18",
       "description": "A python CAD programming library",
       "repo": "https://github.com/gumyr/build123d",
       "license": "Apache-2.0",
@@ -361,7 +361,7 @@
       ],
       "verified": true,
       "license_registry": "Apache Software License",
-      "stars": 2873
+      "stars": 3170
     },
     {
       "package": "cadquery",
@@ -378,15 +378,15 @@
       ],
       "verified": true,
       "license_registry": "Apache Software License",
-      "stars": 5618
+      "stars": 5806
     },
     {
       "package": "trimesh",
       "ecosystem": "pypi",
       "concept": "csg",
       "role": "generation-library",
-      "version": "5.0.0",
-      "last_release": "2026-08-01",
+      "version": "5.1.0",
+      "last_release": "2026-08-31",
       "description": "Import, export, process, analyze and view triangular meshes.",
       "repo": "https://github.com/mikedh/trimesh",
       "license": "MIT",
@@ -395,7 +395,7 @@
       ],
       "verified": true,
       "license_registry": "MIT License",
-      "stars": 3651
+      "stars": 3683
     },
     {
       "package": "soundfont-player",
@@ -430,7 +430,7 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 14700
+      "stars": 14731
     },
     {
       "package": "librosa",
@@ -447,15 +447,15 @@
       ],
       "verified": true,
       "license_registry": "ISC License (ISCL)",
-      "stars": 8564
+      "stars": 8619
     },
     {
       "package": "pedalboard",
       "ecosystem": "pypi",
       "concept": "dsp",
       "role": "post-processing",
-      "version": "0.9.24",
-      "last_release": "2026-07-08",
+      "version": "0.9.25",
+      "last_release": "2026-09-09",
       "description": "A Python library for adding effects to audio.",
       "repo": null,
       "license": "GPL-3.0",
@@ -512,7 +512,7 @@
       ],
       "description": "Optimisation and numerics from the Accord.NET framework, including genetic algorithms, simulated annealing and PCA. Recorded with a caveat: the framework has been unmaintained since 2017 and is listed because a large amount of existing C# generation code depends on it.",
       "verified": true,
-      "stars": 4535,
+      "stars": 4533,
       "archived": true
     },
     {
@@ -520,8 +520,8 @@
       "ecosystem": "pypi",
       "concept": "evo",
       "role": "solver",
-      "version": "4.4.4",
-      "last_release": "2026-02-25",
+      "version": "4.5.0",
+      "last_release": "2026-09-13",
       "description": "CMA-ES, Covariance Matrix Adaptation Evolution Strategy for non-linear numerical optimization i",
       "repo": "https://github.com/CMA-ES/pycma",
       "license": "BSD-3-Clause",
@@ -530,7 +530,7 @@
       ],
       "verified": true,
       "license_registry": "BSD-3-Clause",
-      "stars": 1346
+      "stars": 1357
     },
     {
       "package": "deap",
@@ -597,7 +597,7 @@
       "description": "Marching squares over a scalar grid, producing GeoJSON multipolygons, with density estimation to build the grid from points. This is the isoline half of the field concept, and the saddle-case resolution is handled explicitly.",
       "verified": true,
       "license_registry": "ISC",
-      "stars": 519
+      "stars": 522
     },
     {
       "package": "opencv-python",
@@ -615,7 +615,7 @@
       "description": "The largest single collection of image-space operators: convolution, Sobel and Laplacian, bilateral filtering, morphology, distance transforms, seamless cloning by Poisson blending, and inpainting. Most of the filter concept, in one import.",
       "verified": true,
       "license_registry": "Apache Software License",
-      "stars": 5355
+      "stars": 5401
     },
     {
       "package": "scikit-image",
@@ -632,7 +632,7 @@
       "description": "Image processing over NumPy arrays, with the pieces the filter and texsyn concepts need: filters and morphology, marching cubes and marching squares, histogram matching, inpainting, and segmentation.",
       "verified": true,
       "license_registry": "BSD License",
-      "stars": 6572
+      "stars": 6594
     },
     {
       "package": "recastnavigation/recastnavigation",
@@ -650,7 +650,7 @@
       "description": "The navmesh generator behind a large share of shipped games: voxelise arbitrary level geometry, filter by slope and headroom, erode by agent radius, and emit walkable polygons. Detour is the query and crowd half.",
       "verified": true,
       "license_registry": "Zlib",
-      "stars": 7861
+      "stars": 7929
     },
     {
       "package": "graphlib",
@@ -667,7 +667,7 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 1740
+      "stars": 1746
     },
     {
       "package": "graphology",
@@ -684,7 +684,7 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 1729
+      "stars": 1748
     },
     {
       "package": "ngraph.graph",
@@ -701,7 +701,7 @@
       ],
       "verified": true,
       "license_registry": "BSD-3-Clause",
-      "stars": 579
+      "stars": 580
     },
     {
       "package": "ngraph.path",
@@ -718,7 +718,7 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 3134
+      "stars": 3133
     },
     {
       "package": "QuikGraph",
@@ -735,7 +735,7 @@
       "description": "Generic graph data structures and algorithms for .NET — spanning trees, shortest paths, maximum flow, topological sort. The successor to QuickGraph, and the practical answer for graph-driven level and quest generation in Unity.",
       "verified": true,
       "license_registry": "MS-PL",
-      "stars": 550
+      "stars": 553
     },
     {
       "package": "igraph",
@@ -768,7 +768,7 @@
       ],
       "verified": true,
       "license_registry": "BSD-3-Clause",
-      "stars": 17202
+      "stars": 17271
     },
     {
       "package": "r-barnes/richdem",
@@ -786,7 +786,7 @@
       "description": "The author of the priority-flood paper's own implementation: depression filling, D8 and D-infinity routing, flow accumulation, watershed labelling, all parallelised for large rasters.",
       "verified": true,
       "license_registry": "GPL-3.0",
-      "stars": 323
+      "stars": 324
     },
     {
       "package": "pysheds",
@@ -803,7 +803,7 @@
       "description": "Watershed delineation over a NumPy-backed grid: fill, resolve flats, flow direction, accumulation, catchment extraction and stream ordering. The most direct route from a heightfield to a river network in Python.",
       "verified": true,
       "license_registry": "GNU General Public License v3 or later (GPLv3+)",
-      "stars": 895
+      "stars": 902
     },
     {
       "package": "richdem",
@@ -821,7 +821,7 @@
       "description": "The Python interface to RichDEM. Depression filling, flow routing in several schemes, and flow accumulation over rasters large enough that the algorithmic complexity is the point.",
       "verified": true,
       "license_registry": "GNU General Public License v3 (GPLv3)",
-      "stars": 323
+      "stars": 324
     },
     {
       "package": "whitebox",
@@ -839,7 +839,7 @@
       "description": "Python bindings to WhiteboxTools, several hundred geospatial operations including the full hydrology suite — breaching as well as filling depressions, which is often the better choice because it carves an outlet instead of drowning the pit.",
       "verified": true,
       "license_registry": "MIT License",
-      "stars": 419
+      "stars": 422
     },
     {
       "package": "three-ik",
@@ -856,15 +856,15 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 583
+      "stars": 586
     },
     {
       "package": "ikpy",
       "ecosystem": "pypi",
       "concept": "ik",
       "role": "generation-library",
-      "version": "4.0.0",
-      "last_release": "2026-07-05",
+      "version": "4.1.0",
+      "last_release": "2026-08-30",
       "description": "An inverse kinematics library aiming performance and modularity",
       "repo": "https://github.com/Phylliade/ikpy",
       "license": null,
@@ -872,7 +872,7 @@
         "python"
       ],
       "verified": true,
-      "stars": 1026
+      "stars": 1031
     },
     {
       "package": "lindenmayer",
@@ -956,7 +956,7 @@
       "description": "Rust bindings to meshoptimizer, so simplification and cache optimisation are available to a Rust generation pipeline without leaving the language.",
       "verified": true,
       "license_registry": "MIT OR Apache-2.0",
-      "stars": 220
+      "stars": 223
     },
     {
       "package": "tri-mesh",
@@ -973,15 +973,15 @@
       "description": "A half-edge triangle mesh with the traversal and edit operations that depend on it: split, collapse, flip, and connectivity queries. The data structure the mesh concept is about, in Rust.",
       "verified": true,
       "license_registry": "MIT",
-      "stars": 97
+      "stars": 98
     },
     {
       "package": "CGAL/cgal",
       "ecosystem": "github",
       "concept": "mesh",
       "role": "generation-library",
-      "version": "6.2",
-      "last_release": "2026-06-11",
+      "version": "6.2.1",
+      "last_release": "2026-09-04",
       "license": null,
       "repo": "https://github.com/CGAL/cgal",
       "technologies": [
@@ -990,15 +990,15 @@
       ],
       "description": "The computational geometry library that takes exactness seriously: Delaunay in 2D and 3D, mesh generation with quality guarantees, straight skeletons, booleans, and the exact predicate kernels the rest of the field borrows. Dual-licensed GPL and commercial.",
       "verified": true,
-      "stars": 6010
+      "stars": 6051
     },
     {
       "package": "libigl/libigl",
       "ecosystem": "github",
       "concept": "mesh",
       "role": "generation-library",
-      "version": "2.6.0",
-      "last_release": "2025-05-15",
+      "version": "2.6.4",
+      "last_release": "2026-09-15",
       "license": "GPL-3.0",
       "repo": "https://github.com/libigl/libigl",
       "technologies": [
@@ -1008,7 +1008,7 @@
       "description": "Header-only geometry processing: decimation, subdivision, parameterisation, distances, curvature, booleans. The C++ library the research literature is written against, with a Python wrapper on PyPI.",
       "verified": true,
       "license_registry": "GPL-3.0",
-      "stars": 5068
+      "stars": 5090
     },
     {
       "package": "sp4cerat/Fast-Quadric-Mesh-Simplification",
@@ -1025,7 +1025,7 @@
       "description": "Quadric error decimation in a single readable header — the clearest short implementation of Garland and Heckbert, and the one most ports and bindings are derived from.",
       "verified": true,
       "license_registry": "MIT",
-      "stars": 1759
+      "stars": 1765
     },
     {
       "package": "zeux/meshoptimizer",
@@ -1045,15 +1045,15 @@
       "description": "Simplification, vertex-cache and overdraw optimisation, meshlet building and vertex-stream compression. This is the step between \"the generator produced a mesh\" and \"the mesh is fast\", and it is what glTF pipelines use.",
       "verified": true,
       "license_registry": "MIT",
-      "stars": 8228
+      "stars": 8353
     },
     {
       "package": "libigl",
       "ecosystem": "pypi",
       "concept": "mesh",
       "role": "generation-library",
-      "version": "2.6.2",
-      "last_release": "2026-03-05",
+      "version": "2.6.3",
+      "last_release": "2026-09-01",
       "license": "GPL-3.0",
       "repo": "https://github.com/libigl/libigl-python-bindings",
       "technologies": [
@@ -1081,15 +1081,15 @@
       "description": "Scriptable access to MeshLab's several hundred filters: quadric decimation, subdivision schemes, Poisson reconstruction, remeshing, curvature and repair. The broadest single mesh toolbox reachable from Python.",
       "verified": true,
       "license_registry": "GPL3",
-      "stars": 972
+      "stars": 978
     },
     {
       "package": "diffusers",
       "ecosystem": "pypi",
       "concept": "ml",
       "role": "model",
-      "version": "0.39.0",
-      "last_release": "2026-07-03",
+      "version": "0.40.0",
+      "last_release": "2026-08-20",
       "description": "State-of-the-art diffusion in PyTorch and JAX.",
       "repo": "https://github.com/huggingface/diffusers",
       "license": "Apache-2.0",
@@ -1098,15 +1098,15 @@
       ],
       "verified": true,
       "license_registry": "Apache Software License",
-      "stars": 34336
+      "stars": 34555
     },
     {
       "package": "scikit-learn",
       "ecosystem": "pypi",
       "concept": "ml",
       "role": "model",
-      "version": "1.9.0",
-      "last_release": "2026-06-02",
+      "version": "1.9.1",
+      "last_release": "2026-09-10",
       "description": "A set of python modules for machine learning and data mining",
       "repo": "https://github.com/scikit-learn/scikit-learn",
       "license": "BSD-3-Clause",
@@ -1115,15 +1115,15 @@
       ],
       "verified": true,
       "license_registry": "BSD-3-Clause",
-      "stars": 66966
+      "stars": 67328
     },
     {
       "package": "torch",
       "ecosystem": "pypi",
       "concept": "ml",
       "role": "infrastructure",
-      "version": "2.13.0",
-      "last_release": "2026-07-08",
+      "version": "2.14.0",
+      "last_release": "2026-09-02",
       "description": "Tensors and Dynamic neural networks in Python with strong GPU acceleration",
       "repo": "https://github.com/pytorch/pytorch",
       "license": "Apache-2.0",
@@ -1131,7 +1131,7 @@
         "python"
       ],
       "verified": true,
-      "stars": 102452
+      "stars": 103143
     },
     {
       "package": "fastnoise-lite",
@@ -1149,7 +1149,7 @@
       "description": "The Rust port of FastNoiseLite. Worth listing separately from the C++ original because it is the half that makes cross-language determinism usable from a Rust server or a WASM client.",
       "verified": true,
       "license_registry": "MIT",
-      "stars": 3482
+      "stars": 3514
     },
     {
       "package": "libnoise",
@@ -1185,7 +1185,7 @@
       "description": "The established Rust noise crate: Perlin, simplex, value, Worley, plus a combinator graph of fBm, billow, ridged multifractal, turbulence and domain warping built as composable types rather than as parameters.",
       "verified": true,
       "license_registry": "Apache-2.0/MIT",
-      "stars": 1078
+      "stars": 1086
     },
     {
       "package": "Auburn/FastNoiseLite",
@@ -1207,7 +1207,7 @@
       "description": "A single header per language implementing OpenSimplex2, Perlin, value and cellular noise plus fBm and domain warping. The reason it matters here is portability: the same noise, byte-identical, in C++, C#, Rust, GLSL, JavaScript and Python, which is what lets a server and a shader agree on a world.",
       "verified": true,
       "license_registry": "MIT",
-      "stars": 3482
+      "stars": 3514
     },
     {
       "package": "nothings/stb",
@@ -1224,7 +1224,7 @@
       ],
       "description": "Single-file public-domain C libraries. Relevant here for stb_perlin.h — Perlin, ridged, turbulence and fBm in about 150 lines with no dependencies — and stb_image_resize for filtered field resampling.",
       "verified": true,
-      "stars": 34425
+      "stars": 34684
     },
     {
       "package": "stegu/webgl-noise",
@@ -1267,8 +1267,8 @@
       "ecosystem": "npm",
       "concept": "noise",
       "role": "generation-library",
-      "version": "2.1.0",
-      "last_release": "2023-01-25",
+      "version": "3.0.0",
+      "last_release": "2026-08-23",
       "description": "Fractal noise library",
       "repo": "https://github.com/joshforisha/fractal-noise-js",
       "license": "Unlicense",
@@ -1300,8 +1300,8 @@
       "ecosystem": "npm",
       "concept": "noise",
       "role": "generation-library",
-      "version": "2.5.0",
-      "last_release": "2021-04-15",
+      "version": "3.0.0",
+      "last_release": "2026-08-23",
       "description": "OpenSimplex noise for TypeScript/JavaScript",
       "repo": "https://github.com/joshforisha/open-simplex-noise-js",
       "license": "Unlicense",
@@ -1327,7 +1327,7 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 1845
+      "stars": 1849
     },
     {
       "package": "noise",
@@ -1344,7 +1344,7 @@
       ],
       "verified": true,
       "license_registry": "MIT License",
-      "stars": 456
+      "stars": 455
     },
     {
       "package": "opensimplex",
@@ -1392,7 +1392,7 @@
       ],
       "verified": true,
       "license_registry": "MIT License",
-      "stars": 18
+      "stars": 19
     },
     {
       "package": "rbush",
@@ -1411,15 +1411,15 @@
       "description": "An R-tree spatial index using bulk-loading by sort-tile-recursive packing. The practical answer for \"what is near this\" over generated content when the data is rectangles rather than points, where a k-d tree would want points.",
       "verified": true,
       "license_registry": "MIT",
-      "stars": 2767
+      "stars": 2779
     },
     {
       "package": "rand",
       "ecosystem": "cargo",
       "concept": "rand",
       "role": "generation-library",
-      "version": "0.10.2",
-      "last_release": "2026-07-02",
+      "version": "0.10.3",
+      "last_release": "2026-09-20",
       "license": "MIT",
       "repo": "https://github.com/rust-random/rand",
       "technologies": [
@@ -1429,7 +1429,7 @@
       "description": "Rust's standard randomness crate. Relevant here for what it makes explicit rather than what it computes: seedable generators are a separate type from the OS entropy source, and the distinction between reproducible and secure randomness is enforced at compile time.",
       "verified": true,
       "license_registry": "MIT OR Apache-2.0",
-      "stars": 2063
+      "stars": 2082
     },
     {
       "package": "rand_xoshiro",
@@ -1464,7 +1464,7 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 105
+      "stars": 104
     },
     {
       "package": "pure-rand",
@@ -1481,7 +1481,7 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 115
+      "stars": 117
     },
     {
       "package": "random-js",
@@ -1498,7 +1498,7 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 617
+      "stars": 618
     },
     {
       "package": "seedrandom",
@@ -1532,15 +1532,15 @@
       "description": "The .NET numerics library: Mersenne Twister and xorshift generators, distributions, interpolation including cubic splines, linear algebra and the FFT. In generation terms it is the substrate that C# otherwise lacks.",
       "verified": true,
       "license_registry": "MIT",
-      "stars": 3759
+      "stars": 3772
     },
     {
       "package": "numpy",
       "ecosystem": "pypi",
       "concept": "rand",
       "role": "generation-library",
-      "version": "2.5.2",
-      "last_release": "2026-08-09",
+      "version": "2.5.3",
+      "last_release": "2026-09-06",
       "description": "Fundamental package for array computing in Python",
       "repo": "https://github.com/numpy/numpy",
       "license": "BSD-3-Clause",
@@ -1549,7 +1549,7 @@
       ],
       "verified": true,
       "license_registry": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0",
-      "stars": 32548
+      "stars": 32793
     },
     {
       "package": "randomgen",
@@ -1566,7 +1566,7 @@
       ],
       "verified": true,
       "license_registry": "NCSA",
-      "stars": 126
+      "stars": 127
     },
     {
       "package": "fast_poisson",
@@ -1600,7 +1600,7 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 41
+      "stars": 42
     },
     {
       "package": "maxrects-packer",
@@ -1633,7 +1633,7 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 252
+      "stars": 253
     },
     {
       "package": "potpack",
@@ -1685,7 +1685,7 @@
       "description": "Generates multi-channel signed distance fields from vector outlines, which is how text and icons stay sharp at any magnification from one small texture. The multi-channel trick preserves corners that a single-channel SDF rounds off.",
       "verified": true,
       "license_registry": "MIT",
-      "stars": 4905
+      "stars": 4930
     },
     {
       "package": "patriciogonzalezvivo/lygia",
@@ -1702,7 +1702,7 @@
       ],
       "description": "A shader standard library, cross-compiled to GLSL, HLSL, WGSL, Metal and CUDA: noise bases, SDF primitives and operators, colour-space conversions, filters and lighting. The closest thing shader work has to an importable package.",
       "verified": true,
-      "stars": 3407
+      "stars": 3442
     },
     {
       "package": "lyon",
@@ -1721,7 +1721,7 @@
       "description": "Path geometry for GPU rendering: Bézier evaluation and flattening, offsetting, stroking and fill tessellation. The adaptive flattening is de Casteljau subdivision put to work.",
       "verified": true,
       "license_registry": "MIT OR Apache-2.0",
-      "stars": 2596
+      "stars": 2599
     },
     {
       "package": "bezier-js",
@@ -1738,7 +1738,7 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 1870
+      "stars": 1873
     },
     {
       "package": "cubic-spline",
@@ -1772,7 +1772,7 @@
       ],
       "verified": true,
       "license_registry": "ISC",
-      "stars": 2524
+      "stars": 2528
     },
     {
       "package": "simplify-js",
@@ -1791,7 +1791,7 @@
       "description": "Ramer–Douglas–Peucker with an optional radial-distance pre-pass, in about forty lines. The library behind polyline simplification in most JavaScript mapping stacks.",
       "verified": true,
       "license_registry": "BSD-2-Clause",
-      "stars": 2392
+      "stars": 2395
     },
     {
       "package": "geomdl",
@@ -1808,7 +1808,7 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 764
+      "stars": 766
     },
     {
       "package": "PixarAnimationStudios/OpenSubdiv",
@@ -1826,7 +1826,7 @@
       ],
       "description": "Catmull–Clark and Loop with semi-sharp creases, hierarchical edits and GPU evaluation. Inside Maya, Blender and RenderMan, which makes it less one implementation than the de facto definition of what a subdivision surface is in production.",
       "verified": true,
-      "stars": 3070
+      "stars": 3073
     },
     {
       "package": "three-subdivide",
@@ -1861,7 +1861,7 @@
       "description": "Neural texture synthesis and remixing: extend a photographed material, make it seamless, or transfer its statistics to another image. The descendant of Portilla–Simoncelli with a learned feature space in place of the steerable pyramid. Note the AGPL licence.",
       "verified": true,
       "license_registry": "GNU Affero General Public License v3",
-      "stars": 759
+      "stars": 760
     },
     {
       "package": "nlopt",
@@ -1879,15 +1879,15 @@
       "description": "The optimiser half of an adjoint inverse-design loop: MMA, SLSQP, CCSA and the rest, all taking a user-supplied gradient. Pair it with an automatic-differentiation or adjoint-capable simulator and you have the machinery the nanophotonics literature uses.",
       "verified": true,
       "license_registry": "MIT License",
-      "stars": 2264
+      "stars": 2274
     },
     {
       "package": "openmdao",
       "ecosystem": "pypi",
       "concept": "topopt",
       "role": "solver",
-      "version": "3.45.0",
-      "last_release": "2026-07-17",
+      "version": "3.45.1",
+      "last_release": "2026-09-11",
       "license": "Apache-2.0",
       "repo": "https://github.com/OpenMDAO/OpenMDAO",
       "technologies": [
@@ -1896,7 +1896,7 @@
       "description": "NASA's multidisciplinary optimisation framework. Its reason to be here is analytic derivatives across coupled solvers: it assembles the adjoint for a whole system rather than for one simulation, which is what makes inverse design tractable when the physics has several parts.",
       "verified": true,
       "license_registry": "Apache-2.0",
-      "stars": 770
+      "stars": 782
     },
     {
       "package": "topopt",
@@ -1931,7 +1931,7 @@
       "description": "The Rust port of Delaunator: incremental Delaunay triangulation with a space-filling-curve insertion order, from which the Voronoi dual falls out. Fast enough that the triangulation stops being the bottleneck.",
       "verified": true,
       "license_registry": "ISC",
-      "stars": 251
+      "stars": 253
     },
     {
       "package": "spade",
@@ -1948,7 +1948,7 @@
       "description": "Delaunay and constrained Delaunay triangulations with exact predicates and refinement to a quality bound. The constrained half is what you need when the triangulation has to respect a coastline or a road you already generated.",
       "verified": true,
       "license_registry": "MIT OR Apache-2.0",
-      "stars": 336
+      "stars": 337
     },
     {
       "package": "d3-delaunay",
@@ -1982,7 +1982,7 @@
       ],
       "verified": true,
       "license_registry": "ISC",
-      "stars": 2615
+      "stars": 2623
     },
     {
       "package": "voronoi",
@@ -1999,7 +1999,7 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 1060,
+      "stars": 1062,
       "archived": true
     },
     {
@@ -2007,8 +2007,8 @@
       "ecosystem": "pypi",
       "concept": "vor",
       "role": "generation-library",
-      "version": "3.5.0",
-      "last_release": "2025-10-08",
+      "version": "3.6.0",
+      "last_release": "2026-09-18",
       "description": "Powerful, efficient trajectory analysis in scientific Python.",
       "repo": "https://github.com/glotzerlab/freud",
       "license": "BSD-3-Clause",
@@ -2017,7 +2017,7 @@
       ],
       "verified": true,
       "license_registry": "BSD-3-Clause",
-      "stars": 327
+      "stars": 329
     },
     {
       "package": "pyvoro",
@@ -2034,15 +2034,15 @@
       ],
       "verified": true,
       "license_registry": "UNKNOWN",
-      "stars": 130
+      "stars": 131
     },
     {
       "package": "scipy",
       "ecosystem": "pypi",
       "concept": "vor",
       "role": "generation-library",
-      "version": "1.18.0",
-      "last_release": "2026-06-19",
+      "version": "1.18.1",
+      "last_release": "2026-08-21",
       "description": "Fundamental algorithms for scientific computing in Python",
       "repo": "https://github.com/scipy/scipy",
       "license": "BSD-3-Clause",
@@ -2051,7 +2051,7 @@
       ],
       "verified": true,
       "license_registry": "BSD License",
-      "stars": 14934
+      "stars": 15032
     },
     {
       "package": "mxgmn/WaveFunctionCollapse",
@@ -2068,7 +2068,7 @@
       ],
       "description": "The reference implementation, and effectively the specification, since WFC has no paper. Both the overlapping model that learns NxN patterns from one bitmap and the simple-tiled model. Note the licence: the repository carries no standard SPDX identifier, so check the terms before shipping it.",
       "verified": true,
-      "stars": 25278
+      "stars": 25342
     },
     {
       "package": "wavefunctioncollapse",
@@ -2085,9 +2085,9 @@
       ],
       "verified": true,
       "license_registry": "MIT",
-      "stars": 523
+      "stars": 526
     }
   ],
   "_resolved": "The previous version of this file observed that many npm packages reported a last_release in 2022-05 or 2022-06, clustering too tightly across unrelated projects to be real, and guessed at a bulk registry metadata operation. That guess was wrong. Re-resolving showed the dates were simply the day the original lookup ran: the field had been filled with the check date rather than the release date, on 23 of 71 rows. The real dates range from 2013 to 2026, and some of those packages genuinely have not shipped in a decade — which the wrong dates were concealing.",
-  "_polled": "Registry state as of 2026-08-18, refreshed by scripts/poll-registries.js. Do not hand-edit version, last_release, stars or archived — the next run overwrites them. Licence differences are reported by the poller but never written, because the registry's answer and the catalogue's are not always disagreeing."
+  "_polled": "Registry state as of 2026-09-21, refreshed by scripts/poll-registries.js. Do not hand-edit version, last_release, stars, archived or license_registry — the next run overwrites them. license_registry is the registry's raw licence string, kept so a change in the registry's own answer is detectable; the curated license field is reported against but never written, because the registry's answer and the catalogue's are not always disagreeing."
 }
